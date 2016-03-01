@@ -1,185 +1,212 @@
-Router = require('./router')
+Promise = require('bluebird')
+
+# Append type
+isNumber  = (a) -> Object.prototype.toString.call(a) is '[object Number]'
+isBoolean = (a) -> Object.prototype.toString.call(a) is '[object Boolean]'
+
+defaultReadOptions = (opts) ->
+  opts = {} if not opts?
+  opts.eagerness = 1 if not opts.eagerness?
+  opts
+  
+encode = (val) ->
+  if isNumber(val)
+    val + '^^number'
+  else if isBoolean(val)
+    val + '^^boolean'
+  else
+    val
+
+decode = (val) ->
+  index = val.indexOf('^^')
+  return val if index is -1
+  
+  type  = val.slice(index)
+  value = val.slice(0, index)
+  
+  if type is '^^number'
+    Number(value)
+  else if type is '^^boolean'
+    Boolean(value)
+  else
+    value
+
+redis = null
 
 # This is the main entry point of any new socket connection.
+# Define a route function that will take a message signature and construct a route for
+# that signature using the controller function
+console.log('weaverrr')
 module.exports =
+  redis: (url) ->
+    if url?
+      redis = new require('ioredis')(url)
+    else
+      redis = new require('ioredis')()
+
   wire: (socket) ->
 
-    # Route function taking path, key and operation
-    route = Router(socket)
+    # CREATE
+    socket.on('create', (payload, ack) ->
+      for key, val of payload.data
+        payload.data[key] = encode(val)
+        
+      # Example: user, session, project, model
+      type = payload.type 
+      
+      # ID
+      id = payload.id
+      
+      # Data
+      data = payload.data
+            
+      # Save type to redis set
+      redis.sadd(type, id)
+      
+      # Append type to data
+      data.type = type
 
-    # Route paths
-    core     = route('core')
-    app      = route('app')
-    dataset  = route('dataset')
-    flow     = route('flow')
-    email    = route('email')
+      if data and Object.keys(data).length isnt 0
+        redis.hmset(id, data)
 
-    # Auth
-    core 'auth','signup'
-    core 'auth','signinToken'
-    core 'auth','signinUsername'
+      socket.broadcast.emit(type + ':created', payload.id)
+      ack('0')
+    )
+    
+    
+    # READ
+    socket.on('read', (payload, ack) ->
 
-    # Organization
-    core 'organization','create'
-    core 'organization','update'
-    core 'organization','delete'
-    core 'organization','add'
-    core 'organization','remove'
+      # Assume eagerness = 1
+      
+      # Prevention of circular references blowing up the recursion chain
+      visited = []
+      
+      read = (id, eagerness) ->
+        object = {}
+        visited.push(id)
 
-    # User
-    core 'user','create'
-    core 'user','update'
-    core 'user','delete'
-    core 'user','add'
-    core 'user','remove'
+        # Get properties
+        redis.hgetall(id).then((properties) ->
+          for key,val of properties
+            properties[key] = decode(val)
 
-    # Session
-    core 'session','create'
-    core 'session','update'
-    core 'session','delete'
+          object = properties
+          
+          # Save meta information
+          object._META = {fetched: false, type: object.type, id}
+          
+          # Remove type from object
+          delete object.type
+          
+        ).then(->
+          # Stop condition
+          if eagerness isnt 0
+  
+            # Set fetched tag to true
+            object._META.fetched = true
+            
+            # Get links
+            redis.smembers(id + ':_LINKS').each((link) ->
+              redis.get(id + ':' + link).then((linkId) ->
+                
+                if visited.indexOf(linkId) is -1
+                  read(linkId, eagerness - 1).then((result) ->
+                    object[link] = result
+                  )
+                else
+                  object[link] = {'_REF': linkId}
+              )
+            )         
+        ).then(-> object)
 
-    # Workspace
-    core 'workspace','create'
-    core 'workspace','update'
-    core 'workspace','delete'
-    core 'workspace','add'
-    core 'workspace','remove'
 
-    # Project
-    core 'project','create'
-    core 'project','update'
-    core 'project','delete'
-    core 'project','add'
-    core 'project','remove'
+      # ID
+      id   = payload.id
+      opts = payload.opts
+      opts = defaultReadOptions(opts)
+      
+      read(id, opts.eagerness).then(ack)
+    )
+        
+    
+    # UPDATE
+    socket.on('update', (payload, ack) ->
 
-    # Dataset
-    dataset 'dataset','create'
-    dataset 'dataset','update'
-    dataset 'dataset','delete'
-    dataset 'dataset','add'
-    dataset 'dataset','remove'
+      # ID
+      id = payload.id 
+      
+      # Value
+      attribute = payload.attribute      
+      
+      # Value
+      value = payload.value
 
-    # App
-    app 'app','create'
-    app 'app','read'
-    app 'app','update'
-    app 'app','delete'
-    app 'app','add'
-    app 'app','remove'
+      if value?
+        redis.hset(id, attribute, encode(value))
+      else
+        redis.hdel(id, attribute)
 
-    # Model
-    dataset 'model','create'
-    dataset 'model','read'
-    dataset 'model','delete'
-    dataset 'model','update'
-    dataset 'model','add'
-    dataset 'model','remove'
+      socket.broadcast.emit(payload.id + ':updated', payload)
+      ack(0)
+    )   
 
-    # Object
-    dataset 'object','create'
-    dataset 'object','delete'
-    dataset 'object','update'
-    dataset 'object','add'
-    dataset 'object','remove'
+    
+    # LINK
+    socket.on('link', (payload, ack) ->
 
-    # Attribute
-    dataset 'attribute','create'
-    dataset 'attribute','delete'
-    dataset 'attribute','update'
+      # ID
+      id = payload.id
 
-    # Property
-    dataset 'property','create'
-    dataset 'property','delete'
-    dataset 'property','update'
-    dataset 'property','add'
-    dataset 'property','remove'
+      # users or projects
+      key = payload.key
+      
+      # target object to add
+      target = payload.target
 
-    # View
-    app 'view','create'
-    app 'view','delete'
-    app 'view','update'
-    app 'view','add'
-    app 'view','remove'
+      # add key to object as dependencies
+      redis.sadd(id + ':_LINKS', key)
 
-    # Element
-    app 'element','create'
-    app 'element','delete'
-    app 'element','update'
-    app 'element','add'
-    app 'element','remove'
+      # save link
+      redis.set(id + ':' + key, target)
 
-    # Style
-    app 'style','create'
-    app 'style','delete'
-    app 'style','update'
+      socket.broadcast.emit(payload.id + ':linked', payload)
+      ack(0)
+    )
 
-    # Variable
-    app 'variable','create'
-    app 'variable','update'
-    app 'variable','delete'
-    app 'variable','add'
-    app 'variable','remove'
 
-    # Behaviour
-    flow 'behaviour','create'
-    flow 'behaviour','update'
-    flow 'behaviour','delete'
-    flow 'behaviour','add'
-    flow 'behaviour','remove'
+    # UNLINK
+    socket.on('unlink', (payload, ack) ->
 
-    # Flow
-    flow 'flow','create'
-    flow 'flow','update'
-    flow 'flow','delete'
-    flow 'flow','add'
-    flow 'flow','remove'
+      # ID
+      id = payload.id
 
-    # Function
-    flow 'function','create'
-    flow 'function','update'
-    flow 'function','delete'
-    flow 'function','add'
-    flow 'function','remove'
+      # users or projects
+      key = payload.key
 
-    # Component
-    flow 'component','create'
-    flow 'component','update'
-    flow 'component','delete'
-    flow 'component','add'
-    flow 'component','remove'
+      # add key to object as dependencies
+      redis.srem(id + ':_LINKS', key)
 
-    # Argument
-    flow 'argument','create'
-    flow 'argument','update'
-    flow 'argument','delete'
+      # save link
+      redis.del(id + ':' + key)
 
-    # Inport
-    flow 'inport','create'
-    flow 'inport','update'
-    flow 'inport','delete'
+      socket.broadcast.emit(payload.id + ':unlinked', payload)
+      ack(0)
+    )
 
-    # Outport
-    flow 'outport','create'
-    flow 'outport','update'
-    flow 'outport','delete'
 
-    # Trigger
-    flow 'trigger','create'
-    flow 'trigger','update'
-    flow 'trigger','delete'
+    # DELETE
+    socket.on('delete', (payload, ack) ->
 
-    # Connection
-    flow 'connection','create'
-    flow 'connection','update'
-    flow 'connection','delete'
+      # ID
+      id = payload.id
 
-    # Environment
-    core 'environment','create'
-    core 'environment','update'
-    core 'environment','delete'
-    core 'environment','read'
-    core 'environment','add'
-    core 'environment','remove'
-
-    # Email
-    email 'email','send'
+      # Find type
+      redis.hget(id, 'type')
+      .then((type) ->
+    
+      ).then(->
+        socket.broadcast.emit(payload.id + ':deleted')
+        ack(0)
+      )
+    )
