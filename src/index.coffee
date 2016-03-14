@@ -20,8 +20,9 @@ module.exports =
     
       # Socket io
       io = require('socket.io')(http)
+      self = @
       io.on('connection', (socket) ->
-        @routes.wire(socket)
+        self.routes.wire(socket)
       )
       
       # Loop through plugins

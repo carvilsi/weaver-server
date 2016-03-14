@@ -52,13 +52,15 @@ module.exports =
         
       # Example: user, session, project, model
       type = payload.type 
+      type = '$ROOT' if not type?
       
       # ID
       id = payload.id
       
       # Data
       data = payload.data
-            
+      data = {} if not data?
+      
       # Save type to @redis set
       @redis.sadd(type, id)
       
