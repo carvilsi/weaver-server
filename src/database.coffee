@@ -177,29 +177,34 @@ module.exports =
       # add key to object as dependencies
       @redis.srem(id + ':_LINKS', key)
 
-      # save link
+      # delete link
       @redis.del(id + ':' + key)
 
       # TODO: fire onUnlinked
   
-  
-    # TODO: implement
-    delete: (payload) ->
-      return
-  
+    # Remove key
+    remove: (payload) ->
       # ID
       id = payload.id
 
-      # Find type
-      @redis.hget(id, 'type')
-      .then((type) ->
-    
-      ).then(->
-        socket.broadcast.emit(payload.id + ':deleted')
-        return 0
-      )
+      # Attribute
+      attribute = payload.attribute
 
-    # TODO
+      # Remove
+      @redis.hdel(id, attribute)
+
+
+    # Destroy object
+    destroy: (payload) ->
+      # ID
+      id = payload.id
+
+      # Remove key
+      @redis.del(id)
+
+
+
+# TODO
     onUpdate: (id, callback) ->
       return
 

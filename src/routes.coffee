@@ -26,6 +26,14 @@ module.exports =
         socket.broadcast.emit(payload.id + ':updated', payload)
         ack(0)
       )
+
+      # Removes a key from an entity
+      socket.on('remove', (payload, ack) ->
+        self.database.remove(payload).then(ack)
+
+        socket.broadcast.emit(payload.id + ':removed', payload)
+        ack(0)
+      )
       
       socket.on('link', (payload, ack) ->
         self.database.link(payload).then(ack)
@@ -41,6 +49,10 @@ module.exports =
         ack(0)
       )
       
-      socket.on('delete', (payload, ack) ->
-        self.database.delete(payload).then(ack)
+      # Destroys entity
+      socket.on('destroy', (payload, ack) ->
+        self.database.destroy(payload).then(ack)
+        
+        socket.broadcast.emit(payload.id + ':destroyed', payload)
+        ack(0)
       )
