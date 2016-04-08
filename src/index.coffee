@@ -1,5 +1,6 @@
 Database = require('./database')
 Routes   = require('./routes')
+Operations   = require('./operations')
 
 module.exports = 
   class WeaverServer
@@ -8,10 +9,18 @@ module.exports =
       @database = new Database(url)
       @routes   = new Routes(@database)
       @plugins  = []
+      @connector = null
+      @operations = null
 
     addPlugin: (plugin) ->
       @plugins.push(plugin)
-    
+
+    setConnector: (connector) ->
+      @connector = connector
+      @connector.init().then(=>
+        @operations = new Operations(@database, @connector)
+      )
+
     wire: (app, http) ->  
       # Connection test
       app.get('/connection', (req, res) ->
@@ -29,3 +38,5 @@ module.exports =
       for plugin in @plugins
         plugin.setDatabase(@database) if plugin.setDatabase?
         plugin.wire(app, http)
+
+      # Wire connector
