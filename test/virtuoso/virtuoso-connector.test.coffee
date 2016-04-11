@@ -1,13 +1,15 @@
 require("../test-suite")()
 WeaverServer = require('../../src/index')
-Connector  = require('weaver-connector')
+VirtuosoConnector  = require('weaver-connector-virtuoso')
+Promise = require('bluebird')
 
-describe 'Create an object using Empty connector', ->
+describe 'Create an object using Virtuoso connector', ->
 
   server = null
   object = null
 
   before ->
+
 
 
     object = {
@@ -35,8 +37,19 @@ describe 'Create an object using Empty connector', ->
     server = new WeaverServer("http://localhost:6379")
 
 
-    emptyConnector = new Connector()
-    server.setConnector(emptyConnector)
+    virtuosoConnector = new VirtuosoConnector({
+      host:'192.168.99.100'
+      port:'1111'
+      user:'dba'
+      password:'myDbaPassword'
+      graph:'http://weaver-connector-virtuoso/test#'
+    })
+    server.setConnector(virtuosoConnector)
+
+
+
+
+
 
 
 
@@ -47,7 +60,7 @@ describe 'Create an object using Empty connector', ->
 
     payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
 
-    server.operations.create(payload).then(->
+    server.operations.create(payload).then(
 
       # resolved
       ->
@@ -65,7 +78,7 @@ describe 'Create an object using Empty connector', ->
 
     payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
 
-    server.operations.read(payload).then(->
+    server.operations.read(payload).then(
 
       # resolved
       ->
@@ -83,7 +96,7 @@ describe 'Create an object using Empty connector', ->
 
     payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
 
-    server.operations.update(payload).then(->
+    server.operations.update(payload).then(
 
       # resolved
       ->
@@ -101,7 +114,7 @@ describe 'Create an object using Empty connector', ->
 
     payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
 
-    server.operations.delete(payload).then(->
+    server.operations.delete(payload).then(
 
       # resolved
       ->
@@ -119,7 +132,7 @@ describe 'Create an object using Empty connector', ->
 
     payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
 
-    server.operations.link(payload).then(->
+    server.operations.link(payload).then(
 
       # resolved
       ->
@@ -137,7 +150,7 @@ describe 'Create an object using Empty connector', ->
 
     payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
 
-    server.operations.unlink(payload).then(->
+    server.operations.unlink(payload).then(
 
       # resolved
       ->
@@ -155,7 +168,7 @@ describe 'Create an object using Empty connector', ->
 
     payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
 
-    server.operations.destroy(payload).then(->
+    server.operations.destroy(payload).then(
 
       # resolved
       ->

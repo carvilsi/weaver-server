@@ -1,24 +1,32 @@
 Database = require('./database')
 Routes   = require('./routes')
 Operations   = require('./operations')
+Promise = require('bluebird')
 
 module.exports = 
   class WeaverServer
   
     constructor: (url) ->
       @database = new Database(url)
-      @routes   = new Routes(@database)
       @plugins  = []
-      @connector = null
-      @operations = null
 
     addPlugin: (plugin) ->
       @plugins.push(plugin)
 
     setConnector: (connector) ->
       @connector = connector
-      @connector.init().then(=>
-        @operations = new Operations(@database, @connector)
+      @connector.init().then(
+
+        # resolved
+        =>
+          @operations = new Operations(@database, @connector)
+          @routes     = new Routes(@operations)
+
+          Promise.resolve()
+
+        # rejected
+        (error) ->
+          Promise.reject(error)
       )
 
     wire: (app, http) ->  

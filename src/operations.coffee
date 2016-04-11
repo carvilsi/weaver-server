@@ -8,6 +8,8 @@ module.exports =
 
 
     create: (payload) ->
+      console.log('op create')
+      console.log(payload)
 
       proms = []
 
@@ -22,7 +24,15 @@ module.exports =
             )
         )
 
-      if payload.type is '$PROPERTY'
+      if payload.type is '$OBJECT_PROPERTY'
+        proms.push(
+          @connector.transaction().then((trx)->
+            trx.createProperty(payload)).then(=>
+              trx.commit()
+            )
+        )
+
+      if payload.type is '$VALUE_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
             trx.createProperty(payload)).then(=>
@@ -37,66 +47,88 @@ module.exports =
 
 
     read: (payload) ->
+      console.log('op read')
+      console.log(payload)
 
       proms = []
 
-      @database.read(payload)
-
-
-      if payload.type is '$OBJECT'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.readObject(payload)).then(=>
-            trx.commit()
-          )
-        )
-
-      if payload.type is '$PROPERTY'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.readProperty(payload)).then(=>
-            trx.commit()
-          )
-        )
-
-        #todo merge result
-
-      Promise.all(proms)
+      result = @database.read(payload)
+      proms.push(result)
+#
+#
+#      if payload.type is '$OBJECT'
+#        proms.push(
+#          @connector.transaction().then((trx)->
+#            trx.readObject(payload)).then(=>
+#            trx.commit()
+#          )
+#        )
+#
+#      if payload.type is '$OBJECT_PROPERTY'
+#        proms.push(
+#          @connector.transaction().then((trx)->
+#            trx.readProperty(payload)).then(=>
+#            trx.commit()
+#          )
+#        )
+#
+#      if payload.type is '$VALUE_PROPERTY'
+#        proms.push(
+#          @connector.transaction().then((trx)->
+#            trx.readProperty(payload)).then(=>
+#            trx.commit()
+#          )
+#        )
+#
+#        #todo merge result
+#
+      Promise.all(proms).then(->
+        result
+      )
 
 
 
     update: (payload) ->
+      console.log('op update')
+      console.log(payload)
 
       proms = []
 
       proms.push(@database.update(payload))
 
-
-      if payload.type is '$OBJECT'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.updateObject(payload)).then(=>
-            trx.commit()
-          )
+      proms.push(
+        @connector.transaction().then((trx)->
+          trx.updateProperty(payload)).then(=>
+          trx.commit()
         )
-
-      if payload.type is '$PROPERTY'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.updateProperty(payload)).then(=>
-            trx.commit()
-          )
-        )
+      )
 
       Promise.all(proms)
 
 
-
-    delete: (payload) ->
+    # renamed from delete
+    destroyAttribute: (payload) ->
+      console.log('op deleteField')
+      console.log(payload)
 
       proms = []
 
-      proms.push(@database.delete(payload))
+      proms.push(@database.destroyAttribute(payload))
+
+
+
+
+      Promise.all(proms)
+
+
+    # renamed from destroy
+    destroyEntity: (payload) ->
+      console.log('op deleteEntity')
+      console.log(payload)
+
+      proms = []
+
+      proms.push(@database.destroyEntity(payload))
 
 
       if payload.type is '$OBJECT'
@@ -107,7 +139,15 @@ module.exports =
           )
         )
 
-      if payload.type is '$PROPERTY'
+      if payload.type is '$OBJECT_PROPERTY'
+        proms.push(
+          @connector.transaction().then((trx)->
+            trx.deleteProperty(payload)).then(=>
+            trx.commit()
+          )
+        )
+
+      if payload.type is '$VALUE_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
             trx.deleteProperty(payload)).then(=>
@@ -120,46 +160,64 @@ module.exports =
 
 
     link: (payload) ->
+      console.log('op link')
+      console.log(payload)
 
       proms = []
 
       proms.push(@database.link(payload))
+
+      if payload.source.type is '$COLLECTION' and payload.target.type is '$OBJECT_PROPERTY'
+        proms.push(
+          @connector.transaction().then((trx)->
+            trx.linkProperty(payload)).then(=>
+            trx.commit()
+          )
+        )
+
+      if payload.source.type is '$COLLECTION' and payload.target.type is '$VALUE_PROPERTY'
+        proms.push(
+          @connector.transaction().then((trx)->
+            trx.linkProperty(payload)).then(=>
+            trx.commit()
+          )
+        )
 
       Promise.all(proms)
 
 
 
     unlink: (payload) ->
+      console.log('op unlink')
+      console.log(payload)
 
       proms = []
 
       proms.push(@database.unlink(payload))
 
-      Promise.resolve(proms)
-
-
-
-    destroy: (payload) ->
-
-      proms = []
-
-      proms.push(@database.destroy(payload))
-
 
       if payload.type is '$OBJECT'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.deleteObject(payload)).then(=>
+            trx.unlinkObject(payload)).then(=>
             trx.commit()
           )
         )
 
-      if payload.type is '$PROPERTY'
+      if payload.type is '$OBJECT_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.deleteProperty(payload)).then(=>
+            trx.destroyProperty(payload)).then(=>
             trx.commit()
           )
         )
 
-      Promise.all(proms)
+      if payload.type is '$VALUE_PROPERTY'
+        proms.push(
+          @connector.transaction().then((trx)->
+            trx.destroyProperty(payload)).then(=>
+            trx.commit()
+          )
+        )
+
+      Promise.resolve(proms)

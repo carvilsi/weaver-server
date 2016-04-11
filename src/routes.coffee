@@ -12,6 +12,8 @@ module.exports =
 
       #
       socket.on('create', (payload, ack) ->
+        console.log('sock create')
+
         self.operations.create(payload).then(
 
           (result) ->
@@ -26,12 +28,17 @@ module.exports =
 
       #
       socket.on('read', (payload, ack) ->
+        console.log('sock read')
+
+
         self.operations.read(payload).then(
 
           (result) ->
-            ack
+            console.log(result)
+            ack(result)
 
           (error) ->
+            console.log(error)
             ack(-1)
 
         )
@@ -52,7 +59,7 @@ module.exports =
 
       # Removes a key from an entity
       socket.on('remove', (payload, ack) ->
-        self.operations.delete(payload).then(
+        self.operations.destroyAttribute(payload).then(
 
           (result) ->
             socket.broadcast.emit(payload.id + ':removed', payload)
@@ -92,7 +99,7 @@ module.exports =
       
       # Destroys entity
       socket.on('destroy', (payload, ack) ->
-        self.operations.destroy(payload).then(
+        self.operations.destroyEntity(payload).then(
 
           (result) ->
             socket.broadcast.emit(payload.id + ':destroyed', payload)

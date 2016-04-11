@@ -47,6 +47,8 @@ module.exports =
         @redis = new Redis()
         
     create: (payload) ->
+      console.log(payload)
+
       for key, val of payload.data
         payload.data[key] = encode(val)
         
@@ -75,6 +77,8 @@ module.exports =
       # TODO: fire onCreated 
 
     read: (payload) ->
+      console.log(payload)
+
       # Assume eagerness = 1
       
       # Prevention of circular references blowing up the recursion chain
@@ -129,7 +133,7 @@ module.exports =
       
           
     update: (payload) ->
-      
+
       # ID
       id = payload.id 
       
@@ -153,13 +157,13 @@ module.exports =
     link: (payload) ->
   
       # ID
-      id = payload.id
+      id = payload.source.id
 
       # users or projects
       key = payload.key
       
       # target object to add
-      target = payload.target
+      target = payload.target.id
 
       # add key to object as dependencies
       @redis.sadd(id + ':_LINKS', key)
@@ -190,7 +194,7 @@ module.exports =
       # TODO: fire onUnlinked
   
     # Delete key
-    delete: (payload) ->
+    destroyAttribute: (payload) ->
       # ID
       id = payload.id
 
@@ -204,7 +208,7 @@ module.exports =
 
 
     # Destroy object
-    destroy: (payload) ->
+    destroyEntity: (payload) ->
       # ID
       id = payload.id
 
