@@ -47,6 +47,8 @@ module.exports =
         @redis = new Redis()
         
     create: (payload) ->
+      console.log(payload)
+
       for key, val of payload.data
         payload.data[key] = encode(val)
         
@@ -70,10 +72,13 @@ module.exports =
       if data and Object.keys(data).length isnt 0
         @redis.hmset(id, data)
 
+      Promise.resolve() # todo reject
+
       # TODO: fire onCreated 
-      
-  
-    read: (payload) ->  
+
+    read: (payload) ->
+      console.log(payload)
+
       # Assume eagerness = 1
       
       # Prevention of circular references blowing up the recursion chain
@@ -128,7 +133,7 @@ module.exports =
       
           
     update: (payload) ->
-      
+
       # ID
       id = payload.id 
       
@@ -142,6 +147,8 @@ module.exports =
         @redis.hset(id, attribute, encode(value))
       else
         @redis.hdel(id, attribute)
+
+      Promise.resolve() # todo reject
       
       # TODO: fire onUpdated 
   
@@ -150,19 +157,21 @@ module.exports =
     link: (payload) ->
   
       # ID
-      id = payload.id
+      id = payload.source.id
 
       # users or projects
       key = payload.key
       
       # target object to add
-      target = payload.target
+      target = payload.target.id
 
       # add key to object as dependencies
       @redis.sadd(id + ':_LINKS', key)
 
       # save link
       @redis.set(id + ':' + key, target)
+
+      Promise.resolve() # todo reject
 
       # TODO: fire onLinked
   
@@ -180,27 +189,33 @@ module.exports =
       # delete link
       @redis.del(id + ':' + key)
 
+      Promise.resolve() # todo reject
+
       # TODO: fire onUnlinked
   
-    # Remove key
-    remove: (payload) ->
+    # Delete key
+    destroyAttribute: (payload) ->
       # ID
       id = payload.id
 
       # Attribute
       attribute = payload.attribute
 
-      # Remove
+      # Delete
       @redis.hdel(id, attribute)
+
+      Promise.resolve() # todo reject
 
 
     # Destroy object
-    destroy: (payload) ->
+    destroyEntity: (payload) ->
       # ID
       id = payload.id
 
-      # Remove key
+      # Delete key
       @redis.del(id)
+
+      Promise.resolve() # todo reject
 
 
 

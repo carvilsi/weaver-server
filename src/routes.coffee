@@ -4,55 +4,108 @@ Promise = require('bluebird')
 module.exports =
   
   class Routes
-    constructor: (@database) ->
+    constructor: (@operations) ->
 
     wire: (socket) ->
       
       self = @
-      socket.on('create', (payload, ack) ->
-        self.database.create(payload)
-        
-        socket.broadcast.emit(payload.type + ':created', payload.id)
-        ack(0)
-      )
-      
-      socket.on('read', (payload, ack) ->
-        self.database.read(payload).then(ack)
-      )
-      
-      socket.on('update', (payload, ack) ->
-        self.database.update(payload).then(ack)
 
-        socket.broadcast.emit(payload.id + ':updated', payload)
-        ack(0)
+      #
+      socket.on('create', (payload, ack) ->
+        console.log('sock create')
+
+        self.operations.create(payload).then(
+
+          (result) ->
+            socket.broadcast.emit(payload.type + ':created', payload.id)
+            ack(result)
+
+          (error) ->
+            ack(-1)
+
+        )
+      )
+
+      #
+      socket.on('read', (payload, ack) ->
+        console.log('sock read')
+
+
+        self.operations.read(payload).then(
+
+          (result) ->
+            console.log(result)
+            ack(result)
+
+          (error) ->
+            console.log(error)
+            ack(-1)
+
+        )
+      )
+
+      #
+      socket.on('update', (payload, ack) ->
+        self.operations.update(payload).then(
+
+          (result) ->
+            socket.broadcast.emit(payload.id + ':updated', payload)
+            ack(result)
+
+          (error) ->
+            ack(-1)
+        )
       )
 
       # Removes a key from an entity
       socket.on('remove', (payload, ack) ->
-        self.database.remove(payload).then(ack)
+        self.operations.destroyAttribute(payload).then(
 
-        socket.broadcast.emit(payload.id + ':removed', payload)
-        ack(0)
+          (result) ->
+            socket.broadcast.emit(payload.id + ':removed', payload)
+            ack(result)
+
+          (error) ->
+            ack(-1)
+
+        )
       )
-      
+
+      #
       socket.on('link', (payload, ack) ->
-        self.database.link(payload).then(ack)
+        self.operations.link(payload).then(
 
-        socket.broadcast.emit(payload.id + ':linked', payload)
-        ack(0)
+          (result) ->
+            socket.broadcast.emit(payload.id + ':linked', payload)
+            ack(result)
+
+          (error) ->
+            ack(-1)
+        )
       )
-      
-      socket.on('unlink', (payload, ack) ->
-        self.database.unlink(payload).then(ack)
 
-        socket.broadcast.emit(payload.id + ':unlinked', payload)
-        ack(0)
+      #
+      socket.on('unlink', (payload, ack) ->
+        self.operations.unlink(payload).then(
+
+          (result) ->
+            socket.broadcast.emit(payload.id + ':unlinked', payload)
+            ack(result)
+
+          (error) ->
+            ack(-1)
+        )
       )
       
       # Destroys entity
       socket.on('destroy', (payload, ack) ->
-        self.database.destroy(payload).then(ack)
-        
-        socket.broadcast.emit(payload.id + ':destroyed', payload)
-        ack(0)
+        self.operations.destroyEntity(payload).then(
+
+          (result) ->
+            socket.broadcast.emit(payload.id + ':destroyed', payload)
+            ack(result)
+
+          (error) ->
+            ack(-1)
+        )
       )
