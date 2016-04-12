@@ -1,7 +1,9 @@
-Database = require('./database')
-Routes   = require('./routes')
-Operations   = require('./operations')
-Promise = require('bluebird')
+Promise    = require('bluebird')
+
+Operations = require('./operations')
+Database   = require('./database')
+Routes     = require('./routes')
+REST       = require('./rest')
 
 module.exports = 
   class WeaverServer
@@ -21,6 +23,7 @@ module.exports =
         =>
           @operations = new Operations(@database, @connector)
           @routes     = new Routes(@operations)
+          @rest       = new REST(@operations)
 
           Promise.resolve()
 
@@ -41,6 +44,9 @@ module.exports =
       io.on('connection', (socket) ->
         self.routes.wire(socket)
       )
+      
+      # REST
+      @rest.wire(app)
       
       # Loop through plugins
       for plugin in @plugins

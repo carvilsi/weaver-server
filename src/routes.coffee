@@ -12,7 +12,6 @@ module.exports =
 
       #
       socket.on('create', (payload, ack) ->
-        console.log('sock create')
 
         self.operations.create(payload).then(
 
@@ -29,16 +28,14 @@ module.exports =
       #
       socket.on('read', (payload, ack) ->
         console.log('sock read')
-
+        console.log(payload)
 
         self.operations.read(payload).then(
 
           (result) ->
-            console.log(result)
             ack(result)
 
           (error) ->
-            console.log(error)
             ack(-1)
 
         )
