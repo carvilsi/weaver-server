@@ -94,7 +94,7 @@ module.exports =
           for key,val of properties
             properties[key] = decode(val)
 
-          object = properties
+          object._DATA = properties
           
           # Save meta information
           object._META = {fetched: false, type: object.type, id}
@@ -115,10 +115,10 @@ module.exports =
                 
                 if visited.indexOf(linkId) is -1
                   read(linkId, eagerness - 1).then((result) ->
-                    object[link] = result
+                    object._DATA[link] = result
                   )
                 else
-                  object[link] = {'_REF': linkId}
+                  object._DATA[link] = {'_REF': linkId}
               )
             )         
         ).then(-> object)
