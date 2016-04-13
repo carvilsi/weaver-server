@@ -94,13 +94,13 @@ module.exports =
           for key,val of properties
             properties[key] = decode(val)
 
-          object._DATA = properties
+          object._ATTRIBUTES = properties
           
           # Save meta information
-          object._META = {fetched: false, type: object.type, id}
+          object._META = {fetched: false, type: object._ATTRIBUTES.type, id}
           
           # Remove type from object
-          delete object.type
+          delete object._ATTRIBUTES.type
           
         ).then(->
           # Stop condition
@@ -113,12 +113,15 @@ module.exports =
             self.redis.smembers(id + ':_LINKS').each((link) ->
               self.redis.get(id + ':' + link).then((linkId) ->
                 
+                # Init if not set
+                object._RELATIONS = {} if not object._RELATIONS?
+                
                 if visited.indexOf(linkId) is -1
                   read(linkId, eagerness - 1).then((result) ->
-                    object._DATA[link] = result
+                    object._RELATIONS[link] = result
                   )
                 else
-                  object._DATA[link] = {'_REF': linkId}
+                  object._RELATIONS[link] = {'_REF': linkId}
               )
             )         
         ).then(-> object)
@@ -151,7 +154,6 @@ module.exports =
       Promise.resolve() # todo reject
       
       # TODO: fire onUpdated 
-  
   
 
     link: (payload) ->
