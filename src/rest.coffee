@@ -93,7 +93,7 @@ module.exports =
             res.status(503).send(error)
         )
       )
-sou
+
 
       # DESTROY
       app.get('/rest/destroy', (req, res) =>
