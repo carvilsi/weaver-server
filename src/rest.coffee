@@ -93,20 +93,7 @@ module.exports =
             res.status(503).send(error)
         )
       )
-
-      # UNLINK
-      app.get('/rest/unlink', (req, res) =>
-
-        payload = JSON.parse(req.query.payload)
-        @operations.unlink(payload).then(
-
-          (result) ->
-            res.status(200).send(result)
-
-          (error) ->
-            res.status(503).send(error)
-        )
-      )
+sou
 
       # DESTROY
       app.get('/rest/destroy', (req, res) =>
