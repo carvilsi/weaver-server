@@ -96,12 +96,13 @@ module.exports =
 
       proms.push(@database.update(payload))
 
-      proms.push(
-        @connector.transaction().then((trx)->
-          trx.updateProperty(payload)).then(=>
-          trx.commit()
+      if false
+        proms.push(
+          @connector.transaction().then((trx)->
+            trx.updateProperty(payload)).then(=>
+            trx.commit()
+          )
         )
-      )
 
       Promise.all(proms)
 

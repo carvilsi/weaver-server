@@ -1,0 +1,4 @@
+# Needed for the ASCI art logo of Weaver in the index file.
+
+[index.html]
+trim_trailing_whitespace = false
