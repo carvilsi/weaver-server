@@ -222,3 +222,16 @@ module.exports =
         )
 
       Promise.resolve(proms)
+
+
+# TODO
+    onUpdate: (id, callback) ->
+      return
+
+# TODO  
+    onLinked: (id, callback) ->
+      return
+
+# TODO
+    onUnlinked: (id, callback) ->
+      return

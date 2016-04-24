@@ -1,4 +1,6 @@
-Promise    = require('bluebird')
+Promise    = require('bluebird')      
+bodyParser = require('body-parser')   # POST requests
+
 
 Operations = require('./operations')
 Database   = require('./database')
@@ -32,7 +34,12 @@ module.exports =
           Promise.reject(error)
       )
 
-    wire: (app, http) ->  
+    wire: (app, http) ->
+
+      # For POST requests
+      app.use(bodyParser.json({limit: '1000000mb'})) # Support json encoded bodies
+      app.use(bodyParser.urlencoded({limit: '1000000mb', extended: true })) # Support encoded bodies
+            
       # Connection test
       app.get('/connection', (req, res) ->
         res.status(204).send()
@@ -50,7 +57,7 @@ module.exports =
       
       # Loop through plugins
       for plugin in @plugins
-        plugin.setDatabase(@database) if plugin.setDatabase?
+        plugin.setDatabase(@operations) if plugin.setDatabase?
         plugin.wire(app, http)
 
       # Wire connector

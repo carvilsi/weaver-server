@@ -3,7 +3,7 @@ app            = require('express')()
 http           = require('http').Server(app)
 EmptyConnector = require('weaver-connector')
 WeaverServer   = require('../src/index')
-
+RevitInterface = require('weaver-plugin-interface-revit')
 
 # CORS allow all
 app.all('*', (req, res, next) ->
@@ -30,9 +30,12 @@ emptyConnector = new EmptyConnector()
 weaver.setConnector(emptyConnector).then(->
 
 # Turtle plugin
-# weaver.addPlugin(new TurtlePlugin())
+#weaver.addPlugin(new TurtlePlugin())
 
-# Wire weaver-server to express
+  # Revit interface
+  weaver.addPlugin(new RevitInterface({apiKey: 'kj6tEWz#4Kmr23fsV'}))
+
+  # Wire weaver-server to express
   weaver.wire(app, http)
 
   # Launch
