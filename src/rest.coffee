@@ -20,6 +20,20 @@ module.exports =
           (error) ->
             res.status(503).send(error)
         )
+      )      
+      
+      # CREATE BULK
+      app.get('/rest/create/bulk', (req, res) =>
+
+        payload = JSON.parse(req.query.payload)        
+        @operations.createBulk(payload).then(
+
+          ->
+            res.sendStatus(200)
+
+          (error) ->
+            res.status(503).send(error)
+        )
       )
 
       # READ

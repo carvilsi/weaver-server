@@ -6,6 +6,9 @@ module.exports =
   class Operations
     constructor: (@database, @connector) ->
 
+    createBulk: (payloads) ->
+      proms = (@create(payload) for payload in payloads.creates)
+      Promise.all(proms)
 
     create: (payload) ->
       console.log('op create')

@@ -10,7 +10,7 @@ module.exports =
       
       self = @
 
-      #
+      # Create
       socket.on('create', (payload, ack) ->
 
         self.operations.create(payload).then(
@@ -25,6 +25,21 @@ module.exports =
         )
       )
 
+      # Create Bulk
+      socket.on('create/bulk', (payload, ack) ->
+
+        self.operations.createBulk(payload).then(
+
+          (result) ->
+            ack(result)
+
+          (error) ->
+            ack(-1)
+
+        )
+      )
+
+      
       #
       socket.on('read', (payload, ack) ->
         console.log('sock read')
