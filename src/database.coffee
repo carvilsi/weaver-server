@@ -77,7 +77,7 @@ module.exports =
       # TODO: fire onCreated 
 
     read: (payload) ->
-      console.log(payload)
+      console.dir(payload, {depth: null})
 
       # Assume eagerness = 1
       
@@ -124,7 +124,9 @@ module.exports =
                   object._RELATIONS[link] = {'_REF': linkId}
               )
             )         
-        ).then(-> object)
+        ).then(->
+           object
+        )
 
 
       # ID

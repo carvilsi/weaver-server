@@ -121,3 +121,15 @@ module.exports =
             ack(-1)
         )
       )
+
+      # Populate
+      socket.on('populate', (payload, ack) ->
+        self.operations.populate(payload).then(
+
+          (result) ->
+            ack(result)
+
+          (error) ->
+            ack(-1)
+        )
+      )

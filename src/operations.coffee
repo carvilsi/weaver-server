@@ -1,4 +1,10 @@
 Promise = require('bluebird')
+util = require('util')
+WeaverConnector    = require('weaver-connector')
+Individual         = WeaverConnector.model.Individual
+IndividualProperty = WeaverConnector.model.IndividualProperty
+ValueProperty      = WeaverConnector.model.ValueProperty
+Filter             = WeaverConnector.model.Filter
 
 # This is the main entry point of any new socket connection.
 module.exports =
@@ -11,36 +17,37 @@ module.exports =
       Promise.all(proms)
 
     create: (payload) ->
-      console.log('op create')
-      console.log(payload)
 
       proms = []
 
       proms.push(@database.create(payload))
 
 
-      if payload.type is '$OBJECT'
+      if payload.type is '$INDIVIDUAL'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.createObject(payload)).then(=>
+            trx.createIndividual(new Individual(payload.id)).then(=>
               trx.commit()
             )
+          )
         )
 
-      if payload.type is '$OBJECT_PROPERTY'
+      if payload.type is '$INDIVIDUAL_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.createProperty(payload)).then(=>
+            trx.createIndividualProperty(new IndividualProperty(payload.id, payload.data.subject, payload.data.predicate, payload.data.object)).then(=>
               trx.commit()
             )
+          )
         )
 
       if payload.type is '$VALUE_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.createProperty(payload)).then(=>
+            trx.createValueProperty(new ValueProperty(payload.id, payload.data.subject, payload.data.predicate, payload.data.value)).then(=>
               trx.commit()
             )
+          )
         )
 
       Promise.all(proms)
@@ -53,47 +60,65 @@ module.exports =
       console.log('op read')
       console.log(payload)
 
-      proms = []
+      @database.read(payload).then((object) ->
 
-      result = @database.read(payload)
-      proms.push(result)
-#
-#
-#      if payload.type is '$OBJECT'
-#        proms.push(
-#          @connector.transaction().then((trx)->
-#            trx.readObject(payload)).then(=>
-#            trx.commit()
-#          )
-#        )
-#
-#      if payload.type is '$OBJECT_PROPERTY'
-#        proms.push(
-#          @connector.transaction().then((trx)->
-#            trx.readProperty(payload)).then(=>
-#            trx.commit()
-#          )
-#        )
-#
-#      if payload.type is '$VALUE_PROPERTY'
-#        proms.push(
-#          @connector.transaction().then((trx)->
-#            trx.readProperty(payload)).then(=>
-#            trx.commit()
-#          )
-#        )
-#
-#        #todo merge result
-#
-      Promise.all(proms).then(->
-        result
+        console.log(util.inspect(object, {showHidden: false, depth: null}))
+
+        object
       )
+
+
+#      # lookup the entity
+#      @database.read(payload).then((signature) ->
+#        if signature.type is '$INDIVIDUAL'
+#
+#             @connector.query().then((query)->
+#              query.selectIndividual(payload.id).then((result) ->
+#                console.log('querying virtuoso for an object')
+#                console.log(result)
+#
+#                # add redis stuff to result
+#
+#                return result
+#              )
+#            )
+#
+#        else if signature.type is '$INDIVIDUAL_PROPERTY'
+#
+#            @connector.query().then((query)->
+#              query.selectIndividualProperty(payload.id).then((result) ->
+#                console.log('querying virtuoso for an individual property')
+#                console.log(result)
+#
+#                # add redis stuff to result
+#
+#                return result
+#
+#
+#              )
+#            )
+#
+#        else if signature.type is '$VALUE_PROPERTY'
+#
+#            @connector.query().then((query)->
+#              query.selectValueProperty(payload.id).then((result) ->
+#                console.log('querying virtuoso for a value property')
+#                console.log(result)
+#
+#                # add redis stuff to result
+#
+#                return result
+#              )
+#            )
+#
+#      )
+
+
+
 
 
 
     update: (payload) ->
-      console.log('op update')
-      console.log(payload)
 
       proms = []
 
@@ -112,8 +137,6 @@ module.exports =
 
     # renamed from delete
     destroyAttribute: (payload) ->
-      console.log('op deleteField')
-      console.log(payload)
 
       proms = []
 
@@ -127,15 +150,13 @@ module.exports =
 
     # renamed from destroy
     destroyEntity: (payload) ->
-      console.log('op deleteEntity')
-      console.log(payload)
 
       proms = []
 
       proms.push(@database.destroyEntity(payload))
 
 
-      if payload.type is '$OBJECT'
+      if payload.type is '$INDIVIDUAL'
         proms.push(
           @connector.transaction().then((trx)->
             trx.deleteObject(payload)).then(=>
@@ -143,7 +164,7 @@ module.exports =
           )
         )
 
-      if payload.type is '$OBJECT_PROPERTY'
+      if payload.type is '$INDIVIDUAL_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
             trx.deleteProperty(payload)).then(=>
@@ -164,77 +185,95 @@ module.exports =
 
 
     link: (payload) ->
-      console.log('op link')
-      console.log(payload)
 
-      proms = []
-
-      proms.push(@database.link(payload))
-
-      if payload.source.type is '$COLLECTION' and payload.target.type is '$OBJECT_PROPERTY'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.linkProperty(payload)).then(=>
-            trx.commit()
-          )
-        )
-
-      if payload.source.type is '$COLLECTION' and payload.target.type is '$VALUE_PROPERTY'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.linkProperty(payload)).then(=>
-            trx.commit()
-          )
-        )
-
-      Promise.all(proms)
+      @database.link(payload)
 
 
 
     unlink: (payload) ->
-      console.log('op unlink')
-      console.log(payload)
 
-      proms = []
-
-      proms.push(@database.unlink(payload))
+      @database.unlink(payload)
 
 
-      if payload.type is '$OBJECT'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.unlinkObject(payload)).then(=>
-            trx.commit()
-          )
-        )
+    populateFromFilters: (filters) ->
 
-      if payload.type is '$OBJECT_PROPERTY'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.destroyProperty(payload)).then(=>
-            trx.commit()
-          )
-        )
-
-      if payload.type is '$VALUE_PROPERTY'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.destroyProperty(payload)).then(=>
-            trx.commit()
-          )
-        )
-
-      Promise.resolve(proms)
+      @connector.query().then((query) ->
+        query.selectIndividuals(filters)
+      )
 
 
-# TODO
+    populate: (payload) ->
+
+      # Retrieve the view object
+      @read({ id: payload.id, opts: { eagerness: -1 } }).then((view) =>
+
+        filtersMap = view._RELATIONS.filters._RELATIONS
+        filters = []
+        for filter_id, filter of filtersMap
+
+
+          conditions = []
+          for cond_id, condition of filter._RELATIONS.conditions._RELATIONS
+
+
+            # todo extremely ugly
+            if condition._ATTRIBUTES.conditiontype is 'string'
+              conditions.push({
+                operation: condition._ATTRIBUTES.operation
+                value: condition._ATTRIBUTES.value
+                conditiontype: condition._ATTRIBUTES.conditiontype
+              })
+
+
+            # todo extremely ugly
+            else if condition._ATTRIBUTES.conditiontype is 'individual'
+              conditions.push({
+                operation: condition._ATTRIBUTES.operation
+                individual: condition._RELATIONS.individual._META.id
+                conditiontype: condition._ATTRIBUTES.conditiontype
+              })
+
+
+            # todo extremely ugly
+            else if condition._ATTRIBUTES.conditiontype is 'view'
+              conditions.push({
+                operation: condition._ATTRIBUTES.operation
+                view: condition._RELATIONS.view._META.id
+                conditiontype: condition._ATTRIBUTES.conditiontype
+              })
+
+
+            # todo extremely ugly
+            else
+              thrown new Error('unsupported condition type')
+
+
+
+          filter = {
+            label: filter._ATTRIBUTES.label
+            predicate: filter._ATTRIBUTES.predicate
+            celltype: filter._ATTRIBUTES.celltype
+            conditions: conditions
+          }
+
+
+          filters.push(filter)
+        promise = @populateFromFilters(filters)
+        return promise
+      )
+
+
+
+
+
+    # TODO
     onUpdate: (id, callback) ->
       return
 
-# TODO  
+    # TODO
     onLinked: (id, callback) ->
       return
 
-# TODO
+    # TODO
     onUnlinked: (id, callback) ->
       return

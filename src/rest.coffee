@@ -122,3 +122,18 @@ module.exports =
             res.status(503).send(error)
         )
       )
+
+
+      # DESTROY
+      app.get('/rest/populate', (req, res) =>
+
+        payload = JSON.parse(req.query.payload)
+        @operations.populate(payload).then(
+
+          (result) ->
+            res.status(200).send(result)
+
+          (error) ->
+            res.status(503).send(error)
+        )
+      )
