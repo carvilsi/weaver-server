@@ -49,8 +49,8 @@ module.exports =
     create: (payload) ->
       console.log(payload)
 
-      for key, val of payload.data
-        payload.data[key] = encode(val)
+      for key, val of payload.attributes
+        payload.attributes[key] = encode(val)
         
       # Example: user, session, project, model
       type = payload.type 
@@ -60,7 +60,7 @@ module.exports =
       id = payload.id
       
       # Data
-      data = payload.data
+      data = payload.attributes
       data = {} if not data?
       
       # Save type to @redis set
@@ -71,6 +71,21 @@ module.exports =
 
       if data and Object.keys(data).length isnt 0
         @redis.hmset(id, data)
+
+
+
+
+      # do a link for each relations field
+      if payload.relations?
+        for key, value of payload.relations       # todo unlink
+
+          console.log('found relations in created object '+key+' '+value)
+
+          # add key to object as dependencies
+          @redis.sadd(id + ':_LINKS', key)
+
+          # save link
+          @redis.set(id + ':' + key, value)
 
       Promise.resolve() # todo reject
 

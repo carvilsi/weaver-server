@@ -17,10 +17,10 @@ module.exports =
       Promise.all(proms)
 
     create: (payload) ->
+      console.log('op create')
+      console.log(payload)
 
       proms = []
-
-      proms.push(@database.create(payload))
 
 
       if payload.type is '$INDIVIDUAL'
@@ -33,22 +33,41 @@ module.exports =
         )
 
       if payload.type is '$INDIVIDUAL_PROPERTY'
+
+        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes?
+        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes.predicate?
+        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations?
+        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations.subject?
+        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations.object?
+
         proms.push(
           @connector.transaction().then((trx)->
-            trx.createIndividualProperty(new IndividualProperty(payload.id, payload.data.subject, payload.data.predicate, payload.data.object)).then(=>
+            trx.createIndividualProperty(new IndividualProperty(payload.id, payload.relations.subject, payload.attributes.predicate, payload.relations.object)).then(=>
               trx.commit()
             )
           )
         )
 
       if payload.type is '$VALUE_PROPERTY'
+
+        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes?
+        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes.predicate?
+        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes.object?
+        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations?
+        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations.subject?
+
         proms.push(
           @connector.transaction().then((trx)->
-            trx.createValueProperty(new ValueProperty(payload.id, payload.data.subject, payload.data.predicate, payload.data.value)).then(=>
+            trx.createValueProperty(new ValueProperty(payload.id, payload.relations.subject, payload.attributes.predicate, payload.attributes.object)).then(=>
               trx.commit()
             )
           )
         )
+
+
+
+
+      proms.push(@database.create(payload))
 
       Promise.all(proms)
 

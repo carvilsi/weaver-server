@@ -28,15 +28,7 @@ else
   weaver = new WeaverServer('localhost:6379')
 
 emptyConnector = new EmptyConnector()
-virtuoso = new Virtuoso({
-  host:'localhost'
-  port:'1111'
-  user:'dba'
-  password:'dba'
-  graphPrefix:'http://weaverplatform.com/test#'
-  wipeEnabled:false
-})
-weaver.setConnector(virtuoso).then(->
+weaver.setConnector(emptyConnector).then(->
 
 # Turtle plugin
 #weaver.addPlugin(new TurtlePlugin())
