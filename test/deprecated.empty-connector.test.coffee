@@ -1,5 +1,5 @@
-require("../test-suite")()
-WeaverServer = require('../../src/index')
+require("./test-suite")()
+WeaverServer = require('../src/index')
 Connector  = require('weaver-connector')
 
 describe 'Create an object using Empty connector', ->

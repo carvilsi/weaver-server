@@ -33,6 +33,6 @@
   "scripts": {
     "start": "coffee src/index.coffee",
     "prepublish": "coffee -o lib -c src",
-    "test": "./node_modules/.bin/mocha --compilers coffee:coffee-script/register --recursive $(find test -path '*test.coffee' ! -iname 'deprecated.*')"
+    "test": "./node_modules/.bin/mocha --compilers coffee:coffee-script/register -g deprecated"
   }
 }
