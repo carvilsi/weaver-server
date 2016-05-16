@@ -1,7 +1,7 @@
 language: node_js
 node_js:
   - 0.12
-#before_script:
-#  - npm install -g grunt-cli
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+#before_script:
+#  - npm install -g grunt-cli
