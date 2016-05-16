@@ -249,3 +249,8 @@ module.exports =
     # TODO
     onUnlinked: (id, callback) ->
       return
+
+    # todo process the boolean this function returns
+    wipe: ->
+      @redis.call('flushall').then((results) ->
+        return results is 'OK')

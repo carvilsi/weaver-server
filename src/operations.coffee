@@ -300,6 +300,9 @@ module.exports =
 
     wipe: ->
 
-      if not @opts['wipeEnabled']? or not @opts['wipeEnabled']
+      if not @opts? or not @opts['wipeEnabled']? or not @opts['wipeEnabled']
         throw new Error('wiping disabled')
-      console.log('will wipe everything')
+
+      # todo: cleanup state / re-init ????
+      @connector.wipe()
+      @database.wipe()
