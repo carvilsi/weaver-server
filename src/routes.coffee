@@ -133,3 +133,15 @@ module.exports =
             ack(-1)
         )
       )
+
+      # Populate
+      socket.on('wipe', (payload, ack) ->
+        self.operations.wipe().then(
+
+          (result) ->
+            ack(result)
+
+          (error) ->
+            ack(-1)
+        )
+      )

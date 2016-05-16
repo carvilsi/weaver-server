@@ -10,7 +10,7 @@ REST       = require('./rest')
 module.exports = 
   class WeaverServer
   
-    constructor: (url) ->
+    constructor: (url, @opts) ->
       @database = new Database(url)
       @plugins  = []
 
@@ -23,9 +23,9 @@ module.exports =
 
         # resolved
         =>
-          @operations = new Operations(@database, @connector)
-          @routes     = new Routes(@operations)
-          @rest       = new REST(@operations)
+          @operations = new Operations(@database, @connector, @opts)
+          @routes     = new Routes(@operations)  # Accepting socket connections
+          @rest       = new REST(@operations)    # Accepting rest calls
 
           Promise.resolve()
 
