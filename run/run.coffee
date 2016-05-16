@@ -25,10 +25,20 @@ weaver = null
 if process.env.REDIS_URL?
   weaver = new WeaverServer(process.env.REDIS_URL)
 else
-  weaver = new WeaverServer('localhost:6379')
+  weaver = new WeaverServer('localhost:6379',{
+    wipeEnabled:true
+  })
 
 emptyConnector = new EmptyConnector()
-weaver.setConnector(emptyConnector).then(->
+virtuoso = new Virtuoso({
+  host:'192.168.99.100'
+  port:'1111'
+  user:'dba'
+  password:'myDbaPassword'
+  graphPrefix:'http://weaverplatform.com/test#'
+  wipeEnabled:true
+})
+weaver.setConnector(virtuoso).then(->
 
 # Turtle plugin
 #weaver.addPlugin(new TurtlePlugin())
