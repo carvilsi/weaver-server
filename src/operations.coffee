@@ -1,5 +1,8 @@
 Promise = require('bluebird')
 util = require('util')
+http = require('http')
+cuid = require('cuid')
+
 WeaverConnector    = require('weaver-connector')
 Individual         = WeaverConnector.model.Individual
 IndividualProperty = WeaverConnector.model.IndividualProperty
@@ -16,7 +19,33 @@ module.exports =
       proms = (@create(payload) for payload in payloads.creates)
       Promise.all(proms)
 
+
+    dump: ->
+
+
+      payloads = []
+      @database.redis.lrange('payloads', 0, -1).bind(@).each((payloadId) ->
+        @database.redis.hgetall(payloadId).then((payload) ->
+          payload.id = payloadId
+          payloads.push(payload)
+        )
+      ).then(->
+        payloads
+      )
+
+
+
+
     create: (payload) ->
+
+      # Add payload ID to payloads set
+      payloadId = cuid()
+      @database.redis.rpush('payloads', payloadId)
+
+      # Save payload as map
+      @database.redis.hmset(payloadId, {timestamp: new Date().getTime(),action: 'create', payload: JSON.stringify(payload)})
+
+
       console.log('op create')
       console.log(payload)
 
@@ -306,3 +335,23 @@ module.exports =
       # todo: cleanup state / re-init ????
       @connector.wipe()
       @database.wipe()
+
+
+    bootstrap: (url) ->
+
+      payload = ''
+
+      http.get(url, (res)=>
+
+        if not res.statusCode is 200
+          return Promise.reject()
+
+        res.on('data', (data)=>
+          payload += data
+        )
+        res.on('end', ()=>
+          # todo do something usefull with payload
+          console.log(payload)
+          return Promise.resolve()
+        )
+      )
