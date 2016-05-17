@@ -10,7 +10,7 @@ Filter             = WeaverConnector.model.Filter
 module.exports =
 
   class Operations
-    constructor: (@database, @connector) ->
+    constructor: (@database, @connector, @opts) ->
 
     createBulk: (payloads) ->
       proms = (@create(payload) for payload in payloads.creates)
@@ -296,3 +296,13 @@ module.exports =
     # TODO
     onUnlinked: (id, callback) ->
       return
+
+
+    wipe: ->
+
+      if not @opts? or not @opts['wipeEnabled']? or not @opts['wipeEnabled']
+        throw new Error('wiping disabled')
+
+      # todo: cleanup state / re-init ????
+      @connector.wipe()
+      @database.wipe()

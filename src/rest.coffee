@@ -124,11 +124,25 @@ module.exports =
       )
 
 
-      # DESTROY
+      # POPULATE
       app.get('/rest/populate', (req, res) =>
 
         payload = JSON.parse(req.query.payload)
         @operations.populate(payload).then(
+
+          (result) ->
+            res.status(200).send(result)
+
+          (error) ->
+            res.status(503).send(error)
+        )
+      )
+
+
+      # WIPE
+      app.get('/rest/wipe', (req, res) =>
+
+        @operations.wipe().then(
 
           (result) ->
             res.status(200).send(result)
