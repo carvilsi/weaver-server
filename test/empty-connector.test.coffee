@@ -58,3 +58,22 @@ describe 'Create an object using Empty connector', ->
         console.log(error)
     )
 
+
+  it 'Create in batch', ->
+
+
+
+    server.operations.bootstrap('http://tester:H00pSloop@test.ib.weaverplatform.com/bootstraps/friends.js')
+
+
+    .then(->
+
+      # resolved
+      ->
+        console.log('success')
+
+      # rejected
+      (error) ->
+        console.log(error)
+    )
+
