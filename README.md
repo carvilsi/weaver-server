@@ -60,13 +60,43 @@ The format the payload these SDK's produce is documented on this page. They dire
 }
 ```
 
-## destroyAttribute 
+## destroyAttribute
+```json
+{
+  id: "",
+  attribute: ""
+}
+```
 
 ## destroyEntity
+```json
+{
+id:""
+}
+```
 
 ## link
+```json
+{
+  source: {
+    id: "",
+    type: "",
+    fetched: true,
+    attributes: {}
+    relations: {}
+  },
+  key: "",
+  target: {}
+}
+```
 
 ## unlink
+```json
+{
+  id: "",
+  key: ""
+}
+```
 
 ## populate
 
