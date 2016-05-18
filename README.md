@@ -13,9 +13,52 @@ The format the payload these SDK's produce is documented on this page. They dire
 
 ## create
 
+```json
+{
+  id : "",
+  type: "";
+  data: {
+
+    key: value,
+    key: "value"
+
+  }
+}
+```
+
 ## read
 
+```json
+{
+  _META: {  }
+  _ATTRIBUTES: {
+
+    key: value
+
+  }
+  _RELATIONS: {
+
+    1234: {
+
+        _META: {}
+        _ATTRIBUTES {}
+        _RELATIONS{}
+
+    }
+
+   }
+}
+```
+
 ## update
+
+```json
+{
+  id: "",
+  attribute: "",
+  value: ""
+}
+```
 
 ## destroyAttribute 
 
