@@ -78,28 +78,27 @@ no payload
 
 no payload
 
-## bootstrap
+## bootstrapFromUrl
 
 there are two options
 ```json
 {
-  "fromUrl": "http://__.json" 
+  "url": "http://__.json" 
 }
 ```
 
-or
+## bootstrapFromJson
 
 ```json
-{
-  "fromLog": [
+[
+
+  {
+    "id": "cuid...",
+    "action": "create",
+    "payload": "{...}"
+  },
   
-    {
-      "id": "cuid...",
-      "action": "create",
-      "payload": "{...}"
-    },
-    
-    etc.
-  ] 
-}
+  etc.
+] 
+
 ```
