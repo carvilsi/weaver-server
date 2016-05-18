@@ -15,12 +15,12 @@ The format the payload these SDK's produce is documented on this page. They dire
 
 ```json
 {
-  id : "",
-  type: "",
-  data: {
+  "id" : "",
+  "type": "",
+  "data": {
 
-    key: value,
-    key: "value"
+    "key": value,
+    "key": "value"
 
   }
 }
@@ -30,19 +30,19 @@ The format the payload these SDK's produce is documented on this page. They dire
 
 ```json
 {
-  _META: {  }
-  _ATTRIBUTES: {
+  "_META": {  }
+  "_ATTRIBUTES": {
 
-    key: value
+    "key": value
 
   }
-  _RELATIONS: {
+  "_RELATIONS": {
 
-    1234: {
+    "1234": {
 
-        _META: {}
-        _ATTRIBUTES {}
-        _RELATIONS{}
+        "_META": {}
+        "_ATTRIBUTES": {}
+        "_RELATIONS":{}
 
     }
 
@@ -54,47 +54,47 @@ The format the payload these SDK's produce is documented on this page. They dire
 
 ```json
 {
-  id: "",
-  attribute: "",
-  value: ""
+  "id": "",
+  "attribute": "",
+  "value": ""
 }
 ```
 
 ## destroyAttribute
 ```json
 {
-  id: "",
-  attribute: ""
+  "id": "",
+  "attribute": ""
 }
 ```
 
 ## destroyEntity
 ```json
 {
-id:""
+  "id":""
 }
 ```
 
 ## link
 ```json
 {
-  source: {
-    id: "",
-    type: "",
-    fetched: true,
-    attributes: {}
-    relations: {}
+  "source": {
+    "id": "",
+    "type": "",
+    "fetched": true,
+    "attributes": {}
+    "relations": {}
   },
-  key: "",
-  target: {}
+  "key": "",
+  "target": {}
 }
 ```
 
 ## unlink
 ```json
 {
-  id: "",
-  key: ""
+  "id": "",
+  "key": ""
 }
 ```
 
