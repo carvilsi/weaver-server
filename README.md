@@ -16,7 +16,7 @@ The format the payload these SDK's produce is documented on this page. They dire
 ```json
 {
   id : "",
-  type: "";
+  type: "",
   data: {
 
     key: value,
