@@ -18,10 +18,6 @@ The format the payload these SDK's produce is documented on this page. They dire
   "id" : "",
   "type": "",
   "data": {
-
-    "key": value,
-    "key": "value"
-
   }
 }
 ```
@@ -33,7 +29,7 @@ The format the payload these SDK's produce is documented on this page. They dire
   "_META": {  },
   "_ATTRIBUTES": {
 
-    "key": value
+    "key": "value"
 
   }
   "_RELATIONS": {
@@ -81,7 +77,7 @@ The format the payload these SDK's produce is documented on this page. They dire
   "source": {
     "id": "",
     "type": "",
-    "fetched": true,
+    "fetched": "true",
     "attributes": {},
     "relations": {}
   },
