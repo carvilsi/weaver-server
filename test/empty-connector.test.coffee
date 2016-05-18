@@ -43,37 +43,37 @@ describe 'Create an object using Empty connector', ->
 
 
 
-  it 'Create', ->
-
-    payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
-
-    server.operations.create(payload).then(->
-
-      # resolved
-      ->
-        console.log('success')
-
-      # rejected
-      (error) ->
-        console.log(error)
-    )
-
-
-  it 'Create in batch', ->
-
-
-
-    server.operations.bootstrap('http://tester:H00pSloop@test.ib.weaverplatform.com/bootstraps/friends.js')
-
-
-    .then(->
-
-      # resolved
-      ->
-        console.log('success')
-
-      # rejected
-      (error) ->
-        console.log(error)
-    )
-
+#  it 'Create', ->
+#
+#    payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
+#
+#    server.operations.create(payload).then(->
+#
+#      # resolved
+#      ->
+#        console.log('success')
+#
+#      # rejected
+#      (error) ->
+#        console.log(error)
+#    )
+#
+#
+#  it 'Create in batch', ->
+#
+#
+#
+#    server.operations.bootstrap('http://tester:H00pSloop@test.ib.weaverplatform.com/bootstraps/friends.js')
+#
+#
+#    .then(->
+#
+#      # resolved
+#      ->
+#        console.log('success')
+#
+#      # rejected
+#      (error) ->
+#        console.log(error)
+#    )
+#

@@ -40,6 +40,7 @@
   "scripts": {
     "start": "coffee src/index.coffee",
     "prepublish": "coffee -o lib -c src",
-    "test": "./node_modules/.bin/mocha --require blanket -R html-cov --compilers coffee:coffee-script/register src > coverage.html"
+    "test": "./node_modules/.bin/mocha --compilers coffee:coffee-script/register --recursive test",
+    "coverage": "./node_modules/.bin/mocha --require blanket -R html-cov --recursive --compilers coffee:coffee-script/register src > coverage.html"
   }
 }

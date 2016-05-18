@@ -15,39 +15,24 @@ module.exports =
   class Operations
     constructor: (@database, @connector, @opts) ->
 
-    createBulk: (payloads) ->
-      proms = (@create(payload) for payload in payloads.creates)
-      Promise.all(proms)
+    logPayload: (action, payload) ->
 
 
-    dump: ->
+      @database.redis.incr('payloadIndex').then((payloadIndex) =>
 
+        # Add payload ID to payloads set
+        payloadId = 'payload:' + payloadIndex + ':' + cuid()
+        @database.redis.rpush('payloads', payloadId)
 
-      payloads = []
-      @database.redis.lrange('payloads', 0, -1).bind(@).each((payloadId) ->
-        @database.redis.hgetall(payloadId).then((payload) ->
-          payload.id = payloadId
-          payloads.push(payload)
-        )
-      ).then(->
-        payloads
+        # Save payload as map
+        @database.redis.hmset(payloadId, {timestamp: new Date().getTime(), action: action, payload: JSON.stringify(payload)})
       )
-
 
 
 
     create: (payload) ->
 
-      # Add payload ID to payloads set
-      payloadId = cuid()
-      @database.redis.rpush('payloads', payloadId)
-
-      # Save payload as map
-      @database.redis.hmset(payloadId, {timestamp: new Date().getTime(),action: 'create', payload: JSON.stringify(payload)})
-
-
-      console.log('op create')
-      console.log(payload)
+      @logPayload('create', payload)
 
       proms = []
 
@@ -105,61 +90,16 @@ module.exports =
 
 
     read: (payload) ->
-      console.log('op read')
-      console.log(payload)
 
       @database.read(payload).then((object) ->
 
-        console.log(util.inspect(object, {showHidden: false, depth: null}))
-
-        object
+        Promise.resolve(object)
       )
 
+      # todo in the future see if the cache was invalidated
 
-#      # lookup the entity
-#      @database.read(payload).then((signature) ->
-#        if signature.type is '$INDIVIDUAL'
-#
-#             @connector.query().then((query)->
-#              query.selectIndividual(payload.id).then((result) ->
-#                console.log('querying virtuoso for an object')
-#                console.log(result)
-#
-#                # add redis stuff to result
-#
-#                return result
-#              )
-#            )
-#
-#        else if signature.type is '$INDIVIDUAL_PROPERTY'
-#
-#            @connector.query().then((query)->
-#              query.selectIndividualProperty(payload.id).then((result) ->
-#                console.log('querying virtuoso for an individual property')
-#                console.log(result)
-#
-#                # add redis stuff to result
-#
-#                return result
-#
-#
-#              )
-#            )
-#
-#        else if signature.type is '$VALUE_PROPERTY'
-#
-#            @connector.query().then((query)->
-#              query.selectValueProperty(payload.id).then((result) ->
-#                console.log('querying virtuoso for a value property')
-#                console.log(result)
-#
-#                # add redis stuff to result
-#
-#                return result
-#              )
-#            )
-#
-#      )
+
+
 
 
 
@@ -167,6 +107,10 @@ module.exports =
 
 
     update: (payload) ->
+
+      @logPayload('update', payload)
+
+      console.log(payload)
 
       proms = []
 
@@ -186,6 +130,8 @@ module.exports =
     # renamed from delete
     destroyAttribute: (payload) ->
 
+      @logPayload('destroyAttribute', payload)
+
       proms = []
 
       proms.push(@database.destroyAttribute(payload))
@@ -198,6 +144,8 @@ module.exports =
 
     # renamed from destroy
     destroyEntity: (payload) ->
+
+      @logPayload('destroyEntity', payload)
 
       proms = []
 
@@ -234,23 +182,22 @@ module.exports =
 
     link: (payload) ->
 
+      @logPayload('link', payload)
+
       @database.link(payload)
 
 
 
     unlink: (payload) ->
 
+      @logPayload('unlink', payload)
+
       @database.unlink(payload)
 
 
-    populateFromFilters: (filters) ->
-
-      @connector.query().then((query) ->
-        query.selectIndividuals(filters)
-      )
-
-
     populate: (payload) ->
+
+      @logPayload('populate', payload)
 
       # Retrieve the view object
       @read({ id: payload.id, opts: { eagerness: -1 } }).then((view) =>
@@ -311,6 +258,13 @@ module.exports =
       )
 
 
+    populateFromFilters: (filters) ->
+
+      @connector.query().then((query) ->
+        query.selectIndividuals(filters)
+      )
+
+
 
 
 
@@ -332,26 +286,60 @@ module.exports =
       if not @opts? or not @opts['wipeEnabled']? or not @opts['wipeEnabled']
         throw new Error('wiping disabled')
 
+      proms = []
       # todo: cleanup state / re-init ????
-      @connector.wipe()
-      @database.wipe()
+      proms.push(@connector.wipe())
+      proms.push(@database.wipe())
+
+      Promise.all(proms)
 
 
-    bootstrap: (url) ->
+    dump: ->
 
-      payload = ''
 
-      http.get(url, (res)=>
+      payloads = []
+      @database.redis.lrange('payloads', 0, -1).bind(@).each((payloadId) ->
+        @database.redis.hgetall(payloadId).then((payload) ->
+          payload.id = payloadId
+          payload.payload = JSON.parse(payload.payload)
+          payloads.push(payload)
+        )
+      ).then(->
+        Promise.resolve(JSON.stringify(payloads))
+      )
+
+    bootstrapFromUrl: (payload) ->
+
+      logArray = ''
+
+      http.get(payload.url, (res)=>
 
         if not res.statusCode is 200
           return Promise.reject()
 
         res.on('data', (data)=>
-          payload += data
+          logArray += data
         )
         res.on('end', ()=>
-          # todo do something usefull with payload
-          console.log(payload)
-          return Promise.resolve()
+          return @bootstrapFromJson(logArray)
         )
+      )
+
+
+    bootstrapFromJson: (stringLogArray) ->
+
+      logArray = JSON.parse(stringLogArray)
+
+      actions = {
+        'create': @create
+        'update': @update
+        'destroyAttribute': @destroyAttribute
+        'destroyEntity': @destroyEntity
+        'link' : @link
+        'unlink' : @unlink
+      }
+
+      Promise.each(logArray, (record) =>
+        if actions[record.action]?
+          actions[record.action].bind(@)(record.payload)
       )

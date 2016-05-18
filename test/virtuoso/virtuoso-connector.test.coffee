@@ -1,4 +1,5 @@
 require("../test-suite")()
+fs = require('fs')
 WeaverServer = require('../../src/index')
 VirtuosoConnector  = require('weaver-connector-virtuoso')
 Promise = require('bluebird')
@@ -6,35 +7,19 @@ Promise = require('bluebird')
 describe 'Create an object using Virtuoso connector', ->
 
   server = null
-  object = null
+
+  json = null
+
 
   before ->
 
 
-
-    object = {
-      id: 'id_o1'
-      name: 'Aap'
-      annotations: [
-        {
-          id: 'id_a1'
-          label: 'eet'
-          celltype: 'object'
-        }
-      ]
-      properties: [
-        {
-          id: 'id_p1'
-          annotation: 'id_a1'
-          subject: 'id_o1'
-          predicate: 'eet'
-          object: 'id_o2'
-        }
-      ]
-    }
+    json = fs.readFileSync('./test/virtuoso/bas.json', 'utf8')          # todo make more dymamically powerful
 
 
-    server = new WeaverServer("http://localhost:6379")
+    server = new WeaverServer("localhost:6379", {
+      wipeEnabled: true
+    })
 
 
     virtuosoConnector = new VirtuosoConnector({
@@ -43,6 +28,7 @@ describe 'Create an object using Virtuoso connector', ->
       user:'dba'
       password:'myDbaPassword'
       graph:'http://weaver-connector-virtuoso/test#'
+      wipeEnabled: true
     })
     server.setConnector(virtuosoConnector)
 
@@ -52,13 +38,27 @@ describe 'Create an object using Virtuoso connector', ->
 
 
 
+  # for a description of the payload see
+  # https://github.com/weaverplatform/weaverplatform/blob/master/weaver-sdk-payloads.md
 
 
+  it 'Wipe', ->
+
+    server.operations.wipe().should.be.fulfilled
+
+
+
+
+
+  it 'Bootstrap', ->
+
+
+    server.operations.bootstrapFromJson(json).should.be.fulfilled
 
 
   it 'Create', ->
 
-    payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
+    payload = {"type":"$INDIVIDUAL","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
 
     server.operations.create(payload).then(
 
@@ -73,15 +73,15 @@ describe 'Create an object using Virtuoso connector', ->
 
 
 
-
   it 'Read', ->
 
-    payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
+    payload = {"id":"cimm01hj800043k5bz527ys3x", "opts": { "eagerness": "-1" }}
 
-    server.operations.read(payload).then(
+    object = server.operations.read(payload).then(
 
       # resolved
-      ->
+      (result) ->
+        console.log(result)
         console.log('success')
 
       # rejected
@@ -94,7 +94,7 @@ describe 'Create an object using Virtuoso connector', ->
 
   it 'Update', ->
 
-    payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
+    payload = {"id":"cimm01hj800043k5bz527ys3x","attribute":"name", "value":"bosss"}
 
     server.operations.update(payload).then(
 
@@ -110,14 +110,64 @@ describe 'Create an object using Virtuoso connector', ->
 
 
 
-  it 'Delete', ->
+  it 'Set new value', ->
 
-    payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
+    payload = {"id":"cimm01hj800043k5bz527ys3x","attribute":"language", "value":"spanish"}
 
-    server.operations.delete(payload).then(
+    server.operations.update(payload).then(
 
       # resolved
       ->
+        console.log('success')
+
+      # rejected
+      (error) ->
+        console.log(error)
+    )
+
+  it 'Read', ->
+
+    payload = {"id":"cimm01hj800043k5bz527ys3x", "opts": { "eagerness": "-1" }}
+
+    server.operations.read(payload).then(
+
+      # resolved
+      (result) ->
+        console.log(result)
+        console.log('success')
+
+      # rejected
+      (error) ->
+        console.log(error)
+    )
+
+
+
+
+  it 'Destroy Attribute', ->
+
+    payload = {"id":"cimm01hj800043k5bz527ys3x","attribute":"language"}
+
+    server.operations.destroyAttribute(payload).then(
+
+      # resolved
+      ->
+        console.log('success')
+
+      # rejected
+      (error) ->
+        console.log(error)
+    )
+
+  it 'Read', ->
+
+    payload = {"id":"cimm01hj800043k5bz527ys3x", "opts": { "eagerness": "-1" }}
+
+    server.operations.read(payload).then(
+
+      # resolved
+      (result) ->
+        console.log(result)
         console.log('success')
 
       # rejected
@@ -130,7 +180,7 @@ describe 'Create an object using Virtuoso connector', ->
 
   it 'Link', ->
 
-    payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
+    payload = {"source":{"id":"ciocv9q0w00023k6mf1tloaof"},"key":"hasfriend","target":{"id":"cimm01hj800043k5bz527ys3x"}}      # todo: wrong, should be member of collection properties
 
     server.operations.link(payload).then(
 
@@ -143,12 +193,28 @@ describe 'Create an object using Virtuoso connector', ->
         console.log(error)
     )
 
+  it 'Read', ->
+
+    payload = {"id":"ciocv9q0w00023k6mf1tloaof", "opts": { "eagerness": "-1" }}
+
+    server.operations.read(payload).then(
+
+      # resolved
+      (result) ->
+        console.log(result)
+        console.log('success')
+
+      # rejected
+      (error) ->
+        console.log(error)
+    )
+
 
 
 
   it 'Unlink', ->
 
-    payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
+    payload = {"id":"ciocv9q0w00023k6mf1tloaof","key":"hasfriend"}
 
     server.operations.unlink(payload).then(
 
@@ -161,33 +227,30 @@ describe 'Create an object using Virtuoso connector', ->
         console.log(error)
     )
 
+  it 'Read', ->
+
+    payload = {"id":"ciocv9q0w00023k6mf1tloaof", "opts": { "eagerness": "-1" }}
+
+    server.operations.read(payload).then(
+
+      # resolved
+      (result) ->
+        console.log(result)
+        console.log('success')
+
+      # rejected
+      (error) ->
+        console.log(error)
+    )
+
 
 
 
   it 'Destroy', ->
 
-    payload = {"type":"$ROOT","id":"cimm01hj800043k5bz527ys3x","data":{"name":"mo"}}
+    payload = {"id":"cimm01hj800043k5bz527ys3x"}
 
-    server.operations.destroy(payload).then(
-
-      # resolved
-      ->
-        console.log('success')
-
-      # rejected
-      (error) ->
-        console.log(error)
-    )
-
-
-  it 'Create in batch', ->
-
-
-
-    server.operations.bootstrap('http://tester:H00pSloop@test.ib.weaverplatform.com/bootstraps/friends.js')
-
-
-    .then(->
+    server.operations.destroyEntity(payload).then(
 
       # resolved
       ->
@@ -198,6 +261,25 @@ describe 'Create an object using Virtuoso connector', ->
         console.log(error)
     )
 
+
+
+
+
+  it 'Dump', ->
+
+
+    server.operations.dump().then(
+
+      # resolved
+      (result)->
+        console.log(result)
+
+
+
+      # rejected
+      (error) ->
+        console.log(error)
+    )
 
 
 
