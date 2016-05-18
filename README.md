@@ -30,7 +30,7 @@ The format the payload these SDK's produce is documented on this page. They dire
 
 ```json
 {
-  "_META": {  }
+  "_META": {  },
   "_ATTRIBUTES": {
 
     "key": value
@@ -40,8 +40,8 @@ The format the payload these SDK's produce is documented on this page. They dire
 
     "1234": {
 
-        "_META": {}
-        "_ATTRIBUTES": {}
+        "_META": {},
+        "_ATTRIBUTES": {},
         "_RELATIONS":{}
 
     }
@@ -82,7 +82,7 @@ The format the payload these SDK's produce is documented on this page. They dire
     "id": "",
     "type": "",
     "fetched": true,
-    "attributes": {}
+    "attributes": {},
     "relations": {}
   },
   "key": "",
