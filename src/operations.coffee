@@ -195,7 +195,11 @@ module.exports =
       @database.unlink(payload)
 
 
-    populate: (payload) ->
+
+    nativeQuery: (query) ->
+      Promise.resolve({})
+
+    queryFromView: (payload) ->
 
       @logPayload('populate', payload)
 
@@ -258,7 +262,7 @@ module.exports =
       )
 
 
-    populateFromFilters: (filters) ->
+    queryFromFilters: (filters) ->
 
       @connector.query().then((query) ->
         query.selectIndividuals(filters)
@@ -343,3 +347,5 @@ module.exports =
         if actions[record.action]?
           actions[record.action].bind(@)(record.payload)
       )
+
+
