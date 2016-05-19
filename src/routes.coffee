@@ -134,9 +134,33 @@ module.exports =
         )
       )
 
-      # Populate
+      # Wipe
       socket.on('wipe', (payload, ack) ->
         self.operations.wipe().then(
+
+          (result) ->
+            ack(result)
+
+          (error) ->
+            ack(-1)
+        )
+      )
+
+      # Dump
+      socket.on('dump', (payload, ack) ->
+        self.operations.dump().then(
+
+          (result) ->
+            ack(result)
+
+          (error) ->
+            ack(-1)
+        )
+      )
+
+      # Bootstrap
+      socket.on('bootstrap', (url, ack) ->
+        self.operations.bootstrap(url).then(
 
           (result) ->
             ack(result)

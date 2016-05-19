@@ -92,7 +92,6 @@ module.exports =
       # TODO: fire onCreated 
 
     read: (payload) ->
-      console.dir(payload, {depth: null})
 
       # Assume eagerness = 1
       
@@ -252,5 +251,11 @@ module.exports =
 
     # todo process the boolean this function returns
     wipe: ->
-      @redis.call('flushall').then((results) ->
-        return results is 'OK')
+
+      @redis.call('flushall').then(
+        (results) ->
+          if results is 'OK'
+            Promise.resolve()
+          else
+            Promise.reject()
+      )

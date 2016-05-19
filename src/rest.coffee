@@ -151,3 +151,33 @@ module.exports =
             res.status(503).send(error)
         )
       )
+
+
+
+
+      # DUMP
+      app.get('/rest/dump', (req, res) =>
+
+        @operations.dump().then(
+
+          (result) ->
+            res.status(200).send(result)
+
+          (error) ->
+            res.status(503).send(error)
+        )
+      )
+
+      # BOOTSTRAP
+      app.get('/rest/bootstrap', (req, res) =>
+
+        url = req.query.payload
+        @operations.bootstrap(url).then(
+
+          (result) ->
+            res.status(200).send(result)
+
+          (error) ->
+            res.status(503).send(error)
+        )
+      )
