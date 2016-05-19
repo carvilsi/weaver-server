@@ -1,3 +1,4 @@
+[![Build Status](https://secure.travis-ci.org/weaverplatform/weaver-server.png?branch=master)](http://travis-ci.org/weaverplatform/weaver-server)
 # weaver-server
 Weaver-compatible API server module for Node/Express
 
