@@ -131,6 +131,18 @@ module.exports =
         )
       )
 
+      # Populate
+      socket.on('queryFromFilters', (payload, ack) ->
+        self.operations.queryFromFilters(payload).then(
+
+          (result) ->
+            ack(result)
+
+          (error) ->
+            ack(-1)
+        )
+      )
+
       # Wipe
       socket.on('wipe', (payload, ack) ->
         self.operations.wipe().then(
@@ -156,8 +168,20 @@ module.exports =
       )
 
       # Bootstrap
-      socket.on('bootstrap', (url, ack) ->
-        self.operations.bootstrap(url).then(
+      socket.on('bootstrapFromJson', (stringLogArray, ack) ->
+        self.operations.bootstrapFromJson(stringLogArray).then(
+
+          (result) ->
+            ack(result)
+
+          (error) ->
+            ack(-1)
+        )
+      )
+
+      # Bootstrap
+      socket.on('bootstrapFromUrl', (url, ack) ->
+        self.operations.bootstrapFromUrl(url).then(
 
           (result) ->
             ack(result)

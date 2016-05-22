@@ -139,6 +139,21 @@ module.exports =
       )
 
 
+      # POPULATE
+      app.get('/rest/queryFromFilters', (req, res) =>
+
+        payload = JSON.parse(req.query.payload)
+        @operations.queryFromFilters(payload).then(
+
+          (result) ->
+            res.status(200).send(result)
+
+          (error) ->
+            res.status(503).send(error)
+        )
+      )
+
+
       # WIPE
       app.get('/rest/wipe', (req, res) =>
 
@@ -169,10 +184,24 @@ module.exports =
       )
 
       # BOOTSTRAP
-      app.get('/rest/bootstrap', (req, res) =>
+      app.get('/rest/bootstrapFromJson', (req, res) =>
+
+        stringLogArray = req.query.payload
+        @operations.bootstrapFromJson(stringLogArray).then(
+
+          (result) ->
+            res.status(200).send(result)
+
+          (error) ->
+            res.status(503).send(error)
+        )
+      )
+
+      # BOOTSTRAP
+      app.get('/rest/bootstrapFromUrl', (req, res) =>
 
         url = req.query.payload
-        @operations.bootstrap(url).then(
+        @operations.bootstrapFromUrl(url).then(
 
           (result) ->
             res.status(200).send(result)
