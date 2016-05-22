@@ -47,7 +47,6 @@ module.exports =
         @redis = new Redis()
         
     create: (payload) ->
-      console.log(payload)
 
       for key, val of payload.attributes
         payload.attributes[key] = encode(val)

@@ -1,6 +1,6 @@
 {
   "name": "weaver-server",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Module providing a Weaver-compatible API server",
   "author": {
     "name": "Mohamad Alamili",
@@ -18,7 +18,7 @@
     "cuid": "^1.3.8",
     "ioredis": "^1.5.12",
     "socket.io": "^1.3.5",
-    "weaver-connector": "0.1.2"
+    "weaver-commons-js": "0.0.1"
   },
   "devDependencies": {
     "coffee-script": "^1.9.3",

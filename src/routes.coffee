@@ -42,9 +42,6 @@ module.exports =
       
       #
       socket.on('read', (payload, ack) ->
-        console.log('sock read')
-        console.log(payload)
-
         self.operations.read(payload).then(
 
           (result) ->

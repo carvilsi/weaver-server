@@ -3,11 +3,11 @@ util = require('util')
 http = require('http')
 cuid = require('cuid')
 
-WeaverConnector    = require('weaver-connector')
-Individual         = WeaverConnector.model.Individual
-IndividualProperty = WeaverConnector.model.IndividualProperty
-ValueProperty      = WeaverConnector.model.ValueProperty
-Filter             = WeaverConnector.model.Filter
+WeaverCommons    = require('weaver-commons-js')
+Individual         = WeaverCommons.Individual
+IndividualProperty = WeaverCommons.IndividualProperty
+ValueProperty      = WeaverCommons.ValueProperty
+Filter             = WeaverCommons.Filter
 
 # This is the main entry point of any new socket connection.
 module.exports =
@@ -109,8 +109,6 @@ module.exports =
     update: (payload) ->
 
       @logPayload('update', payload)
-
-      console.log(payload)
 
       proms = []
 
