@@ -125,10 +125,10 @@ module.exports =
 
 
       # POPULATE
-      app.get('/rest/populate', (req, res) =>
+      app.get('/rest/queryFromView', (req, res) =>
 
         payload = JSON.parse(req.query.payload)
-        @operations.populate(payload).then(
+        @operations.queryFromView(payload).then(
 
           (result) ->
             res.status(200).send(result)

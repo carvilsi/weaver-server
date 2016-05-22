@@ -199,7 +199,7 @@ module.exports =
 
     queryFromView: (payload) ->
 
-      @logPayload('populate', payload)
+      @logPayload('queryFromView', payload)
 
       # Retrieve the view object
       @read({ id: payload.id, opts: { eagerness: -1 } }).then((view) =>

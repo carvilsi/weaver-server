@@ -120,8 +120,8 @@ module.exports =
       )
 
       # Populate
-      socket.on('populate', (payload, ack) ->
-        self.operations.populate(payload).then(
+      socket.on('queryFromView', (payload, ack) ->
+        self.operations.queryFromView(payload).then(
 
           (result) ->
             ack(result)
