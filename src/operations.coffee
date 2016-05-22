@@ -199,8 +199,6 @@ module.exports =
 
     queryFromView: (payload) ->
 
-      @logPayload('queryFromView', payload)
-
       # Retrieve the view object
       @read({ id: payload.id, opts: { eagerness: -1 } }).then((view) =>
 
@@ -255,7 +253,7 @@ module.exports =
 
 
           filters.push(filter)
-        promise = @populateFromFilters(filters)
+        promise = @queryFromFilters(filters)
         return promise
       )
 

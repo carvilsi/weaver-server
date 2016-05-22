@@ -78,8 +78,6 @@ module.exports =
       if payload.relations?
         for key, value of payload.relations       # todo unlink
 
-          console.log('found relations in created object '+key+' '+value)
-
           # add key to object as dependencies
           @redis.sadd(id + ':_LINKS', key)
 
