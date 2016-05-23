@@ -308,11 +308,11 @@ module.exports =
         Promise.resolve(JSON.stringify(payloads))
       )
 
-    bootstrapFromUrl: (payload) ->
+    bootstrapFromUrl: (url) ->
 
       logArray = ''
 
-      http.get(payload.url, (res)=>
+      http.get(url, (res)=>
 
         if not res.statusCode is 200
           return Promise.reject()
