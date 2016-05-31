@@ -18,7 +18,7 @@ The format the payload these SDK's produce is documented on this page. They dire
 {
   "id" : "",
   "type": "",
-  "data": {
+  "attributes": {
   }
 }
 ```
