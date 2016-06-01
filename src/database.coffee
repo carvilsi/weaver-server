@@ -254,5 +254,5 @@ module.exports =
           if results is 'OK'
             Promise.resolve()
           else
-            Promise.reject()
+            Promise.reject('redis flushall failed: ' + results)
       )
