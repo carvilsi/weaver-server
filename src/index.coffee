@@ -10,9 +10,12 @@ REST       = require('./rest')
 module.exports = 
   class WeaverServer
   
-    constructor: (url, @opts) ->
-      @database = new Database(url)
+    constructor: (port, host, @opts) ->
+      @database = new Database(port, host)
       @plugins  = []
+      
+    connect: ->
+      @database.connect()
 
     addPlugin: (plugin) ->
       @plugins.push(plugin)

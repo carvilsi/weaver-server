@@ -40,12 +40,22 @@ module.exports =
   
   class Database
     
-    constructor: (@url, @redis) ->
-      if @url?
-        @redis = new Redis(@url)
-      else
-        @redis = new Redis()
+    constructor: (@port, @host) ->
+      @redis = new Redis({@port, @host, lazyConnect: true, connectTimeout: 1500})
+
+    connect: ->
+      deferred = Promise.defer()
+      @redis.connect((error) =>
+        @connected = not error?
         
+        if @connected
+          deferred.resolve()
+        else
+          deferred.reject('Could not connect to Redis')
+      )      
+      
+      deferred.promise
+      
     create: (payload) ->
 
       for key, val of payload.attributes
@@ -248,11 +258,5 @@ module.exports =
 
     # todo process the boolean this function returns
     wipe: ->
-
-      @redis.call('flushall').then(
-        (results) ->
-          if results is 'OK'
-            Promise.resolve()
-          else
-            Promise.reject('redis flushall failed: ' + results)
-      )
+      throw Error('Redis not connected') if not @connected
+      @redis.call('flushall')
