@@ -1,5 +1,7 @@
 Promise = require('bluebird')
-Redis   = require('ioredis') 
+Redis   = require('ioredis')
+
+logger    = require('./logger')
 
 # Append type
 isNumber  = (a) -> Object.prototype.toString.call(a) is '[object Number]'
@@ -57,6 +59,8 @@ module.exports =
       deferred.promise
       
     create: (payload) ->
+      
+      logger.log('info', payload)
 
       for key, val of payload.attributes
         payload.attributes[key] = encode(val)
@@ -180,6 +184,14 @@ module.exports =
   
 
     link: (payload) ->
+      
+      if not payload? or
+         not payload.source? or
+         not payload.source.id? or
+         not payload.key? or
+         not payload.target? or
+         not payload.target.id?
+        Promise.reject('payload for link does not contain all fields: '+payload)
   
       # ID
       id = payload.source.id
@@ -196,7 +208,7 @@ module.exports =
       # save link
       @redis.set(id + ':' + key, target)
 
-      Promise.resolve() # todo reject
+      Promise.resolve()
 
       # TODO: fire onLinked
   
