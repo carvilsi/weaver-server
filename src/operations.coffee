@@ -201,7 +201,14 @@ module.exports =
 
       # Retrieve the view object
       @read({ id: payload.id, opts: { eagerness: -1 } }).then((view) =>
-
+        
+        # view might not exist, or have no filters
+        if not view? or 
+           not view._RELATIONS? or 
+           not view._RELATIONS.filters? or 
+           not view._RELATIONS.filters._RELATIONS?
+          return []
+          
         filtersMap = view._RELATIONS.filters._RELATIONS
         filters = []
         for filter_id, filter of filtersMap
