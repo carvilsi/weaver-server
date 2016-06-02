@@ -1,5 +1,7 @@
 Promise = require('bluebird')
 
+logger    = require('./logger')
+
 # This is the main entry point of any new socket connection.
 module.exports =
   
@@ -11,7 +13,16 @@ module.exports =
       # CREATE
       app.get('/rest/create', (req, res) =>
 
-        payload = JSON.parse(req.query.payload)        
+        payload = JSON.parse(req.query.payload)
+
+        logger.log('debug', 'create event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')   
+          
+          
         @operations.create(payload).then(
 
           ->
@@ -25,7 +36,16 @@ module.exports =
       # CREATE BULK
       app.get('/rest/create/bulk', (req, res) =>
 
-        payload = JSON.parse(req.query.payload)        
+        payload = JSON.parse(req.query.payload)
+
+        logger.log('debug', 'create/bulk event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
         @operations.createBulk(payload).then(
 
           ->
@@ -40,6 +60,15 @@ module.exports =
       app.get('/rest/read', (req, res) =>
 
         payload = JSON.parse(req.query.payload)
+
+        logger.log('debug', 'read event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
         @operations.read(payload).then(
 
           (result) ->
@@ -55,6 +84,15 @@ module.exports =
       app.get('/rest/update', (req, res) =>
 
         payload = JSON.parse(req.query.payload)
+
+        logger.log('debug', 'update event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
         @operations.update(payload).then(
 
           (result) ->
@@ -69,6 +107,15 @@ module.exports =
       app.get('/rest/remove', (req, res) =>
 
         payload = JSON.parse(req.query.payload)
+
+        logger.log('debug', 'remove event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
         @operations.destroyAttribute(payload).then(
 
           (result) ->
@@ -83,6 +130,15 @@ module.exports =
       app.get('/rest/link', (req, res) =>
 
         payload = JSON.parse(req.query.payload)
+
+        logger.log('debug', 'link event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
         @operations.link(payload).then(
 
           (result) ->
@@ -98,6 +154,15 @@ module.exports =
       app.get('/rest/unlink', (req, res) =>
 
         payload = JSON.parse(req.query.payload)
+
+        logger.log('debug', 'unlink event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
         @operations.unlink(payload).then(
 
           (result) ->
@@ -113,6 +178,15 @@ module.exports =
       app.get('/rest/destroy', (req, res) =>
 
         payload = JSON.parse(req.query.payload)
+
+        logger.log('debug', 'destroy event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
         @operations.destroyEntity(payload).then(
 
           (result) ->
@@ -128,12 +202,22 @@ module.exports =
       app.get('/rest/queryFromView', (req, res) =>
 
         payload = JSON.parse(req.query.payload)
+
+        logger.log('debug', 'queryFromView event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
         @operations.queryFromView(payload).then(
 
           (result) ->
             res.status(200).send(result)
 
           (error) ->
+            logger.log('error', error)
             res.status(503).send(error)
         )
       )
@@ -143,6 +227,15 @@ module.exports =
       app.get('/rest/queryFromFilters', (req, res) =>
 
         payload = JSON.parse(req.query.payload)
+
+        logger.log('debug', 'queryFromFilters event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
         @operations.queryFromFilters(payload).then(
 
           (result) ->
@@ -156,6 +249,17 @@ module.exports =
 
       # WIPE
       app.get('/rest/wipe', (req, res) =>
+
+
+
+        logger.log('debug', 'wipe event on rest')
+
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
 
         @operations.wipe().then(
 
@@ -173,6 +277,17 @@ module.exports =
       # DUMP
       app.get('/rest/dump', (req, res) =>
 
+
+
+        logger.log('debug', 'dump event on rest')
+
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
+
         @operations.dump().then(
 
           (result) ->
@@ -186,8 +301,17 @@ module.exports =
       # BOOTSTRAP
       app.get('/rest/bootstrapFromJson', (req, res) =>
 
-        stringLogArray = req.query.payload
-        @operations.bootstrapFromJson(stringLogArray).then(
+        payload = req.query.payload
+
+        logger.log('debug', 'bootstrapFromJson event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
+        @operations.bootstrapFromJson(payload).then(
 
           (result) ->
             res.status(200).send(result)
@@ -200,8 +324,17 @@ module.exports =
       # BOOTSTRAP
       app.get('/rest/bootstrapFromUrl', (req, res) =>
 
-        url = req.query.payload
-        @operations.bootstrapFromUrl(url).then(
+        payload = req.query.payload
+
+        logger.log('debug', 'bootstrapFromUrl event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
+        @operations.bootstrapFromUrl(payload).then(
 
           (result) ->
             res.status(200).send(result)

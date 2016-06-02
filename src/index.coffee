@@ -7,10 +7,14 @@ Database   = require('./database')
 Routes     = require('./routes')
 REST       = require('./rest')
 
+logger    = require('./logger')
+
+
 module.exports = 
   class WeaverServer
-  
+    
     constructor: (port, host, @opts) ->
+
       @database = new Database(port, host)
       @plugins  = []
       
@@ -30,6 +34,7 @@ module.exports =
           @routes     = new Routes(@operations)  # Accepting socket connections
           @rest       = new REST(@operations)    # Accepting rest calls
 
+          logger.log('debug', 'connector init succeeded')
           Promise.resolve()
 
         # rejected
@@ -52,10 +57,12 @@ module.exports =
       io = require('socket.io')(http)
       self = @
       io.on('connection', (socket) ->
+        logger.log('debug', 'socket connection started with socket.io, wire it to routes')
         self.routes.wire(socket)
       )
       
-      # REST
+      # REST   
+      logger.log('debug', 'wire app to rest')
       @rest.wire(app)
       
       # Loop through plugins
@@ -63,4 +70,4 @@ module.exports =
         plugin.setDatabase(@operations) if plugin.setDatabase?
         plugin.wire(app, http)
 
-      # Wire connector
+
