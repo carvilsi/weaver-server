@@ -9,6 +9,8 @@ IndividualProperty = WeaverCommons.IndividualProperty
 ValueProperty      = WeaverCommons.ValueProperty
 Filter             = WeaverCommons.Filter
 
+logger    = require('./logger')
+
 # This is the main entry point of any new socket connection.
 module.exports =
 
@@ -33,6 +35,8 @@ module.exports =
     create: (payload) ->
 
       @logPayload('create', payload)
+
+      payload = JSON.parse(payload) if typeof payload is 'string'
 
       proms = []
 
@@ -91,9 +95,14 @@ module.exports =
 
     read: (payload) ->
 
-      @database.read(payload).then((object) ->
+      payload = JSON.parse(payload) if typeof payload is 'string'
 
-        Promise.resolve(object)
+      @database.read(payload).then((result) ->   
+        logger.log('debug', result)
+        if result?
+          Promise.resolve(result)
+        else
+          Promise.reject('entity not found, request payload: '+payload)
       )
 
       # todo in the future see if the cache was invalidated
@@ -109,6 +118,7 @@ module.exports =
     update: (payload) ->
 
       @logPayload('update', payload)
+      payload = JSON.parse(payload) if typeof payload is 'string'
 
       proms = []
 
@@ -128,7 +138,8 @@ module.exports =
     # renamed from delete
     destroyAttribute: (payload) ->
 
-      @logPayload('destroyAttribute', payload)
+      @logPayload('destroyAttribute', payload)  
+      payload = JSON.parse(payload) if typeof payload is 'string'
 
       proms = []
 
@@ -144,6 +155,7 @@ module.exports =
     destroyEntity: (payload) ->
 
       @logPayload('destroyEntity', payload)
+      payload = JSON.parse(payload) if typeof payload is 'string'
 
       proms = []
 
@@ -180,8 +192,12 @@ module.exports =
 
     link: (payload) ->
 
+      
       @logPayload('link', payload)
 
+      
+      
+      payload = JSON.parse(payload) if typeof payload is 'string'
       @database.link(payload)
 
 
@@ -190,6 +206,7 @@ module.exports =
 
       @logPayload('unlink', payload)
 
+      payload = JSON.parse(payload) if typeof payload is 'string'
       @database.unlink(payload)
 
 
@@ -198,6 +215,8 @@ module.exports =
       Promise.resolve({})
 
     queryFromView: (payload) ->
+      
+      payload = JSON.parse(payload) if typeof payload is 'string'
 
       # Retrieve the view object
       @read({ id: payload.id, opts: { eagerness: -1 } }).then((view) =>
@@ -317,25 +336,34 @@ module.exports =
 
     bootstrapFromUrl: (url) ->
 
+      deferred = Promise.defer()
       logArray = ''
 
-      http.get(url, (res)=>
+      http.get(url, (res) =>
 
         if not res.statusCode is 200
-          return Promise.reject()
+          deferred.reject()
 
         res.on('data', (data)=>
           logArray += data
         )
         res.on('end', ()=>
-          return @bootstrapFromJson(logArray)
+          @bootstrapFromJson(logArray).then(->
+            deferred.resolve()
+          )
         )
       )
+      
+      deferred.promise
 
 
     bootstrapFromJson: (stringLogArray) ->
 
-      logArray = JSON.parse(stringLogArray)
+      try 
+        logArray = JSON.parse(stringLogArray)
+      catch error
+        logger.log('info', 'json contained error: '+error)
+        return Promise.reject(error)
 
       actions = {
         'create': @create
