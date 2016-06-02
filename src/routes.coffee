@@ -1,5 +1,7 @@
 Promise = require('bluebird')
 
+logger    = require('./logger')
+
 # This is the main entry point of any new socket connection.
 module.exports =
   
