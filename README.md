@@ -1,4 +1,4 @@
-[![Build Status](https://secure.travis-ci.org/weaverplatform/weaver-server.png?branch=master)](http://travis-ci.org/weaverplatform/weaver-server)
+[![Build Status](https://secure.travis-ci.org/weaverplatform/weaver-server.png?branch=master)](http://travis-ci.org/weaverplatform/weaver-server)[![codecov](https://codecov.io/gh/weaverplatform/weaver-server/branch/master/graph/badge.svg)](https://codecov.io/gh/weaverplatform/weaver-server)
 # weaver-server
 Weaver-compatible API server module for Node/Express
 
