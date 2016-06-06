@@ -1,7 +1,19 @@
 language: node_js
+
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker run -d -p 127.0.0.1:6379:6379 redis:3.2
+
 node_js:
   - 0.12
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-#before_script:
-#  - npm install -g grunt-cli
+before_script:
+  - npm install -g grunt-cli
+
+env:
+  - REDIS_HOST=127.0.0.1

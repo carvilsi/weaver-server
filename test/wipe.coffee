@@ -9,7 +9,7 @@ describe 'Wipe', ->
   server = null
 
   beforeEach ->
-    server = new WeaverServer(6379, "192.168.99.10", {
+    server = new WeaverServer(6379, process.env.REDIS_HOST or "192.168.99.100", {
       wipeEnabled: true
     })
     
