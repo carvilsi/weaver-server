@@ -285,6 +285,8 @@ module.exports =
 
 
     queryFromFilters: (filters) ->
+      
+      filters = JSON.parse(filters) if typeof filters is 'string'
 
       @connector.query().then((query) ->
         query.selectIndividuals(filters)
