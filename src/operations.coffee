@@ -226,6 +226,7 @@ module.exports =
            not view._RELATIONS? or 
            not view._RELATIONS.filters? or 
            not view._RELATIONS.filters._RELATIONS?
+          throw new Error('the view object does not contain the required fields')
           return []
           
         filtersMap = view._RELATIONS.filters._RELATIONS
@@ -240,8 +241,8 @@ module.exports =
             # todo extremely ugly
             if condition._ATTRIBUTES.conditiontype is 'string'
               conditions.push({
-                operation: condition._ATTRIBUTES.operation
-                value: condition._ATTRIBUTES.value
+                operation:     condition._ATTRIBUTES.operation
+                value:         condition._ATTRIBUTES.value
                 conditiontype: condition._ATTRIBUTES.conditiontype
               })
 
@@ -249,24 +250,24 @@ module.exports =
             # todo extremely ugly
             else if condition._ATTRIBUTES.conditiontype is 'individual'
               conditions.push({
-                operation: condition._ATTRIBUTES.operation
-                individual: condition._RELATIONS.individual._META.id
+                operation:     condition._ATTRIBUTES.operation
+                individual:    condition._ATTRIBUTES.individual
                 conditiontype: condition._ATTRIBUTES.conditiontype
               })
 
 
             # todo extremely ugly
-            else if condition._ATTRIBUTES.conditiontype is 'view'
+            else if condition._ATTRIBUTES.conditiontype is 'view' 
               conditions.push({
-                operation: condition._ATTRIBUTES.operation
-                view: condition._RELATIONS.view._META.id
+                operation:     condition._ATTRIBUTES.operation
+                view:          condition._ATTRIBUTES.view
                 conditiontype: condition._ATTRIBUTES.conditiontype
               })
 
 
             # todo extremely ugly
             else
-              thrown new Error('unsupported condition type')
+              throw new Error('unsupported condition type')
 
 
 
