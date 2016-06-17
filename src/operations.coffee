@@ -46,6 +46,7 @@ module.exports =
           @connector.transaction().then((trx)->
             trx.createIndividual(new Individual(payload.id)).then(=>
               trx.commit()
+              trx.conn.close()
             )
           )
         )
@@ -62,6 +63,7 @@ module.exports =
           @connector.transaction().then((trx)->
             trx.createIndividualProperty(new IndividualProperty(payload.id, payload.relations.subject, payload.attributes.predicate, payload.relations.object)).then(=>
               trx.commit()
+              trx.conn.close()
             )
           )
         )
@@ -78,6 +80,7 @@ module.exports =
           @connector.transaction().then((trx)->
             trx.createValueProperty(new ValueProperty(payload.id, payload.relations.subject, payload.attributes.predicate, payload.attributes.object)).then(=>
               trx.commit()
+              trx.conn.close()
             )
           )
         )
@@ -129,6 +132,7 @@ module.exports =
           @connector.transaction().then((trx)->
             trx.updateProperty(payload)).then(=>
             trx.commit()
+            trx.conn.close()
           )
         )
 
@@ -167,6 +171,7 @@ module.exports =
           @connector.transaction().then((trx)->
             trx.deleteObject(payload)).then(=>
             trx.commit()
+            trx.conn.close()
           )
         )
 
@@ -175,6 +180,7 @@ module.exports =
           @connector.transaction().then((trx)->
             trx.deleteProperty(payload)).then(=>
             trx.commit()
+            trx.conn.close()
           )
         )
 
@@ -183,6 +189,7 @@ module.exports =
           @connector.transaction().then((trx)->
             trx.deleteProperty(payload)).then(=>
             trx.commit()
+            trx.conn.close()
           )
         )
 
@@ -290,7 +297,9 @@ module.exports =
       filters = JSON.parse(filters) if typeof filters is 'string'
 
       @connector.query().then((query) ->
-        query.selectIndividuals(filters)
+        result = query.selectIndividuals(filters)
+        query.conn.close()
+        result
       )
 
 
