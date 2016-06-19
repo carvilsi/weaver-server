@@ -164,14 +164,24 @@ module.exports =
           
     update: (payload) ->
 
+      if not payload? or
+         not payload.source? or
+         not payload.source.id? or
+         not payload.source.type? or
+         not payload.attribute? or
+         not payload.target? or
+         not payload.target.value? or
+         not payload.target.datatype?
+        Promise.reject('payload for update does not contain all fields: '+JSON.stringify(payload))
+
       # ID
-      id = payload.id 
+      id = payload.source.id 
       
       # Value
       attribute = payload.attribute      
       
       # Value
-      value = payload.value
+      value = payload.target.value
 
       if value?
         @redis.hset(id, attribute, encode(value))
@@ -191,7 +201,7 @@ module.exports =
          not payload.key? or
          not payload.target? or
          not payload.target.id?
-        Promise.reject('payload for link does not contain all fields: '+payload)
+        Promise.reject('payload for link does not contain all fields: '+JSON.stringify(payload))
   
       # ID
       id = payload.source.id

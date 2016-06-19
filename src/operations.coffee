@@ -125,16 +125,40 @@ module.exports =
 
       proms = []
 
-      proms.push(@database.update(payload))
+  
 
-      if false
+      if payload.source.type is '$INDIVIDUAL_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.updateProperty(payload)).then(=>
+            trx.updateIndividualProperty(payload)).then(=>
             trx.commit()
             trx.conn.close()
           )
         )
+
+      if payload.source.type is '$VALUE_PROPERTY'
+        proms.push(
+          @connector.transaction().then((trx)->
+            trx.updateValueProperty(payload)).then(=>
+            trx.commit()
+            trx.conn.close()
+          )
+        )
+
+
+
+      
+      # pointing to a value
+      if payload.target.value?
+        proms.push(@database.update(payload))
+      
+      # pointing to an individual
+      else if payload.target.id?
+        proms.push(@database.link(payload))
+        
+      else
+        return Promise.reject('update called not for value or target')
+
 
       Promise.all(proms)
 
