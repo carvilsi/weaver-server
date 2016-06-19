@@ -21,5 +21,5 @@ transports = [new Console({timestamp, formatter})]
 # Return logger
 Logger = winston.Logger
 logger = new Logger({transports})
-logger.level = 'debug'
+logger.level = 'error'
 module.exports = logger
