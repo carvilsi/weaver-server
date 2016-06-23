@@ -199,6 +199,31 @@ module.exports =
 
 
       # POPULATE
+      app.get('/rest/nativeQuery', (req, res) =>
+
+        payload = JSON.parse(req.query.payload)
+
+        logger.log('debug', 'nativeQuery event on rest, with payload:')
+        logger.log('debug', payload)
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+
+        @operations.nativeQuery(payload).then(
+
+          (result) ->
+            res.status(200).send(result)
+
+          (error) ->
+            logger.log('error', error)
+            res.status(503).send(error)
+        )
+      )
+
+
+      # POPULATE
       app.get('/rest/queryFromView', (req, res) =>
 
         payload = JSON.parse(req.query.payload)

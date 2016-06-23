@@ -213,6 +213,26 @@ module.exports =
       )
 
       # Populate
+      socket.on('nativeQuery', (payload, ack) ->
+
+        logger.log('debug', 'nativeQuery event on socket, with payload:')
+        logger.log('debug', payload)
+
+        if not ack?
+          logger.log('error', 'no ack function')
+          throw new Error('no ack function')
+        
+        self.operations.nativeQuery(payload).then(
+
+          (result) ->
+            ack(result)
+
+          (error) ->
+            ack(error)
+        )
+      )
+
+      # Populate
       socket.on('queryFromView', (payload, ack) ->
 
         logger.log('debug', 'queryFromView event on socket, with payload:')

@@ -242,8 +242,15 @@ module.exports =
 
 
 
-    nativeQuery: (query) ->
-      Promise.resolve({})
+    nativeQuery: (passedQuery) ->
+      
+      console.log(passedQuery)
+
+      @connector.query().then((query) ->
+        result = query.nativeQuery(passedQuery)
+        query.conn.close()
+        result
+      )
 
     queryFromView: (payload) ->
       
