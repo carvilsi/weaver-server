@@ -242,9 +242,10 @@ module.exports =
 
 
 
-    nativeQuery: (passedQuery) ->
-      
-      console.log(passedQuery)
+    nativeQuery: (payload) ->
+      payload = JSON.parse(payload) if typeof payload is 'string'
+
+      passedQuery = payload.query
 
       @connector.query().then((query) ->
         result = query.nativeQuery(passedQuery)
