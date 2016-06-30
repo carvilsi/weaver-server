@@ -36,56 +36,61 @@ module.exports =
 
       @logPayload('create', payload)
 
-      payload = JSON.parse(payload) if typeof payload is 'string'
+      payload = JSON.parse(payload) if typeof payload is 'string' # move to weaver-commons-js
 
       proms = []
 
-
       if payload.type is '$INDIVIDUAL'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.createIndividual(new Individual(payload.id)).then(=>
-              trx.commit()
-              trx.conn.close()
+
+        Individual individual = new Individual(payload)
+
+        if individual.isValid()
+          proms.push(
+            @connector.transaction().then((trx)->
+              trx.createIndividual(individual).then(=>
+                trx.commit()
+                trx.conn.close()
+              )
             )
           )
-        )
+
+        else
+          return Promise.reject('This payload does not content a valid $INDIVIDUAL object')
 
       if payload.type is '$INDIVIDUAL_PROPERTY'
 
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes.predicate?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations.subject?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations.object?
+        IndividualProperty individualProperty = new IndividualProperty(payload)
 
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.createIndividualProperty(new IndividualProperty(payload.id, payload.relations.subject, payload.attributes.predicate, payload.relations.object)).then(=>
-              trx.commit()
-              trx.conn.close()
+        if individualProperty.isValid()
+          proms.push(
+            @connector.transaction().then((trx)->
+              trx.createIndividualProperty(individualProperty).then(=>
+                trx.commit()
+                trx.conn.close()
+              )
             )
           )
-        )
+
+        else
+          return Promise.reject('This payload does not content a valid $INDIVIDUAL_PROPERTY object')
+
 
       if payload.type is '$VALUE_PROPERTY'
 
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes.predicate?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes.object?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations.subject?
+        ValueProperty valueProperty = new ValueProperty(payload)
 
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.createValueProperty(new ValueProperty(payload.id, payload.relations.subject, payload.attributes.predicate, payload.attributes.object)).then(=>
-              trx.commit()
-              trx.conn.close()
+        if valueProperty.isValid()
+          proms.push(
+            @connector.transaction().then((trx)->
+              trx.createValueProperty(valueProperty).then(=>
+                trx.commit()
+                trx.conn.close()
+              )
             )
           )
-        )
 
-
+        else
+          return Promise.reject('This payload does not content a valid $VALUE_PROPERTY object')
 
 
       proms.push(@database.create(payload))
@@ -100,7 +105,7 @@ module.exports =
 
       payload = JSON.parse(payload) if typeof payload is 'string'
 
-      @database.read(payload).then((result) ->   
+      @database.read(payload).then((result) ->
         logger.log('debug', result)
         if result?
           Promise.resolve(result)
@@ -125,7 +130,7 @@ module.exports =
 
       proms = []
 
-  
+
 
       if payload.source.type is '$INDIVIDUAL_PROPERTY'
         proms.push(
@@ -147,15 +152,15 @@ module.exports =
 
 
 
-      
+
       # pointing to a value
       if payload.target.value?
         proms.push(@database.update(payload))
-      
+
       # pointing to an individual
       else if payload.target.id?
         proms.push(@database.link(payload))
-        
+
       else
         return Promise.reject('update called not for value or target')
 
@@ -166,7 +171,7 @@ module.exports =
     # renamed from delete
     destroyAttribute: (payload) ->
 
-      @logPayload('destroyAttribute', payload)  
+      @logPayload('destroyAttribute', payload)
       payload = JSON.parse(payload) if typeof payload is 'string'
 
       proms = []
@@ -223,11 +228,11 @@ module.exports =
 
     link: (payload) ->
 
-      
+
       @logPayload('link', payload)
 
-      
-      
+
+
       payload = JSON.parse(payload) if typeof payload is 'string'
       @database.link(payload)
 
@@ -254,20 +259,20 @@ module.exports =
       )
 
     queryFromView: (payload) ->
-      
+
       payload = JSON.parse(payload) if typeof payload is 'string'
 
       # Retrieve the view object
       @read({ id: payload.id, opts: { eagerness: -1 } }).then((view) =>
-        
+
         # view might not exist, or have no filters
-        if not view? or 
-           not view._RELATIONS? or 
-           not view._RELATIONS.filters? or 
+        if not view? or
+           not view._RELATIONS? or
+           not view._RELATIONS.filters? or
            not view._RELATIONS.filters._RELATIONS?
           throw new Error('the view object does not contain the required fields')
           return []
-          
+
         filtersMap = view._RELATIONS.filters._RELATIONS
         filters = []
         for filter_id, filter of filtersMap
@@ -296,7 +301,7 @@ module.exports =
 
 
             # todo extremely ugly
-            else if condition._ATTRIBUTES.conditiontype is 'view' 
+            else if condition._ATTRIBUTES.conditiontype is 'view'
               conditions.push({
                 operation:     condition._ATTRIBUTES.operation
                 view:          condition._ATTRIBUTES.view
@@ -325,7 +330,7 @@ module.exports =
 
 
     queryFromFilters: (filters) ->
-      
+
       filters = JSON.parse(filters) if typeof filters is 'string'
 
       @connector.query().then((query) ->
@@ -397,13 +402,13 @@ module.exports =
           )
         )
       )
-      
+
       deferred.promise
 
 
     bootstrapFromJson: (stringLogArray) ->
 
-      try 
+      try
         logArray = JSON.parse(stringLogArray)
       catch error
         logger.log('info', 'json contained error: '+error)
@@ -422,5 +427,3 @@ module.exports =
         if actions[record.action]?
           actions[record.action].bind(@)(record.payload)
       )
-
-
