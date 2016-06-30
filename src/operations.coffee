@@ -127,7 +127,7 @@ module.exports =
 
   
 
-      if payload.source.type is '$INDIVIDUAL_PROPERTY'
+      if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.attribute is 'object'
         proms.push(
           @connector.transaction().then((trx)->
             trx.updateIndividualProperty(payload)).then(=>
@@ -136,7 +136,7 @@ module.exports =
           )
         )
 
-      if payload.source.type is '$VALUE_PROPERTY'
+      if payload.source.type is '$VALUE_PROPERTY' and payload.attribute is 'object'
         proms.push(
           @connector.transaction().then((trx)->
             trx.updateValueProperty(payload)).then(=>
