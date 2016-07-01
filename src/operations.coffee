@@ -127,21 +127,23 @@ module.exports =
 
   
 
-      if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.attribute is 'object'
+      if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.updateIndividualProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.updateIndividualProperty(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
-      if payload.source.type is '$VALUE_PROPERTY' and payload.attribute is 'object'
+      if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.updateValueProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.updateValueProperty(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
@@ -193,27 +195,30 @@ module.exports =
       if payload.type is '$INDIVIDUAL'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.deleteObject(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.deleteObject(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
       if payload.type is '$INDIVIDUAL_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.deleteProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.deleteProperty(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
       if payload.type is '$VALUE_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.deleteProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.deleteProperty(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
