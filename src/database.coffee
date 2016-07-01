@@ -168,7 +168,7 @@ module.exports =
          not payload.source? or
          not payload.source.id? or
          not payload.source.type? or
-         not payload.attribute? or
+         not payload.key? or
          not payload.target? or
          not payload.target.value? or
          not payload.target.datatype?
@@ -178,7 +178,7 @@ module.exports =
       id = payload.source.id 
       
       # Value
-      attribute = payload.attribute      
+      attribute = payload.key
       
       # Value
       value = payload.target.value

@@ -1,6 +1,7 @@
 Promise = require('bluebird')
 util = require('util')
 http = require('http')
+https = require('https')
 cuid = require('cuid')
 
 WeaverCommons    = require('weaver-commons-js')
@@ -127,21 +128,23 @@ module.exports =
 
   
 
-      if payload.source.type is '$INDIVIDUAL_PROPERTY'
+      if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.updateIndividualProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.updateIndividualProperty(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
-      if payload.source.type is '$VALUE_PROPERTY'
+      if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.updateValueProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.updateValueProperty(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
@@ -190,30 +193,13 @@ module.exports =
       proms.push(@database.destroyEntity(payload))
 
 
-      if payload.type is '$INDIVIDUAL'
+      if payload.type is '$INDIVIDUAL' or payload.type is '$INDIVIDUAL_PROPERTY' or payload.type is '$VALUE_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.deleteObject(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
-          )
-        )
-
-      if payload.type is '$INDIVIDUAL_PROPERTY'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.deleteProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
-          )
-        )
-
-      if payload.type is '$VALUE_PROPERTY'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.deleteProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.deleteObject(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
@@ -383,7 +369,7 @@ module.exports =
       deferred = Promise.defer()
       logArray = ''
 
-      http.get(url, (res) =>
+      processResponse = (res) =>
 
         if not res.statusCode is 200
           deferred.reject()
@@ -396,7 +382,11 @@ module.exports =
             deferred.resolve()
           )
         )
-      )
+
+      if url.substr(0,5) is 'https'
+        https.get(url, processResponse)
+      else
+        http.get(url, processResponse)
       
       deferred.promise
 
