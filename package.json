@@ -1,13 +1,12 @@
 {
   "name": "weaver-server",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "Module providing a Weaver-compatible API server",
   "author": {
     "name": "Mohamad Alamili",
     "url": "http://weaverplatform.com",
     "email": "mail@weaverplatform.com"
   },
-  "readme": "README.md",
   "main": "lib/index.js",
   "license": "GPL-3.0",
   "repository": {},
@@ -18,7 +17,7 @@
     "ioredis": "2.0.1",
     "moment": "^2.13.0",
     "socket.io": "1.4.5",
-    "weaver-commons-js": "0.0.7",
+    "weaver-commons-js": "0.0.8",
     "winston": "^2.2.0"
   },
   "devDependencies": {
