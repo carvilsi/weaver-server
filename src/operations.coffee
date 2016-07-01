@@ -37,55 +37,61 @@ module.exports =
 
       @logPayload('create', payload)
 
-      payload = JSON.parse(payload) if typeof payload is 'string'
+      payload = JSON.parse(payload) if typeof payload is 'string' # move to weaver-commons-js
 
       proms = []
 
-
       if payload.type is '$INDIVIDUAL'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.createIndividual(new Individual(payload.id)).then(=>
-              trx.commit()
-              trx.conn.close()
+
+        Individual individual = new Individual(payload)
+
+        if individual.isValid()
+          proms.push(
+            @connector.transaction().then((trx)->
+              trx.createIndividual(individual).then(=>
+                trx.commit()
+                trx.conn.close()
+              )
             )
           )
-        )
+
+        else
+          return Promise.reject('This payload does not content a valid $INDIVIDUAL object')
 
       if payload.type is '$INDIVIDUAL_PROPERTY'
 
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes.predicate?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations.subject?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations.object?
+        IndividualProperty individualProperty = new IndividualProperty(payload)
 
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.createIndividualProperty(new IndividualProperty(payload.id, payload.relations.subject, payload.attributes.predicate, payload.relations.object)).then(=>
-              trx.commit()
-              trx.conn.close()
+        if individualProperty.isValid()
+          proms.push(
+            @connector.transaction().then((trx)->
+              trx.createIndividualProperty(individualProperty).then(=>
+                trx.commit()
+                trx.conn.close()
+              )
             )
           )
-        )
+
+        else
+          return Promise.reject('This payload does not content a valid $INDIVIDUAL_PROPERTY object')
+
 
       if payload.type is '$VALUE_PROPERTY'
 
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes.predicate?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.attributes.object?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations?
-        return Promise.reject('field missing for creating $INDIVIDUAL_PROPERTY') if not payload.relations.subject?
+        ValueProperty valueProperty = new ValueProperty(payload)
 
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.createValueProperty(new ValueProperty(payload.id, payload.relations.subject, payload.attributes.predicate, payload.attributes.object)).then(=>
-              trx.commit()
-              trx.conn.close()
+        if valueProperty.isValid()
+          proms.push(
+            @connector.transaction().then((trx)->
+              trx.createValueProperty(valueProperty).then(=>
+                trx.commit()
+                trx.conn.close()
+              )
             )
           )
-        )
 
+        else
+          return Promise.reject('This payload does not content a valid $VALUE_PROPERTY object')
 
 
 
