@@ -199,30 +199,10 @@ module.exports =
       proms.push(@database.destroyEntity(payload))
 
 
-      if payload.type is '$INDIVIDUAL'
+      if payload.type is '$INDIVIDUAL' or payload.type is '$INDIVIDUAL_PROPERTY' or payload.type is '$VALUE_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
             trx.deleteObject(payload).then(=>
-              trx.commit()
-              trx.conn.close()
-            )
-          )
-        )
-
-      if payload.type is '$INDIVIDUAL_PROPERTY'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.deleteProperty(payload).then(=>
-              trx.commit()
-              trx.conn.close()
-            )
-          )
-        )
-
-      if payload.type is '$VALUE_PROPERTY'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.deleteProperty(payload).then(=>
               trx.commit()
               trx.conn.close()
             )
@@ -395,44 +375,24 @@ module.exports =
       deferred = Promise.defer()
       logArray = ''
 
+      processResponse = (res) =>
+
+        if not res.statusCode is 200
+          deferred.reject()
+
+        res.on('data', (data)=>
+          logArray += data
+        )
+        res.on('end', ()=>
+          @bootstrapFromJson(logArray).then(->
+            deferred.resolve()
+          )
+        )
 
       if url.substr(0,5) is 'https'
-
-        https.get(url, (res) =>
-
-          logger.log('error', 'got response from https call (code '+res.statusCode+')')
-
-          if not res.statusCode is 200
-            deferred.reject()
-
-          res.on('data', (data)=>
-            logArray += data
-          )
-          res.on('end', ()=>
-            @bootstrapFromJson(logArray).then(->
-              deferred.resolve()
-            )
-          )
-        )
-
+        https.get(url, processResponse)
       else
-
-        http.get(url, (res) =>
-
-          logger.log('error', 'got response from http call (code '+res.statusCode+')')
-
-          if not res.statusCode is 200
-            deferred.reject()
-
-          res.on('data', (data)=>
-            logArray += data
-          )
-          res.on('end', ()=>
-            @bootstrapFromJson(logArray).then(->
-              deferred.resolve()
-            )
-          )
-        )
+        http.get(url, processResponse)
       
       deferred.promise
 
