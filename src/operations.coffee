@@ -1,6 +1,7 @@
 Promise = require('bluebird')
 util = require('util')
 http = require('http')
+https = require('https')
 cuid = require('cuid')
 
 WeaverCommons    = require('weaver-commons-js')
@@ -93,6 +94,7 @@ module.exports =
           return Promise.reject('This payload does not content a valid $VALUE_PROPERTY object')
 
 
+
       proms.push(@database.create(payload))
 
       Promise.all(proms)
@@ -105,7 +107,7 @@ module.exports =
 
       payload = JSON.parse(payload) if typeof payload is 'string'
 
-      @database.read(payload).then((result) ->
+      @database.read(payload).then((result) ->   
         logger.log('debug', result)
         if result?
           Promise.resolve(result)
@@ -130,37 +132,39 @@ module.exports =
 
       proms = []
 
+  
 
-
-      if payload.source.type is '$INDIVIDUAL_PROPERTY'
+      if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.updateIndividualProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.updateIndividualProperty(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
-      if payload.source.type is '$VALUE_PROPERTY'
+      if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.updateValueProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.updateValueProperty(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
 
 
-
+      
       # pointing to a value
       if payload.target.value?
         proms.push(@database.update(payload))
-
+      
       # pointing to an individual
       else if payload.target.id?
         proms.push(@database.link(payload))
-
+        
       else
         return Promise.reject('update called not for value or target')
 
@@ -171,7 +175,7 @@ module.exports =
     # renamed from delete
     destroyAttribute: (payload) ->
 
-      @logPayload('destroyAttribute', payload)
+      @logPayload('destroyAttribute', payload)  
       payload = JSON.parse(payload) if typeof payload is 'string'
 
       proms = []
@@ -198,27 +202,30 @@ module.exports =
       if payload.type is '$INDIVIDUAL'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.deleteObject(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.deleteObject(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
       if payload.type is '$INDIVIDUAL_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.deleteProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.deleteProperty(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
       if payload.type is '$VALUE_PROPERTY'
         proms.push(
           @connector.transaction().then((trx)->
-            trx.deleteProperty(payload)).then(=>
-            trx.commit()
-            trx.conn.close()
+            trx.deleteProperty(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
           )
         )
 
@@ -228,11 +235,11 @@ module.exports =
 
     link: (payload) ->
 
-
+      
       @logPayload('link', payload)
 
-
-
+      
+      
       payload = JSON.parse(payload) if typeof payload is 'string'
       @database.link(payload)
 
@@ -259,20 +266,20 @@ module.exports =
       )
 
     queryFromView: (payload) ->
-
+      
       payload = JSON.parse(payload) if typeof payload is 'string'
 
       # Retrieve the view object
       @read({ id: payload.id, opts: { eagerness: -1 } }).then((view) =>
-
+        
         # view might not exist, or have no filters
-        if not view? or
-           not view._RELATIONS? or
-           not view._RELATIONS.filters? or
+        if not view? or 
+           not view._RELATIONS? or 
+           not view._RELATIONS.filters? or 
            not view._RELATIONS.filters._RELATIONS?
           throw new Error('the view object does not contain the required fields')
           return []
-
+          
         filtersMap = view._RELATIONS.filters._RELATIONS
         filters = []
         for filter_id, filter of filtersMap
@@ -301,7 +308,7 @@ module.exports =
 
 
             # todo extremely ugly
-            else if condition._ATTRIBUTES.conditiontype is 'view'
+            else if condition._ATTRIBUTES.conditiontype is 'view' 
               conditions.push({
                 operation:     condition._ATTRIBUTES.operation
                 view:          condition._ATTRIBUTES.view
@@ -330,7 +337,7 @@ module.exports =
 
 
     queryFromFilters: (filters) ->
-
+      
       filters = JSON.parse(filters) if typeof filters is 'string'
 
       @connector.query().then((query) ->
@@ -388,27 +395,51 @@ module.exports =
       deferred = Promise.defer()
       logArray = ''
 
-      http.get(url, (res) =>
 
-        if not res.statusCode is 200
-          deferred.reject()
+      if url.substr(0,5) is 'https'
 
-        res.on('data', (data)=>
-          logArray += data
-        )
-        res.on('end', ()=>
-          @bootstrapFromJson(logArray).then(->
-            deferred.resolve()
+        https.get(url, (res) =>
+
+          logger.log('error', 'got response from https call (code '+res.statusCode+')')
+
+          if not res.statusCode is 200
+            deferred.reject()
+
+          res.on('data', (data)=>
+            logArray += data
+          )
+          res.on('end', ()=>
+            @bootstrapFromJson(logArray).then(->
+              deferred.resolve()
+            )
           )
         )
-      )
 
+      else
+
+        http.get(url, (res) =>
+
+          logger.log('error', 'got response from http call (code '+res.statusCode+')')
+
+          if not res.statusCode is 200
+            deferred.reject()
+
+          res.on('data', (data)=>
+            logArray += data
+          )
+          res.on('end', ()=>
+            @bootstrapFromJson(logArray).then(->
+              deferred.resolve()
+            )
+          )
+        )
+      
       deferred.promise
 
 
     bootstrapFromJson: (stringLogArray) ->
 
-      try
+      try 
         logArray = JSON.parse(stringLogArray)
       catch error
         logger.log('info', 'json contained error: '+error)
@@ -427,3 +458,5 @@ module.exports =
         if actions[record.action]?
           actions[record.action].bind(@)(record.payload)
       )
+
+
