@@ -1,6 +1,7 @@
 Promise = require('bluebird')
 util = require('util')
 http = require('http')
+https = require('https')
 cuid = require('cuid')
 
 WeaverCommons    = require('weaver-commons-js')
@@ -388,20 +389,44 @@ module.exports =
       deferred = Promise.defer()
       logArray = ''
 
-      http.get(url, (res) =>
 
-        if not res.statusCode is 200
-          deferred.reject()
+      if url.substr(0,5) is 'https'
 
-        res.on('data', (data)=>
-          logArray += data
-        )
-        res.on('end', ()=>
-          @bootstrapFromJson(logArray).then(->
-            deferred.resolve()
+        https.get(url, (res) =>
+
+          logger.log('error', 'got response from https call (code '+res.statusCode+')')
+
+          if not res.statusCode is 200
+            deferred.reject()
+
+          res.on('data', (data)=>
+            logArray += data
+          )
+          res.on('end', ()=>
+            @bootstrapFromJson(logArray).then(->
+              deferred.resolve()
+            )
           )
         )
-      )
+
+      else
+
+        http.get(url, (res) =>
+
+          logger.log('error', 'got response from http call (code '+res.statusCode+')')
+
+          if not res.statusCode is 200
+            deferred.reject()
+
+          res.on('data', (data)=>
+            logArray += data
+          )
+          res.on('end', ()=>
+            @bootstrapFromJson(logArray).then(->
+              deferred.resolve()
+            )
+          )
+        )
       
       deferred.promise
 
