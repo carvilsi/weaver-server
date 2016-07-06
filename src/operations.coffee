@@ -5,10 +5,7 @@ https = require('https')
 cuid = require('cuid')
 
 WeaverCommons    = require('weaver-commons-js')
-Individual         = WeaverCommons.Individual
-IndividualProperty = WeaverCommons.IndividualProperty
-ValueProperty      = WeaverCommons.ValueProperty
-Filter             = WeaverCommons.Filter
+
 
 logger    = require('./logger')
 
@@ -18,8 +15,10 @@ module.exports =
   class Operations
     constructor: (@database, @connector, @opts) ->
 
-    logPayload: (action, payload) ->
 
+
+
+    logPayload: (action, payload) ->
 
       @database.redis.incr('payloadIndex').then((payloadIndex) =>
 
@@ -33,17 +32,23 @@ module.exports =
 
 
 
+
+
     create: (payload) ->
+
+      payload = new WeaverCommons.create.Entity(payload)
+      if not payload.isValid()
+        throw new Error('create call not valid')
 
       @logPayload('create', payload)
 
-      payload = JSON.parse(payload) if typeof payload is 'string' # move to weaver-commons-js
-
       proms = []
+
+      proms.push(@database.create(payload))
 
       if payload.type is '$INDIVIDUAL'
 
-        Individual individual = new Individual(payload)
+        individual = new WeaverCommons.create.Individual(payload)
 
         if individual.isValid()
           proms.push(
@@ -59,8 +64,7 @@ module.exports =
           return Promise.reject('This payload does not content a valid $INDIVIDUAL object')
 
       if payload.type is '$INDIVIDUAL_PROPERTY'
-
-        IndividualProperty individualProperty = new IndividualProperty(payload)
+        individualProperty = new WeaverCommons.create.IndividualProperty(payload)
 
         if individualProperty.isValid()
           proms.push(
@@ -75,10 +79,8 @@ module.exports =
         else
           return Promise.reject('This payload does not content a valid $INDIVIDUAL_PROPERTY object')
 
-
       if payload.type is '$VALUE_PROPERTY'
-
-        ValueProperty valueProperty = new ValueProperty(payload)
+        valueProperty = new WeaverCommons.create.ValueProperty(payload)
 
         if valueProperty.isValid()
           proms.push(
@@ -93,19 +95,13 @@ module.exports =
         else
           return Promise.reject('This payload does not content a valid $VALUE_PROPERTY object')
 
-
-
-      proms.push(@database.create(payload))
-
       Promise.all(proms)
-
-
-
 
 
     read: (payload) ->
 
-      payload = JSON.parse(payload) if typeof payload is 'string'
+      payload = new WeaverCommons.read.Entity(payload)
+      throw new Error('read call not valid') if not payload.isValid()
 
       @database.read(payload).then((result) ->   
         logger.log('debug', result)
@@ -119,30 +115,36 @@ module.exports =
 
 
 
-
-
-
-
-
-
+    # deprecated, please use updateAttributeLink or updateEntityLink
     update: (payload) ->
 
-      @logPayload('update', payload)
       payload = JSON.parse(payload) if typeof payload is 'string'
 
+      # pointing to a value
+      if payload.target? and payload.target.value?
+        @updateAttributeLink(payload)
+
+        # pointing to an individual
+      else if payload.target? and payload.target.id?
+        @updateEntityLink(payload)
+
+      else
+        return Promise.reject('update called not for value or target')
+
+
+
+
+
+
+
+    updateAttributeLink: (payload) ->
+
+      payload = new WeaverCommons.update.AttributeLink(payload)
+      throw new Error('update call not valid') if not payload.isValid()
+
+      @logPayload('update', payload)
+
       proms = []
-
-  
-
-      if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.updateIndividualProperty(payload).then(=>
-              trx.commit()
-              trx.conn.close()
-            )
-          )
-        )
 
       if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
         proms.push(
@@ -154,20 +156,32 @@ module.exports =
           )
         )
 
+      proms.push(@database.update(payload))
+
+      Promise.all(proms)
 
 
-      
-      # pointing to a value
-      if payload.target.value?
-        proms.push(@database.update(payload))
-      
-      # pointing to an individual
-      else if payload.target.id?
-        proms.push(@database.link(payload))
-        
-      else
-        return Promise.reject('update called not for value or target')
 
+    updateEntityLink: (payload) ->
+
+      payload = new WeaverCommons.update.EnityLink(payload)
+      throw new Error('update call not valid') if not payload.isValid()
+
+      @logPayload('update', payload)
+
+      proms = []
+
+      if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
+        proms.push(
+          @connector.transaction().then((trx)->
+            trx.updateIndividualProperty(payload).then(=>
+              trx.commit()
+              trx.conn.close()
+            )
+          )
+        )
+
+      proms.push(@database.link(payload))
 
       Promise.all(proms)
 
@@ -175,15 +189,14 @@ module.exports =
     # renamed from delete
     destroyAttribute: (payload) ->
 
-      @logPayload('destroyAttribute', payload)  
-      payload = JSON.parse(payload) if typeof payload is 'string'
+      payload = new WeaverCommons.destroyAttribute.Entity(payload)
+      throw new Error('destroyAttribute call not valid') if not payload.isValid()
+
+      @logPayload('destroyAttribute', payload)
 
       proms = []
 
       proms.push(@database.destroyAttribute(payload))
-
-
-
 
       Promise.all(proms)
 
@@ -191,8 +204,10 @@ module.exports =
     # renamed from destroy
     destroyEntity: (payload) ->
 
+      payload = new WeaverCommons.destroyEntity.Entity(payload)
+      throw new Error('destroyEntity call not valid') if not payload.isValid()
+
       @logPayload('destroyEntity', payload)
-      payload = JSON.parse(payload) if typeof payload is 'string'
 
       proms = []
 
@@ -215,39 +230,43 @@ module.exports =
 
     link: (payload) ->
 
-      
+      payload = new WeaverCommons.link.Link(payload)
+      throw new Error('link call not valid') if not payload.isValid()
+
       @logPayload('link', payload)
 
       
-      
-      payload = JSON.parse(payload) if typeof payload is 'string'
+
       @database.link(payload)
 
 
 
     unlink: (payload) ->
 
+      payload = new WeaverCommons.unlink.Link(payload)
+      throw new Error('unlink call not valid') if not payload.isValid()
+
       @logPayload('unlink', payload)
 
-      payload = JSON.parse(payload) if typeof payload is 'string'
       @database.unlink(payload)
 
 
 
     nativeQuery: (payload) ->
-      payload = JSON.parse(payload) if typeof payload is 'string'
 
-      passedQuery = payload.query
+      payload = new WeaverCommons.nativeQuery.Query(payload)
+      throw new Error('nativeQuery call not valid') if not payload.isValid()
 
       @connector.query().then((query) ->
-        result = query.nativeQuery(passedQuery)
+        result = query.nativeQuery(payload)        # todo: accept this object in connector
         query.conn.close()
         result
       )
 
     queryFromView: (payload) ->
-      
-      payload = JSON.parse(payload) if typeof payload is 'string'
+
+      payload = new WeaverCommons.queryFromView.View(payload)
+      throw new Error('queryfromView call not valid') if not payload.isValid()
 
       # Retrieve the view object
       @read({ id: payload.id, opts: { eagerness: -1 } }).then((view) =>
@@ -317,7 +336,6 @@ module.exports =
 
 
     queryFromFilters: (filters) ->
-      
       filters = JSON.parse(filters) if typeof filters is 'string'
 
       @connector.query().then((query) ->

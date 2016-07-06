@@ -277,7 +277,6 @@ module.exports =
       socket.on('wipe', (payload, ack) ->
 
         logger.log('debug', 'wipe event on socket')
-        console.log(payload)
 
 
         if not ack?
