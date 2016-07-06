@@ -7,11 +7,6 @@ logger    = require('./logger')
 isNumber  = (a) -> Object.prototype.toString.call(a) is '[object Number]'
 isBoolean = (a) -> Object.prototype.toString.call(a) is '[object Boolean]'
 
-defaultReadOptions = (opts) ->
-  opts = {} if not opts?
-  opts.eagerness = 1 if not opts.eagerness?
-  opts
-  
 encode = (val) ->
   if isNumber(val)
     val + '^^number'
@@ -157,22 +152,11 @@ module.exports =
       # ID
       id   = payload.id
       opts = payload.opts
-      opts = defaultReadOptions(opts)
       
       read(id, opts.eagerness)
       
           
     update: (payload) ->
-
-      if not payload? or
-         not payload.source? or
-         not payload.source.id? or
-         not payload.source.type? or
-         not payload.key? or
-         not payload.target? or
-         not payload.target.value? or
-         not payload.target.datatype?
-        Promise.reject('payload for update does not contain all fields: '+JSON.stringify(payload))
 
       # ID
       id = payload.source.id 
@@ -194,14 +178,6 @@ module.exports =
   
 
     link: (payload) ->
-      
-      if not payload? or
-         not payload.source? or
-         not payload.source.id? or
-         not payload.key? or
-         not payload.target? or
-         not payload.target.id?
-        Promise.reject('payload for link does not contain all fields: '+JSON.stringify(payload))
   
       # ID
       id = payload.source.id
