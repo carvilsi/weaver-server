@@ -269,67 +269,11 @@ module.exports =
       throw new Error('queryfromView call not valid') if not payload.isValid()
 
       # Retrieve the view object
-      @read({ id: payload.id, opts: { eagerness: -1 } }).then((view) =>
-        
-        # view might not exist, or have no filters
-        if not view? or 
-           not view._RELATIONS? or 
-           not view._RELATIONS.filters? or 
-           not view._RELATIONS.filters._RELATIONS?
-          throw new Error('the view object does not contain the required fields')
-          return []
-          
-        filtersMap = view._RELATIONS.filters._RELATIONS
-        filters = []
-        for filter_id, filter of filtersMap
+      @read({ id: payload.id, opts: { eagerness: -1 } }).then((readResponse) =>
 
+        view = new WeaverCommons.read.response.View(readResponse)
 
-          conditions = []
-          for cond_id, condition of filter._RELATIONS.conditions._RELATIONS
-
-
-            # todo extremely ugly
-            if condition._ATTRIBUTES.conditiontype is 'string'
-              conditions.push({
-                operation:     condition._ATTRIBUTES.operation
-                value:         condition._ATTRIBUTES.value
-                conditiontype: condition._ATTRIBUTES.conditiontype
-              })
-
-
-            # todo extremely ugly
-            else if condition._ATTRIBUTES.conditiontype is 'individual'
-              conditions.push({
-                operation:     condition._ATTRIBUTES.operation
-                individual:    condition._ATTRIBUTES.individual
-                conditiontype: condition._ATTRIBUTES.conditiontype
-              })
-
-
-            # todo extremely ugly
-            else if condition._ATTRIBUTES.conditiontype is 'view' 
-              conditions.push({
-                operation:     condition._ATTRIBUTES.operation
-                view:          condition._ATTRIBUTES.view
-                conditiontype: condition._ATTRIBUTES.conditiontype
-              })
-
-
-            # todo extremely ugly
-            else
-              throw new Error('unsupported condition type')
-
-
-
-          filter = {
-            label: filter._ATTRIBUTES.label
-            predicate: filter._ATTRIBUTES.predicate
-            celltype: filter._ATTRIBUTES.celltype
-            conditions: conditions
-          }
-
-
-          filters.push(filter)
+        filters = view.getFilters()
         promise = @queryFromFilters(filters)
         return promise
       )
@@ -337,11 +281,13 @@ module.exports =
 
     queryFromFilters: (filters) ->
       filters = JSON.parse(filters) if typeof filters is 'string'
+      viewProvider = @
 
       @connector.query().then((query) ->
-        result = query.selectIndividuals(filters)
-        query.conn.close()
-        result
+        query.selectIndividuals(filters, viewProvider).then((result) ->
+          query.conn.close()
+          result
+        )
       )
 
 
