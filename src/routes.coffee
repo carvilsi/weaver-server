@@ -385,3 +385,18 @@ module.exports =
             ack('ERROR: '+error)
         )
       )
+
+      # Bootstrap
+      socket.on('version', (payload, ack) ->
+
+        pjson = require('../package.json')
+        server_version =    pjson.version
+#        commons_version =             pjson.dependencies["weaver-commons-js"]
+
+        if not ack?
+          logger.log('error', 'no ack function')
+          throw new Error('no ack function')
+
+        ack(server_version)
+
+      )
