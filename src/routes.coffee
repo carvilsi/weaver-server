@@ -53,7 +53,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('create call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
 
         )
       )
@@ -75,7 +77,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('create/bulk call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
 
         )
       )
@@ -98,7 +102,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('read call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
 
         )
       )
@@ -121,7 +127,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('update call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
         )
       )
 
@@ -143,7 +151,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('remove call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
 
         )
       )
@@ -166,7 +176,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('link call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
         )
       )
 
@@ -187,7 +199,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('unlink call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
         )
       )
       
@@ -208,7 +222,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('destroy call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
         )
       )
 
@@ -228,7 +244,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('nativeQuery call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
         )
       )
 
@@ -248,7 +266,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('queryFromView call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
         )
       )
 
@@ -269,7 +289,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('queryFromFilters call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
         )
       )
 
@@ -289,7 +311,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('wipe call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
         )
       )
 
@@ -310,7 +334,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('dump call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
         )
       )
 
@@ -331,7 +357,9 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('bootstrapFromJson call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
         )
       )
 
@@ -352,6 +380,23 @@ module.exports =
             ack(result)
 
           (error) ->
-            ack(error)
+            logger.error('bootstrapFromUrl call failed for')
+            logger.error(payload)
+            ack('ERROR: '+error)
         )
+      )
+
+      # Bootstrap
+      socket.on('version', (payload, ack) ->
+
+        pjson = require('../package.json')
+        server_version =    pjson.version
+#        commons_version =             pjson.dependencies["weaver-commons-js"]
+
+        if not ack?
+          logger.log('error', 'no ack function')
+          throw new Error('no ack function')
+
+        ack(server_version)
+
       )

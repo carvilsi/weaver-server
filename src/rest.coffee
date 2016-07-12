@@ -368,3 +368,17 @@ module.exports =
             res.status(503).send(error)
         )
       )
+
+      # VERSION
+      app.get('/rest/version', (req, res) =>
+
+        if not res?
+          logger.log('error', 'no response')
+          throw new Error('no response')
+
+        pjson = require('../package.json')
+        server_version =    pjson.version
+#        commons_version =             pjson.dependencies["weaver-commons-js"]
+
+        res.status(200).send(server_version)
+      )

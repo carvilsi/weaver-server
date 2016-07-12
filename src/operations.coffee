@@ -37,8 +37,7 @@ module.exports =
     create: (payload) ->
 
       payload = new WeaverCommons.create.Entity(payload)
-      if not payload.isValid()
-        throw new Error('create call not valid')
+      return Promise.reject('create call not valid') if not payload.isValid()
 
       @logPayload('create', payload)
 
@@ -101,9 +100,9 @@ module.exports =
     read: (payload) ->
 
       payload = new WeaverCommons.read.Entity(payload)
-      throw new Error('read call not valid') if not payload.isValid()
+      return Promise.reject('read call not valid') if not payload.isValid()
 
-      @database.read(payload).then((result) ->   
+      @database.read(payload).then((result) ->
         logger.log('debug', result)
         if result?
           Promise.resolve(result)
@@ -140,7 +139,7 @@ module.exports =
     updateAttributeLink: (payload) ->
 
       payload = new WeaverCommons.update.AttributeLink(payload)
-      throw new Error('update call not valid') if not payload.isValid()
+      return Promise.reject('update attribute link call not valid') if not payload.isValid()
 
       @logPayload('update', payload)
 
@@ -165,7 +164,7 @@ module.exports =
     updateEntityLink: (payload) ->
 
       payload = new WeaverCommons.update.EnityLink(payload)
-      throw new Error('update call not valid') if not payload.isValid()
+      return Promise.reject('update entity link call not valid') if not payload.isValid()
 
       @logPayload('update', payload)
 
@@ -190,7 +189,7 @@ module.exports =
     destroyAttribute: (payload) ->
 
       payload = new WeaverCommons.destroyAttribute.Entity(payload)
-      throw new Error('destroyAttribute call not valid') if not payload.isValid()
+      return Promise.reject('destroy attribute call not valid') if not payload.isValid()
 
       @logPayload('destroyAttribute', payload)
 
@@ -205,7 +204,7 @@ module.exports =
     destroyEntity: (payload) ->
 
       payload = new WeaverCommons.destroyEntity.Entity(payload)
-      throw new Error('destroyEntity call not valid') if not payload.isValid()
+      return Promise.reject('destroy entity call not valid') if not payload.isValid()
 
       @logPayload('destroyEntity', payload)
 
@@ -231,7 +230,7 @@ module.exports =
     link: (payload) ->
 
       payload = new WeaverCommons.link.Link(payload)
-      throw new Error('link call not valid') if not payload.isValid()
+      return Promise.reject('link call not valid') if not payload.isValid()
 
       @logPayload('link', payload)
 
@@ -244,7 +243,7 @@ module.exports =
     unlink: (payload) ->
 
       payload = new WeaverCommons.unlink.Link(payload)
-      throw new Error('unlink call not valid') if not payload.isValid()
+      return Promise.reject('unlink call not valid') if not payload.isValid()
 
       @logPayload('unlink', payload)
 
@@ -255,7 +254,7 @@ module.exports =
     nativeQuery: (payload) ->
 
       payload = new WeaverCommons.nativeQuery.Query(payload)
-      throw new Error('nativeQuery call not valid') if not payload.isValid()
+      return Promise.reject('native query call not valid') if not payload.isValid()
 
       @connector.query().then((query) ->
         result = query.nativeQuery(payload)        # todo: accept this object in connector
@@ -266,7 +265,7 @@ module.exports =
     queryFromView: (payload) ->
 
       payload = new WeaverCommons.queryFromView.View(payload)
-      throw new Error('queryfromView call not valid') if not payload.isValid()
+      return Promise.reject('query from view call not valid') if not payload.isValid()
 
       # Retrieve the view object
       @read({ id: payload.id, opts: { eagerness: -1 } }).then((readResponse) =>
