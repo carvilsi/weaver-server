@@ -163,7 +163,7 @@ module.exports =
 
     updateEntityLink: (payload) ->
 
-      payload = new WeaverCommons.update.EnityLink(payload)
+      payload = new WeaverCommons.update.EntityLink(payload)
       return Promise.reject('update entity link call not valid') if not payload.isValid()
 
       @logPayload('update', payload)
