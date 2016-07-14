@@ -418,7 +418,7 @@ module.exports =
       try 
         logArray = JSON.parse(stringLogArray)
       catch error
-        logger.log('info', 'json contained error: '+error)
+        logger.log('error', 'json contained error: '+error)
         return Promise.reject(error)
 
       actions = {
@@ -430,9 +430,25 @@ module.exports =
         'unlink' : @unlink
       }
 
-      Promise.each(logArray, (record) =>
-        if actions[record.action]?
-          actions[record.action].bind(@)(record.payload)
-      )
+      limit = 1000
+      processBatch = (arr) ->
+        if arr.length <= limit
+          batch = arr
+          tail = []
+        else
+          batch = arr[0...limit]
+          tail = arr[limit..]
+
+        Promise.each(batch, (record) =>
+          if actions[record.action]?
+            actions[record.action].bind(@)(record.payload)
+        ).then(()->
+          if tail.length > 0
+            processBatch(tail)
+          else
+            Promise.resolve()
+        )
+
+      processBatch(stringLogArray)
 
 
