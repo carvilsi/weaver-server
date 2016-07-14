@@ -388,67 +388,85 @@ module.exports =
 
     bootstrapFromUrl: (url) ->
 
-      deferred = Promise.defer()
-      logArray = ''
+      new Promise((resolve, reject) =>
 
-      processResponse = (res) =>
+        logArray = ''
 
-        if not res.statusCode is 200
-          deferred.reject()
+        processResponse = (res) =>
 
-        res.on('data', (data)=>
-          logArray += data
-        )
-        res.on('end', ()=>
-          @bootstrapFromJson(logArray).then(->
-            deferred.resolve()
+          if not res.statusCode is 200
+            reject('wrong status code: '+res.statusCode)
+
+          res.on('data', (data)=>
+            logArray += data
           )
-        )
+          res.on('end', ()=>
+            @bootstrapFromJson(logArray).then(
+              () ->
+                resolve()
+              (error) ->
+                reject(error)
+            )
+          )
 
-      if url.substr(0,5) is 'https'
-        https.get(url, processResponse)
-      else
-        http.get(url, processResponse)
-      
-      deferred.promise
-
-
-    bootstrapFromJson: (stringLogArray) ->
-
-      try 
-        logArray = JSON.parse(stringLogArray)
-      catch error
-        logger.log('error', 'json contained error: '+error)
-        return Promise.reject(error)
-
-      actions = {
-        'create': @create
-        'update': @update
-        'destroyAttribute': @destroyAttribute
-        'destroyEntity': @destroyEntity
-        'link' : @link
-        'unlink' : @unlink
-      }
-
-      limit = 1000
-      processBatch = (arr) ->
-        if arr.length <= limit
-          batch = arr
-          tail = []
+        if url.substr(0,5) is 'https'
+          https.get(url, processResponse)
         else
-          batch = arr[0...limit]
-          tail = arr[limit..]
+          http.get(url, processResponse)
 
-        Promise.each(batch, (record) =>
-          if actions[record.action]?
-            actions[record.action].bind(@)(record.payload)
-        ).then(()->
-          if tail.length > 0
-            processBatch(tail)
+      )
+
+
+    bootstrapFromJson: (logArray) ->
+
+      new Promise((resolve, reject) =>
+
+        if typeof logArray is 'string'
+
+          try
+            logArray = JSON.parse(logArray)
+          catch error
+            logger.error('error', 'json contained error: '+error)
+            logger.error('error', logArray)
+            reject(error)
+
+        actions = {
+          'create': @create
+          'update': @update
+          'destroyAttribute': @destroyAttribute
+          'destroyEntity': @destroyEntity
+          'link' : @link
+          'unlink' : @unlink
+        }
+
+        limit = 1000
+        processBatch = (arr) =>
+          if arr.length <= limit
+            batch = arr
+            tail = []
           else
-            Promise.resolve()
-        )
+            batch = arr[0...limit]
+            tail = arr[limit..]
 
-      processBatch(stringLogArray)
+          Promise.each(batch, (record) =>
+            if actions[record.action]?
+              actions[record.action].bind(@)(record.payload)
+            else
+              logger.error('unsupported action in bootstrap: '+record.action)
+          ).then(
+
+            ()->
+              if tail.length > 0
+                processBatch(tail)
+              else
+                resolve()
+
+            (error)->
+              reject(error)
+
+          )
+
+        processBatch(logArray)
+      )
 
 
