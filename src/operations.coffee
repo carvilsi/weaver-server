@@ -39,62 +39,67 @@ module.exports =
       payload = new WeaverCommons.create.Entity(payload)
       return Promise.reject('create call not valid') if not payload.isValid()
 
-      @logPayload('create', payload)
+      try
 
-      proms = []
+        @logPayload('create', payload)
 
-      proms.push(@database.create(payload))
+        proms = []
 
-      if payload.type is '$INDIVIDUAL'
+        proms.push(@database.create(payload))
 
-        individual = new WeaverCommons.create.Individual(payload)
+        if payload.type is '$INDIVIDUAL'
 
-        if individual.isValid()
-          proms.push(
-            @connector.transaction().then((trx)->
-              trx.createIndividual(individual).then(=>
-                trx.commit()
-                trx.conn.close()
+          individual = new WeaverCommons.create.Individual(payload)
+
+          if individual.isValid()
+            proms.push(
+              @connector.transaction().then((trx)->
+                trx.createIndividual(individual).then(=>
+                  trx.commit()
+                  trx.conn.close()
+                )
               )
             )
-          )
 
-        else
-          return Promise.reject('This payload does not content a valid $INDIVIDUAL object')
+          else
+            return Promise.reject('This payload does not content a valid $INDIVIDUAL object')
 
-      if payload.type is '$INDIVIDUAL_PROPERTY'
-        individualProperty = new WeaverCommons.create.IndividualProperty(payload)
+        if payload.type is '$INDIVIDUAL_PROPERTY'
+          individualProperty = new WeaverCommons.create.IndividualProperty(payload)
 
-        if individualProperty.isValid()
-          proms.push(
-            @connector.transaction().then((trx)->
-              trx.createIndividualProperty(individualProperty).then(=>
-                trx.commit()
-                trx.conn.close()
+          if individualProperty.isValid()
+            proms.push(
+              @connector.transaction().then((trx)->
+                trx.createIndividualProperty(individualProperty).then(=>
+                  trx.commit()
+                  trx.conn.close()
+                )
               )
             )
-          )
 
-        else
-          return Promise.reject('This payload does not content a valid $INDIVIDUAL_PROPERTY object')
+          else
+            return Promise.reject('This payload does not content a valid $INDIVIDUAL_PROPERTY object')
 
-      if payload.type is '$VALUE_PROPERTY'
-        valueProperty = new WeaverCommons.create.ValueProperty(payload)
+        if payload.type is '$VALUE_PROPERTY'
+          valueProperty = new WeaverCommons.create.ValueProperty(payload)
 
-        if valueProperty.isValid()
-          proms.push(
-            @connector.transaction().then((trx)->
-              trx.createValueProperty(valueProperty).then(=>
-                trx.commit()
-                trx.conn.close()
+          if valueProperty.isValid()
+            proms.push(
+              @connector.transaction().then((trx)->
+                trx.createValueProperty(valueProperty).then(=>
+                  trx.commit()
+                  trx.conn.close()
+                )
               )
             )
-          )
 
-        else
-          return Promise.reject('This payload does not content a valid $VALUE_PROPERTY object')
+          else
+            return Promise.reject('This payload does not content a valid $VALUE_PROPERTY object')
 
-      Promise.all(proms)
+        Promise.all(proms)
+
+      catch error
+        Promise.reject('error during create call: '+error)
 
 
     read: (payload) ->
@@ -102,15 +107,20 @@ module.exports =
       payload = new WeaverCommons.read.Entity(payload)
       return Promise.reject('read call not valid') if not payload.isValid()
 
-      @database.read(payload).then((result) ->
-        logger.log('debug', result)
-        if result?
-          Promise.resolve(result)
-        else
-          Promise.reject('entity not found, request payload: '+payload)
-      )
+      try
 
-      # todo in the future see if the cache was invalidated
+        @database.read(payload).then((result) ->
+          logger.log('debug', result)
+          if result?
+            Promise.resolve(result)
+          else
+            Promise.reject('entity not found, request payload: '+payload)
+        )
+
+        # todo in the future see if the cache was invalidated
+
+      catch error
+        Promise.reject('error during read call: '+error)
 
 
 
@@ -141,23 +151,28 @@ module.exports =
       payload = new WeaverCommons.update.AttributeLink(payload)
       return Promise.reject('update attribute link call not valid') if not payload.isValid()
 
-      @logPayload('update', payload)
+      try
 
-      proms = []
+        @logPayload('update', payload)
 
-      if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.updateValueProperty(payload).then(=>
-              trx.commit()
-              trx.conn.close()
+        proms = []
+
+        if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
+          proms.push(
+            @connector.transaction().then((trx)->
+              trx.updateValueProperty(payload).then(=>
+                trx.commit()
+                trx.conn.close()
+              )
             )
           )
-        )
 
-      proms.push(@database.update(payload))
+        proms.push(@database.update(payload))
 
-      Promise.all(proms)
+        Promise.all(proms)
+
+      catch error
+        Promise.reject('error during update call: '+error)
 
 
 
@@ -166,23 +181,28 @@ module.exports =
       payload = new WeaverCommons.update.EntityLink(payload)
       return Promise.reject('update entity link call not valid') if not payload.isValid()
 
-      @logPayload('update', payload)
+      try
 
-      proms = []
+        @logPayload('update', payload)
 
-      if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.updateIndividualProperty(payload).then(=>
-              trx.commit()
-              trx.conn.close()
+        proms = []
+
+        if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
+          proms.push(
+            @connector.transaction().then((trx)->
+              trx.updateIndividualProperty(payload).then(=>
+                trx.commit()
+                trx.conn.close()
+              )
             )
           )
-        )
 
-      proms.push(@database.link(payload))
+        proms.push(@database.link(payload))
 
-      Promise.all(proms)
+        Promise.all(proms)
+
+      catch error
+        Promise.reject('error during update entity link call: '+error)
 
 
     # renamed from delete
@@ -191,13 +211,18 @@ module.exports =
       payload = new WeaverCommons.destroyAttribute.Entity(payload)
       return Promise.reject('destroy attribute call not valid') if not payload.isValid()
 
-      @logPayload('destroyAttribute', payload)
+      try
 
-      proms = []
+        @logPayload('destroyAttribute', payload)
 
-      proms.push(@database.destroyAttribute(payload))
+        proms = []
 
-      Promise.all(proms)
+        proms.push(@database.destroyAttribute(payload))
+
+        Promise.all(proms)
+
+      catch error
+        Promise.reject('error during destroy attribute call: '+error)
 
 
     # renamed from destroy
@@ -206,24 +231,29 @@ module.exports =
       payload = new WeaverCommons.destroyEntity.Entity(payload)
       return Promise.reject('destroy entity call not valid') if not payload.isValid()
 
-      @logPayload('destroyEntity', payload)
+      try
 
-      proms = []
+        @logPayload('destroyEntity', payload)
 
-      proms.push(@database.destroyEntity(payload))
+        proms = []
+
+        proms.push(@database.destroyEntity(payload))
 
 
-      if payload.type is '$INDIVIDUAL' or payload.type is '$INDIVIDUAL_PROPERTY' or payload.type is '$VALUE_PROPERTY'
-        proms.push(
-          @connector.transaction().then((trx)->
-            trx.deleteObject(payload).then(=>
-              trx.commit()
-              trx.conn.close()
+        if payload.type is '$INDIVIDUAL' or payload.type is '$INDIVIDUAL_PROPERTY' or payload.type is '$VALUE_PROPERTY'
+          proms.push(
+            @connector.transaction().then((trx)->
+              trx.deleteObject(payload).then(=>
+                trx.commit()
+                trx.conn.close()
+              )
             )
           )
-        )
 
-      Promise.all(proms)
+        Promise.all(proms)
+
+      catch error
+        Promise.reject('error during destroy entity call: '+error)
 
 
 
@@ -232,11 +262,14 @@ module.exports =
       payload = new WeaverCommons.link.Link(payload)
       return Promise.reject('link call not valid') if not payload.isValid()
 
-      @logPayload('link', payload)
+      try
 
-      
+        @logPayload('link', payload)
 
-      @database.link(payload)
+        @database.link(payload)
+
+      catch error
+        Promise.reject('error during link call: '+error)
 
 
 
@@ -245,9 +278,14 @@ module.exports =
       payload = new WeaverCommons.unlink.Link(payload)
       return Promise.reject('unlink call not valid') if not payload.isValid()
 
-      @logPayload('unlink', payload)
+      try
 
-      @database.unlink(payload)
+        @logPayload('unlink', payload)
+
+        @database.unlink(payload)
+
+      catch error
+        Promise.reject('error during unlink call: '+error)
 
 
 
@@ -256,26 +294,41 @@ module.exports =
       payload = new WeaverCommons.nativeQuery.Query(payload)
       return Promise.reject('native query call not valid') if not payload.isValid()
 
-      @connector.query().then((query) ->
-        result = query.nativeQuery(payload)        # todo: accept this object in connector
-        query.conn.close()
-        result
-      )
+      try
+
+        @connector.query().then((query) ->
+          result = query.nativeQuery(payload)        # todo: accept this object in connector
+          query.conn.close()
+          result
+        )
+
+      catch error
+        Promise.reject('error during native query call: '+error)
 
     queryFromView: (payload) ->
 
       payload = new WeaverCommons.queryFromView.View(payload)
       return Promise.reject('query from view call not valid') if not payload.isValid()
 
-      # Retrieve the view object
-      @read({ id: payload.id, opts: { eagerness: -1 } }).then((readResponse) =>
+      try
 
-        view = new WeaverCommons.read.response.View(readResponse)
+        # Retrieve the view object
+        @read({id: payload.id, opts: {eagerness: -1}}).then(
 
-        filters = view.getFilters()
-        promise = @queryFromFilters(filters)
-        return promise
-      )
+          (readResponse) =>
+            view = new WeaverCommons.read.response.View(readResponse)
+
+            filters = view.getFilters()
+            promise = @queryFromFilters(filters)
+            return promise
+
+          (error) ->
+            Promise.reject('error during query from view call: '+error)
+        )
+
+      catch error
+        Promise.reject('error during query from view call: '+error)
+
 
 
     queryFromFilters: (filters) ->
