@@ -353,8 +353,8 @@ module.exports =
         
         self.operations.bootstrapFromJson(payload).then(
 
-          (result) ->
-            ack(result)
+          () ->
+            ack('OK')
 
           (error) ->
             logger.error('bootstrapFromJson call failed for')
@@ -376,8 +376,8 @@ module.exports =
         
         self.operations.bootstrapFromUrl(payload).then(
 
-          (result) ->
-            ack(result)
+          () ->
+            ack('OK')
 
           (error) ->
             logger.error('bootstrapFromUrl call failed for')
