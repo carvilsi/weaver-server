@@ -6,10 +6,14 @@ logger    = require('./logger')
 module.exports =
   
   class Routes
-    constructor: (@operations) ->
+    constructor: (@operations, @opts) ->
 
     wire: (app) ->
       
+      # Disable REST calls if any authentication tokens are set
+      if @opts['readToken']? or @opts['writeToken']?
+        return
+        
       # CREATE
       app.get('/rest/create', (req, res) =>
 
