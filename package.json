@@ -21,6 +21,8 @@
     "winston": "^2.2.0"
   },
   "devDependencies": {
+    "socket.io-client": "~1.4.6",
+    "express": "^4.13.0",
     "chai": "^3.0.0",
     "chai-as-promised": "^5.1.0",
     "coffee-coverage": "^1.0.1",

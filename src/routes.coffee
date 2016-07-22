@@ -6,11 +6,36 @@ logger    = require('./logger')
 module.exports =
   
   class Routes
-    constructor: (@operations) ->
+    constructor: (@operations, @opts) ->
       
     wire: (socket) ->
+              
+      # If no tokens are set, read and write are per default permitted
+      socket.readPermitted  = not @opts['readToken']?
+      socket.writePermitted = not @opts['writeToken']?
+      
+      noReadPermission = (socket, ack) ->
+        if not socket.readPermitted
+          ack('unauthorized to read operations')
+          
+        not socket.readPermitted
+          
+      noWritePermission = (socket, ack) ->
+        if not socket.writePermitted
+          ack('unauthorized to write operations')
 
+        not socket.writePermitted
 
+      socket.on('authenticate', (token, ack) =>
+        if token is @opts['readToken']
+          socket.readPermitted  = true
+        else if token is @opts['writeToken'] 
+          socket.readPermitted  = true
+          socket.writePermitted = true
+        
+        ack({read: socket.readPermitted, write: socket.writePermitted})
+      )
+      
       socket.on('error',  (err) ->
         logger.log('error', err.stack)
       )
@@ -41,6 +66,7 @@ module.exports =
         logger.log('debug', 'create event on socket, with payload:')
         logger.log('debug', payload)
 
+        return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -53,7 +79,7 @@ module.exports =
             ack(result)
 
           (error) ->
-            logger.error('create call failed for')
+            logger.error('create call failed for payload with error: '+error)
             logger.error(payload)
             ack('ERROR: '+error)
 
@@ -66,6 +92,7 @@ module.exports =
         logger.log('debug', 'create/bulk event on socket, with payload:')
         logger.log('debug', payload)
 
+        return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -90,7 +117,8 @@ module.exports =
 
         logger.log('debug', 'read event on socket, with payload:')
         logger.log('debug', payload)
-
+        
+        return if noReadPermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -114,7 +142,8 @@ module.exports =
 
         logger.log('debug', 'update event on socket, with payload:')
         logger.log('debug', payload)
-
+        
+        return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -139,6 +168,7 @@ module.exports =
         logger.log('debug', 'remove event on socket, with payload:')
         logger.log('debug', payload)
 
+        return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -164,6 +194,7 @@ module.exports =
         logger.log('debug', 'link event on socket, with payload:')
         logger.log('debug', payload)
 
+        return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -187,6 +218,8 @@ module.exports =
 
         logger.log('debug', 'unlink event on socket, with payload:')
         logger.log('debug', payload)
+        
+        return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -210,6 +243,8 @@ module.exports =
 
         logger.log('debug', 'destroy event on socket, with payload:')
         logger.log('debug', payload)
+        
+        return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -233,7 +268,9 @@ module.exports =
 
         logger.log('debug', 'nativeQuery event on socket, with payload:')
         logger.log('debug', payload)
-
+        
+        return if noReadPermission(socket, ack)
+        
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
@@ -255,6 +292,8 @@ module.exports =
 
         logger.log('debug', 'queryFromView event on socket, with payload:')
         logger.log('debug', payload)
+        
+        return if noReadPermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -277,7 +316,8 @@ module.exports =
 
         logger.log('debug', 'queryFromFilters event on socket, with payload:')
         logger.log('debug', payload)
-
+        
+        return if noReadPermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -300,6 +340,7 @@ module.exports =
 
         logger.log('debug', 'wipe event on socket')
 
+        return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -322,7 +363,8 @@ module.exports =
 
         logger.log('debug', 'dump event on socket, with payload:')
         logger.log('debug', payload)
-
+        
+        return if noReadPermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -346,6 +388,7 @@ module.exports =
         logger.log('debug', 'bootstrapFromJson event on socket, with payload:')
         logger.log('debug', payload)
 
+        return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
@@ -368,7 +411,8 @@ module.exports =
 
         logger.log('debug', 'Bootstrap event on socket, with payload:')
         logger.log('debug', payload)
-
+        
+        return if noWritePermission(socket, ack)
         
         if not ack?
           logger.log('error', 'no ack function')
