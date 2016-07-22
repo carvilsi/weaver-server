@@ -54,10 +54,7 @@ module.exports =
           if individual.isValid()
             proms.push(
               @connector.transaction().then((trx)->
-                trx.createIndividual(individual).then(=>
-                  trx.commit()
-                  trx.conn.close()
-                )
+                trx.createIndividual(individual)
               )
             )
 
@@ -70,10 +67,7 @@ module.exports =
           if individualProperty.isValid()
             proms.push(
               @connector.transaction().then((trx)->
-                trx.createIndividualProperty(individualProperty).then(=>
-                  trx.commit()
-                  trx.conn.close()
-                )
+                trx.createIndividualProperty(individualProperty)
               )
             )
 
@@ -86,10 +80,7 @@ module.exports =
           if valueProperty.isValid()
             proms.push(
               @connector.transaction().then((trx)->
-                trx.createValueProperty(valueProperty).then(=>
-                  trx.commit()
-                  trx.conn.close()
-                )
+                trx.createValueProperty(valueProperty)
               )
             )
 
@@ -160,10 +151,7 @@ module.exports =
         if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
           proms.push(
             @connector.transaction().then((trx)->
-              trx.updateValueProperty(payload).then(=>
-                trx.commit()
-                trx.conn.close()
-              )
+              trx.updateValueProperty(payload)
             )
           )
 
@@ -190,10 +178,7 @@ module.exports =
         if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
           proms.push(
             @connector.transaction().then((trx)->
-              trx.updateIndividualProperty(payload).then(=>
-                trx.commit()
-                trx.conn.close()
-              )
+              trx.updateIndividualProperty(payload)
             )
           )
 
@@ -243,10 +228,7 @@ module.exports =
         if payload.type is '$INDIVIDUAL' or payload.type is '$INDIVIDUAL_PROPERTY' or payload.type is '$VALUE_PROPERTY'
           proms.push(
             @connector.transaction().then((trx)->
-              trx.deleteObject(payload).then(=>
-                trx.commit()
-                trx.conn.close()
-              )
+              trx.deleteObject(payload)
             )
           )
 
@@ -298,7 +280,6 @@ module.exports =
 
         @connector.query().then((query) ->
           result = query.nativeQuery(payload)        # todo: accept this object in connector
-          query.conn.close()
           result
         )
 
@@ -337,7 +318,6 @@ module.exports =
 
       @connector.query().then((query) ->
         query.selectIndividuals(filters, viewProvider).then((result) ->
-          query.conn.close()
           result
         )
       )

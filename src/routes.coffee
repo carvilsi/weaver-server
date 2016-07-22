@@ -79,7 +79,7 @@ module.exports =
             ack(result)
 
           (error) ->
-            logger.error('create call failed for')
+            logger.error('create call failed for payload with error: '+error)
             logger.error(payload)
             ack('ERROR: '+error)
 
