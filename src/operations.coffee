@@ -87,6 +87,19 @@ module.exports =
           else
             return Promise.reject('This payload does not content a valid $VALUE_PROPERTY object')
 
+        if payload.type is '$PREDICATE'
+          predicate = new WeaverCommons.create.Predicate(payload)
+
+          if predicate.isValid()
+              proms.push(
+                @connector.transaction().then((trx)->
+                  trx.createIndividual(predicate)
+                )
+              )
+
+          else
+            return Promise.reject('This payload does not content a valid $PREDICATE object')
+
         Promise.all(proms)
 
       catch error
