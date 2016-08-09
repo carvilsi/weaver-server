@@ -88,7 +88,7 @@ module.exports =
             return Promise.reject('This payload does not content a valid $VALUE_PROPERTY object')
 
         if payload.type is '$PREDICATE'
-          predicate = new WeaverCommons.create.Predicate(payload)
+          predicate = new WeaverCommons.create.Individual(payload)
 
           if predicate.isValid()
               proms.push(
