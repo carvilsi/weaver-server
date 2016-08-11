@@ -34,7 +34,7 @@ module.exports =
 
 
 
-    create: (payload) ->
+    create: (payload, ignoreConnector) ->
 
       payload = new WeaverCommons.create.Entity(payload)
       return Promise.reject('create call not valid') if not payload.isValid()
@@ -45,6 +45,9 @@ module.exports =
 
         proms = []
 
+        if ignoreConnector
+          return @database.create(payload)
+        
         proms.push(@database.create(payload))
 
         if payload.type is '$INDIVIDUAL'
@@ -129,17 +132,17 @@ module.exports =
 
 
     # deprecated, please use updateAttributeLink or updateEntityLink
-    update: (payload) ->
+    update: (payload, ignoreConnector) ->
 
       payload = JSON.parse(payload) if typeof payload is 'string'
 
       # pointing to a value
       if payload.target? and payload.target.value?
-        @updateAttributeLink(payload)
+        @updateAttributeLink(payload, ignoreConnector)
 
         # pointing to an individual
       else if payload.target? and payload.target.id?
-        @updateEntityLink(payload)
+        @updateEntityLink(payload, ignoreConnector)
 
       else
         return Promise.reject('update called not for value or target')
@@ -150,7 +153,7 @@ module.exports =
 
 
 
-    updateAttributeLink: (payload) ->
+    updateAttributeLink: (payload, ignoreConnector) ->
 
       payload = new WeaverCommons.update.AttributeLink(payload)
       return Promise.reject('update attribute link call not valid') if not payload.isValid()
@@ -161,14 +164,17 @@ module.exports =
 
         proms = []
 
+        if ignoreConnector
+          return @database.update(payload)
+        
+        proms.push(@database.update(payload))
+
         if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
           proms.push(
             @connector.transaction().then((trx)->
               trx.updateValueProperty(payload)
             )
           )
-
-        proms.push(@database.update(payload))
 
         Promise.all(proms)
 
@@ -177,7 +183,7 @@ module.exports =
 
 
 
-    updateEntityLink: (payload) ->
+    updateEntityLink: (payload, ignoreConnector) ->
 
       payload = new WeaverCommons.update.EntityLink(payload)
       return Promise.reject('update entity link call not valid') if not payload.isValid()
@@ -187,6 +193,11 @@ module.exports =
         @logPayload('update', payload)
 
         proms = []
+        
+        if ignoreConnector 
+          return @database.link(payload)
+        
+        proms.push(@database.link(payload))
 
         if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
           proms.push(
@@ -224,7 +235,7 @@ module.exports =
 
 
     # renamed from destroy
-    destroyEntity: (payload) ->
+    destroyEntity: (payload, ignoreConnector) ->
 
       payload = new WeaverCommons.destroyEntity.Entity(payload)
       return Promise.reject('destroy entity call not valid') if not payload.isValid()
@@ -235,6 +246,9 @@ module.exports =
 
         proms = []
 
+        if ignoreConnector
+          return @database.destroyEntity(payload)
+        
         proms.push(@database.destroyEntity(payload))
 
 
@@ -411,8 +425,9 @@ module.exports =
 
 
     bootstrapFromJson: (logArray) ->
-
-      new Promise((resolve, reject) =>
+      connectorImport = @connector.bulkInsert(logArray)
+      
+      redisImport = new Promise((resolve, reject) =>
 
         if typeof logArray is 'string'
 
@@ -443,7 +458,7 @@ module.exports =
 
           Promise.each(batch, (record) =>
             if actions[record.action]?
-              actions[record.action].bind(@)(record.payload)
+              actions[record.action].bind(@)(record.payload, true)
             else
               logger.error('unsupported action in bootstrap: '+record.action)
           ).then(
@@ -461,5 +476,7 @@ module.exports =
 
         processBatch(logArray)
       )
+            
+      return Promise.all([redisImport, connectorImport])
 
 
