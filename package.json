@@ -17,17 +17,17 @@
     "ioredis": "2.0.1",
     "moment": "^2.13.0",
     "socket.io": "1.4.5",
+    "tmp": "0.0.28",
     "weaver-commons-js": "0.1.3",
     "winston": "^2.2.0"
   },
   "devDependencies": {
     "socket.io-client": "~1.4.6",
-    "express": "^4.13.0",
+    "express": "^4.13.4",
     "chai": "^3.0.0",
     "chai-as-promised": "^5.1.0",
     "coffee-coverage": "^1.0.1",
     "coffee-script": "^1.9.3",
-    "express": "^4.13.4",
     "istanbul": "^0.4.3",
     "mocha": "^2.2.5",
     "sinon": "^1.15.4"

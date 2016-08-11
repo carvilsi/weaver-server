@@ -400,8 +400,7 @@ module.exports =
             ack('OK')
 
           (error) ->
-            logger.error('bootstrapFromJson call failed for')
-            logger.error(payload)
+            logger.error('bootstrapFromJson call failed: ' + error)
             ack('ERROR: '+error)
         )
       )
