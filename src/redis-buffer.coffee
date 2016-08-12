@@ -9,10 +9,10 @@ module.exports =
   class RedisBuffer
     
     constructor: ->
-      @log = []
+      @log = ""
       
     sadd: (arg0, arg1) ->
-      @log.push(@toRedisProtocol("SADD", [arg0, arg1]))
+      @log += @toRedisProtocol("SADD", [arg0, arg1])
     
     hmset: (arg0, arg1) ->
       args = [arg0]
@@ -20,22 +20,22 @@ module.exports =
         args.push(key)
         args.push(value)
 
-      @log.push(@toRedisProtocol("HMSET", args))
+      @log += @toRedisProtocol("HMSET", args)
 
     hset: (arg0, arg1, arg2) ->
-      @log.push(@toRedisProtocol("HSET", [arg0, arg1, arg2]))
+      @log += @toRedisProtocol("HSET", [arg0, arg1, arg2])
 
     hdel: (arg0, arg1) ->
-      @log.push(@toRedisProtocol("HDEL", [arg0, arg1]))
+      @log += @toRedisProtocol("HDEL", [arg0, arg1])
 
     set: (arg0, arg1) ->
-      @log.push(@toRedisProtocol("SET", [arg0, arg1]))
+      @log += @toRedisProtocol("SET", [arg0, arg1])
 
     srem: (arg0, arg1) ->
-      @log.push(@toRedisProtocol("SREM", [arg0, arg1]))
+      @log += @toRedisProtocol("SREM", [arg0, arg1])
 
     del: (arg0) ->
-      @log.push(@toRedisProtocol("DEL", [arg0]))
+      @log += @toRedisProtocol("DEL", [arg0])
       
       
     toRedisProtocol: (key, args) ->
@@ -70,30 +70,24 @@ module.exports =
         if err
           console.log(path)
           deferred.reject(err)
-        
-        file = fs.createWriteStream(path);
-        file.on('error', (err) ->
-          console.log(path)
-          deferred.reject(err)
-        )
-        
-        @log.forEach((v) ->
-          file.write(v + '')
-        );
-        
-        file.end()
 
-        cmd = """cat #{path} | redis-cli --pipe -h docker"""
 
-        exec(cmd, (error, stdout, stderr) ->
-          console.log(stdout)
-          
-          if(error)
+        fs.writeFile(path, @log, (err) ->
+          if (err)
             deferred.reject(error)
-          else  
-            cleanupCallback()
-            deferred.resolve()
-        )        
+          else
+            cmd = """cat #{path} | redis-cli --pipe -h docker"""
+
+            exec(cmd, (error, stdout, stderr) ->
+              console.log(stdout)
+  
+              if(error)
+                deferred.reject(error)
+              else
+                cleanupCallback()
+                deferred.resolve()
+          )
+        )
       )
       
       return deferred.promise
