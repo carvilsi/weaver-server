@@ -39,6 +39,15 @@ module.exports =
       
       
     toRedisProtocol: (key, args) ->
+      lengthInUtf8Bytes = (str) ->
+        # Matches only the 10.. bytes that are non-initial characters in a multi-byte sequence.
+        m = encodeURIComponent(str).match(/%[89ABab]/g);
+        if m?
+          str.length + m.length
+        else
+          str.length
+
+
       clean = (value) ->
         # trim, remove linebreaks, and remove non breaking spaces
         value.trim().replace(/(\r\n|\n|\r)/gm,"").replace(/\s/g,' ');
@@ -48,7 +57,7 @@ module.exports =
       command +=  key + "\r\n"
       
       for arg in args      
-        command += "$" + clean(arg).length + "\r\n"
+        command += "$" + lengthInUtf8Bytes(clean(arg)) + "\r\n"
         command += clean(arg) + "\r\n"
         
       return command
