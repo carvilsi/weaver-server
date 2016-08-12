@@ -23,10 +23,10 @@ module.exports =
       @log.push(@toRedisProtocol("HMSET", args))
 
     hset: (arg0, arg1, arg2) ->
-      @log.push(@toRedisProtocol("SADD", [arg0, arg1, arg2]))
+      @log.push(@toRedisProtocol("HSET", [arg0, arg1, arg2]))
 
     hdel: (arg0, arg1) ->
-      @log.push(@toRedisProtocol("HDELL", [arg0, arg1]))
+      @log.push(@toRedisProtocol("HDEL", [arg0, arg1]))
 
     set: (arg0, arg1) ->
       @log.push(@toRedisProtocol("SET", [arg0, arg1]))
