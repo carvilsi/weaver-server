@@ -53,9 +53,10 @@ module.exports =
       
       deferred.promise
       
-    create: (payload) ->
+    create: (payload, opts) ->
       
       logger.log('info', payload)
+      redis = if opts.buffer? then opts.buffer else @redis
 
       for key, val of payload.attributes
         payload.attributes[key] = encode(val)
@@ -72,13 +73,13 @@ module.exports =
       data = {} if not data?
       
       # Save type to @redis set
-      @redis.sadd(type, id)
+      redis.sadd(type, id)
       
       # Append type to data
       data.type = type
 
       if data and Object.keys(data).length isnt 0
-        @redis.hmset(id, data)
+        redis.hmset(id, data)
 
 
 
@@ -88,10 +89,10 @@ module.exports =
         for key, value of payload.relations       # todo unlink
 
           # add key to object as dependencies
-          @redis.sadd(id + ':_LINKS', key)
+          redis.sadd(id + ':_LINKS', key)
 
           # save link
-          @redis.set(id + ':' + key, value)
+          redis.set(id + ':' + key, value)
 
       Promise.resolve() # todo reject
 
@@ -156,8 +157,10 @@ module.exports =
       read(id, opts.eagerness)
       
           
-    update: (payload) ->
+    update: (payload, opts) ->
 
+      redis = if opts.buffer? then opts.buffer else @redis
+        
       # ID
       id = payload.source.id 
       
@@ -168,16 +171,18 @@ module.exports =
       value = payload.target.value
 
       if value?
-        @redis.hset(id, attribute, encode(value))
+        redis.hset(id, attribute, encode(value))
       else
-        @redis.hdel(id, attribute)
+        redis.hdel(id, attribute)
 
       Promise.resolve() # todo reject
       
       # TODO: fire onUpdated 
   
 
-    link: (payload) ->
+    link: (payload, opts) ->
+
+      redis = if opts.buffer? then opts.buffer else @redis
   
       # ID
       id = payload.source.id
@@ -189,17 +194,20 @@ module.exports =
       target = payload.target.id
 
       # add key to object as dependencies
-      @redis.sadd(id + ':_LINKS', key)
+      redis.sadd(id + ':_LINKS', key)
 
       # save link
-      @redis.set(id + ':' + key, target)
+      redis.set(id + ':' + key, target)
 
       Promise.resolve()
 
       # TODO: fire onLinked
   
   
-    unlink: (payload) ->
+    unlink: (payload, opts) ->
+
+      redis = if opts.buffer? then opts.buffer else @redis
+        
       # ID
       id = payload.id
 
@@ -207,17 +215,20 @@ module.exports =
       key = payload.key
 
       # add key to object as dependencies
-      @redis.srem(id + ':_LINKS', key)
+      redis.srem(id + ':_LINKS', key)
 
       # delete link
-      @redis.del(id + ':' + key)
+      redis.del(id + ':' + key)
 
       Promise.resolve() # todo reject
 
       # TODO: fire onUnlinked
   
     # Delete key
-    destroyAttribute: (payload) ->
+    destroyAttribute: (payload, opts) ->
+
+      redis = if opts.buffer? then opts.buffer else @redis
+        
       # ID
       id = payload.id
 
@@ -225,18 +236,21 @@ module.exports =
       attribute = payload.attribute
 
       # Delete
-      @redis.hdel(id, attribute)
+      redis.hdel(id, attribute)
 
       Promise.resolve() # todo reject
 
 
     # Destroy object
-    destroyEntity: (payload) ->
+    destroyEntity: (payload, opts) ->
+
+      redis = if opts.buffer? then opts.buffer else @redis
+        
       # ID
       id = payload.id
 
       # Delete key
-      @redis.del(id)
+      redis.del(id)
 
       Promise.resolve() # todo reject
 

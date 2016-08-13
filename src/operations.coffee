@@ -4,7 +4,8 @@ http = require('http')
 https = require('https')
 cuid = require('cuid')
 
-WeaverCommons    = require('weaver-commons-js')
+WeaverCommons  = require('weaver-commons-js')
+RedisBuffer    = require('./redis-buffer')
 
 
 logger    = require('./logger')
@@ -13,6 +14,8 @@ logger    = require('./logger')
 module.exports =
 
   class Operations
+    @payloadCount: 1
+
     constructor: (@database, @connector, @opts) ->
 
 
@@ -34,18 +37,22 @@ module.exports =
 
 
 
-    create: (payload) ->
-
+    create: (payload, opts) ->
+      opts = {} if not opts?
+      
       payload = new WeaverCommons.create.Entity(payload)
       return Promise.reject('create call not valid') if not payload.isValid()
 
       try
 
-        @logPayload('create', payload)
+        @logPayload('create', payload) if not opts.ignoreLog
 
         proms = []
 
-        proms.push(@database.create(payload))
+        if opts.ignoreConnector
+          return @database.create(payload, opts)
+        
+        proms.push(@database.create(payload, opts))
 
         if payload.type is '$INDIVIDUAL'
 
@@ -106,7 +113,8 @@ module.exports =
         Promise.reject('error during create call: '+error)
 
 
-    read: (payload) ->
+    read: (payload, opts) ->
+      opts = {} if not opts?
 
       payload = new WeaverCommons.read.Entity(payload)
       return Promise.reject('read call not valid') if not payload.isValid()
@@ -129,17 +137,18 @@ module.exports =
 
 
     # deprecated, please use updateAttributeLink or updateEntityLink
-    update: (payload) ->
+    update: (payload, opts) ->
+      opts = {} if not opts?
 
       payload = JSON.parse(payload) if typeof payload is 'string'
 
       # pointing to a value
       if payload.target? and payload.target.value?
-        @updateAttributeLink(payload)
+        @updateAttributeLink(payload, opts)
 
         # pointing to an individual
       else if payload.target? and payload.target.id?
-        @updateEntityLink(payload)
+        @updateEntityLink(payload, opts)
 
       else
         return Promise.reject('update called not for value or target')
@@ -150,16 +159,22 @@ module.exports =
 
 
 
-    updateAttributeLink: (payload) ->
+    updateAttributeLink: (payload, opts) ->
+      opts = {} if not opts?
 
       payload = new WeaverCommons.update.AttributeLink(payload)
       return Promise.reject('update attribute link call not valid') if not payload.isValid()
 
       try
 
-        @logPayload('update', payload)
+        @logPayload('update', payload) if not opts.ignoreLog
 
         proms = []
+
+        if opts.ignoreConnector
+          return @database.update(payload, opts)
+        
+        proms.push(@database.update(payload, opts))
 
         if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
           proms.push(
@@ -168,8 +183,6 @@ module.exports =
             )
           )
 
-        proms.push(@database.update(payload))
-
         Promise.all(proms)
 
       catch error
@@ -177,16 +190,22 @@ module.exports =
 
 
 
-    updateEntityLink: (payload) ->
+    updateEntityLink: (payload, opts) ->
+      opts = {} if not opts?
 
       payload = new WeaverCommons.update.EntityLink(payload)
       return Promise.reject('update entity link call not valid') if not payload.isValid()
 
       try
 
-        @logPayload('update', payload)
+        @logPayload('update', payload) if not opts.ignoreLog
 
         proms = []
+        
+        if opts.ignoreConnector 
+          return @database.link(payload, opts)
+        
+        proms.push(@database.link(payload, opts))
 
         if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
           proms.push(
@@ -195,8 +214,6 @@ module.exports =
             )
           )
 
-        proms.push(@database.link(payload))
-
         Promise.all(proms)
 
       catch error
@@ -204,18 +221,19 @@ module.exports =
 
 
     # renamed from delete
-    destroyAttribute: (payload) ->
+    destroyAttribute: (payload, opts) ->
+      opts = {} if not opts?
 
       payload = new WeaverCommons.destroyAttribute.Entity(payload)
       return Promise.reject('destroy attribute call not valid') if not payload.isValid()
 
       try
 
-        @logPayload('destroyAttribute', payload)
+        @logPayload('destroyAttribute', payload) if not opts.ignoreLog
 
         proms = []
 
-        proms.push(@database.destroyAttribute(payload))
+        proms.push(@database.destroyAttribute(payload, opts))
 
         Promise.all(proms)
 
@@ -224,18 +242,22 @@ module.exports =
 
 
     # renamed from destroy
-    destroyEntity: (payload) ->
+    destroyEntity: (payload, opts) ->
+      opts = {} if not opts?
 
       payload = new WeaverCommons.destroyEntity.Entity(payload)
       return Promise.reject('destroy entity call not valid') if not payload.isValid()
 
       try
 
-        @logPayload('destroyEntity', payload)
+        @logPayload('destroyEntity', payload) if not opts.ignoreLog
 
         proms = []
 
-        proms.push(@database.destroyEntity(payload))
+        if opts.ignoreConnector
+          return @database.destroyEntity(payload, opts)
+        
+        proms.push(@database.destroyEntity(payload, opts))
 
 
         if payload.type is '$INDIVIDUAL' or payload.type is '$INDIVIDUAL_PROPERTY' or payload.type is '$VALUE_PROPERTY'
@@ -252,32 +274,34 @@ module.exports =
 
 
 
-    link: (payload) ->
+    link: (payload, opts) ->
+      opts = {} if not opts?
 
       payload = new WeaverCommons.link.Link(payload)
       return Promise.reject('link call not valid') if not payload.isValid()
 
       try
 
-        @logPayload('link', payload)
+        @logPayload('link', payload) if not opts.ignoreLog
 
-        @database.link(payload)
+        @database.link(payload, opts)
 
       catch error
         Promise.reject('error during link call: '+error)
 
 
 
-    unlink: (payload) ->
+    unlink: (payload, opts) ->
+      opts = {} if not opts?
 
       payload = new WeaverCommons.unlink.Link(payload)
       return Promise.reject('unlink call not valid') if not payload.isValid()
 
       try
 
-        @logPayload('unlink', payload)
+        @logPayload('unlink', payload) if not opts.ignoreLog
 
-        @database.unlink(payload)
+        @database.unlink(payload, opts)
 
       catch error
         Promise.reject('error during unlink call: '+error)
@@ -411,16 +435,22 @@ module.exports =
 
 
     bootstrapFromJson: (logArray) ->
-
-      new Promise((resolve, reject) =>
+      console.log("Payload " + Operations.payloadCount)
+      Operations.payloadCount++
+      
+      connectorImport = @connector.bulkInsert(logArray)
+      
+      buffer = new RedisBuffer()
+      redisImport = new Promise((resolve, reject) =>
 
         if typeof logArray is 'string'
 
           try
             logArray = JSON.parse(logArray)
+            console.log("Processing payload size " + logArray.length)
           catch error
             logger.error('error', 'json contained error: '+error)
-            logger.error('error', logArray)
+            #logger.error('error', logArray)
             reject(error)
 
         actions = {
@@ -443,7 +473,7 @@ module.exports =
 
           Promise.each(batch, (record) =>
             if actions[record.action]?
-              actions[record.action].bind(@)(record.payload)
+              actions[record.action].bind(@)(record.payload, {ignoreLog: true, ignoreConnector: true, buffer})
             else
               logger.error('unsupported action in bootstrap: '+record.action)
           ).then(
@@ -461,5 +491,11 @@ module.exports =
 
         processBatch(logArray)
       )
-
-
+      
+      # Run
+      connectorImport
+      .then(->
+        redisImport
+      ).then(->
+        buffer.execute()
+      )
