@@ -440,7 +440,7 @@ module.exports =
       
       connectorImport = @connector.bulkInsert(logArray)
       
-      buffer = new RedisBuffer()
+      buffer = new RedisBuffer(@database.host)
       redisImport = new Promise((resolve, reject) =>
 
         if typeof logArray is 'string'

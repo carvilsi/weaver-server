@@ -8,7 +8,7 @@ module.exports =
   
   class RedisBuffer
     
-    constructor: ->
+    constructor: (@redisHost) ->
       @log = ""
       
     sadd: (arg0, arg1) ->
@@ -63,6 +63,7 @@ module.exports =
       return command
 
     execute: ->
+      host = @redisHost
       deferred = Promise.defer()
 
       tmp.file((err, path, fd, cleanupCallback) =>
@@ -76,7 +77,7 @@ module.exports =
           if (err)
             deferred.reject(error)
           else
-            cmd = """cat #{path} | redis-cli --pipe -h docker"""
+            cmd = """cat #{path} | redis-cli --pipe -h #{host}"""
 
             exec(cmd, (error, stdout, stderr) ->
               console.log(stdout)
