@@ -2,7 +2,6 @@ Promise = require('bluebird')
 Redis   = require('ioredis')
 
 logger    = require('./logger')
-
 # Append type
 isNumber  = (a) -> Object.prototype.toString.call(a) is '[object Number]'
 isBoolean = (a) -> Object.prototype.toString.call(a) is '[object Boolean]'
@@ -112,6 +111,14 @@ module.exports =
 
         # Get properties
         self.redis.hgetall(id).then((properties) ->
+
+          if Object.keys(properties).length is 0
+            err =
+              code: 404
+              message: 'Entity not found'
+              payload: payload
+            return Promise.reject(err)
+
           for key,val of properties
             properties[key] = decode(val)
 
