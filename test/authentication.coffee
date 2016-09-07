@@ -35,7 +35,7 @@ describe 'Authentication', ->
           assert.isTrue(response.write)
 
           connection.emit("create", {id :'test', attributes: {name: 'test'}, relations: {}, type: 'root'}, (response) ->
-            connection.emit("read", {'id' :'test', opts: {'eagerness: 1'}}, (response) ->
+            connection.emit("read", {id :'test', opts: {'eagerness: 1'}}, (response) ->
               expect(response).to.have.property('_META');
               done()
             )
@@ -213,6 +213,44 @@ describe 'Authentication', ->
             assert.equal(response, 'unauthorized to write operations')
             done()
           )
+        )
+      )
+    )
+
+describe 'ExceptionHandling', ->
+
+  serverPort = '9487'
+  serverUrl = 'http://localhost:' + serverPort
+  server = null
+  mockConnector = null
+
+  beforeEach ->
+    server = new WeaverServer(6379, process.env.REDIS_HOST or "192.168.99.100", {wipeEnabled: true})
+
+    mockConnector =  {}
+    mockConnector.init = sinon.stub()
+    mockConnector.init.onFirstCall().returns(Promise.resolve())
+
+
+  it 'Should throw an exception when an attempt is made to retrieve a non-existent entity', (done) ->
+
+    server.setConnector(mockConnector)
+    server.connect().then(->
+      server.wire(app, http)
+      http.listen(serverPort, ->
+
+        connection = io.connect(serverUrl)
+
+        connection.emit('authenticate', '', (response) ->
+          assert.isTrue(response.read)
+          assert.isTrue(response.write)
+
+          response = connection.emit("read", {id :'test', opts: {'eagerness: 1'}}, (response) ->
+            expect(response).to.have.property('_META');
+            expect(-> response.test()).to.throw()
+            done()
+          )
+
         )
       )
     )
