@@ -245,9 +245,8 @@ describe 'ExceptionHandling', ->
           assert.isTrue(response.read)
           assert.isTrue(response.write)
 
-          response = connection.emit("read", {id :'test', opts: {'eagerness: 1'}}, (response) ->
-            expect(response).to.have.property('_META');
-            expect(-> response.test()).to.throw()
+          response = connection.emit("read", {id :'entity-not-there', opts: {'eagerness: 1'}}, (response) ->
+            expect(-> response.test().code.to.equal(404))
             done()
           )
 
