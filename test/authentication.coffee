@@ -33,11 +33,14 @@ describe 'Authentication', ->
         connection.emit('authenticate', '', (response) ->
           assert.isTrue(response.read)
           assert.isTrue(response.write)
-          
-          connection.emit("read", {'id' :'test', opts: {'eagerness: 1'}}, (response) ->
-            expect(response).to.have.property('_META');
-            done()
+
+          connection.emit("create", {id :'test', attributes: {name: 'test'}, relations: {}, type: 'root'}, (response) ->
+            connection.emit("read", {'id' :'test', opts: {'eagerness: 1'}}, (response) ->
+              expect(response).to.have.property('_META');
+              done()
+            )
           )
+
         )
       )
     )
