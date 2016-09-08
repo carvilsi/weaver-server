@@ -125,14 +125,13 @@ module.exports =
           throw new Error('no ack function')
         
         self.operations.read(payload).then(
-
           (result) ->
             ack(result)
 
           (error) ->
             logger.error('read call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack(error)
 
         )
       )
