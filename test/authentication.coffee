@@ -245,8 +245,9 @@ describe 'ExceptionHandling', ->
           assert.isTrue(response.read)
           assert.isTrue(response.write)
 
-          response = connection.emit("read", {id :'entity-not-there', opts: {'eagerness: 1'}}, (response) ->
-            expect(-> response.test().code.to.equal(404))
+          response = connection.emit("read", {id :'non-existent-entity', opts: {'eagerness: 1'}}, (res) ->
+            expect(res.code).to.equal(404)
+            expect(res.message).to.equal('Entity not found')
             done()
           )
 
