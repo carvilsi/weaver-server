@@ -1,0 +1,23 @@
+version: '2'
+services:
+  redis:
+    image: redis:3.2
+    expose:
+     - "6379"
+    ports:
+     - "6379:6379"
+    command: redis-server --appendonly yes
+    
+  weaver:
+    image: sysunite/weaver-server-beta:0.0.1
+    ports:
+     - "9487:9487"
+    depends_on:
+      - redis
+    links:
+      - redis
+    environment:
+      - PORT=9487
+      - WIPE_ENABLED=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379

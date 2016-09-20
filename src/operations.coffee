@@ -48,9 +48,6 @@ module.exports =
         @logPayload('create', payload) if not opts.ignoreLog
 
         proms = []
-
-        if opts.ignoreConnector
-          return @database.create(payload, opts)
         
         proms.push(@database.create(payload, opts))
 
@@ -60,52 +57,44 @@ module.exports =
 
           if individual.isValid()
             proms.push(
-              @connector.transaction().then((trx)->
-                trx.createIndividual(individual)
-              )
+              @connector.createIndividual(individual)
             )
 
           else
-            return Promise.reject('This payload does not content a valid $INDIVIDUAL object')
+            return Promise.reject('This payload does not contain a valid $INDIVIDUAL object')
 
         if payload.type is '$INDIVIDUAL_PROPERTY'
           individualProperty = new WeaverCommons.create.IndividualProperty(payload)
 
           if individualProperty.isValid()
             proms.push(
-              @connector.transaction().then((trx)->
-                trx.createIndividualProperty(individualProperty)
-              )
+              @connector.createIndividualProperty(individualProperty)   
             )
 
           else
-            return Promise.reject('This payload does not content a valid $INDIVIDUAL_PROPERTY object')
+            return Promise.reject('This payload does not contain a valid $INDIVIDUAL_PROPERTY object')
 
-        if payload.type is '$VALUE_PROPERTY'
+        else if payload.type is '$VALUE_PROPERTY'
           valueProperty = new WeaverCommons.create.ValueProperty(payload)
 
           if valueProperty.isValid()
             proms.push(
-              @connector.transaction().then((trx)->
-                trx.createValueProperty(valueProperty)
-              )
+              @connector.createValueProperty(valueProperty)
             )
 
           else
-            return Promise.reject('This payload does not content a valid $VALUE_PROPERTY object')
+            return Promise.reject('This payload does not contain a valid $VALUE_PROPERTY object')
 
-        if payload.type is '$PREDICATE'
+        else if payload.type is '$PREDICATE'
           predicate = new WeaverCommons.create.Predicate(payload)
 
           if predicate.isValid()
               proms.push(
-                @connector.transaction().then((trx)->
-                  trx.createIndividual(predicate)
-                )
+               @connector.createIndividual(predicate) 
               )
 
           else
-            return Promise.reject('This payload does not content a valid $PREDICATE object')
+            return Promise.reject('This payload does not contain a valid $PREDICATE object')
 
         Promise.all(proms)
 
@@ -119,6 +108,9 @@ module.exports =
       payload = new WeaverCommons.read.Entity(payload)
       return Promise.reject('read call not valid') if not payload.isValid()
 
+      
+      # We need to check if this ID exists in Redis. If it doesnt, then it must exists in the Graph database.
+      
       try
 
         @database.read(payload).then((result) ->
@@ -126,11 +118,11 @@ module.exports =
           if result?
             Promise.resolve(result)
           else
+            
+            # Not found in Redis, try the database
+            
             Promise.reject('entity not found, request payload: '+payload)
         )
-
-        # todo in the future see if the cache was invalidated
-
       catch error
         Promise.reject('error during read call: '+error)
 
@@ -178,9 +170,7 @@ module.exports =
 
         if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
           proms.push(
-            @connector.transaction().then((trx)->
-              trx.updateValueProperty(payload)
-            )
+            @connector.updateValueProperty(payload)
           )
 
         Promise.all(proms)
@@ -209,9 +199,7 @@ module.exports =
 
         if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
           proms.push(
-            @connector.transaction().then((trx)->
-              trx.updateIndividualProperty(payload)
-            )
+            @connector.updateIndividualProperty(payload)
           )
 
         Promise.all(proms)
@@ -262,9 +250,7 @@ module.exports =
 
         if payload.type is '$INDIVIDUAL' or payload.type is '$INDIVIDUAL_PROPERTY' or payload.type is '$VALUE_PROPERTY'
           proms.push(
-            @connector.transaction().then((trx)->
-              trx.deleteObject(payload)
-            )
+            @connector.deleteObject(payload)
           )
 
         Promise.all(proms)

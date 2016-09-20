@@ -1,16 +1,40 @@
 <html>
 <head>
-  <title>Weaver Server</title>
+    
+  <title>Weaver Server BETA v{{server}}</title>
+    
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <script type="application/javascript" src="sdk/weaver-sdk.full.js"></script>
+    
+  <script>
+      // Expose Weaver
+      window.weaver = new Weaver().connect(window.location.href);
+      
+      // Check connection to weaver
+  </script>
+    
   <style>
     body {
       background-color: black;
     }
     
-    pre {
+    pre.logo {
       font: 4px/2px monospace;
-      color: rgb(147, 251, 255);
+      color: rgba(0,255,0,1);
+        /* rgb(220, 220, 220);*/
       margin-top: 125px;
       text-align: center;
+
+      -webkit-animation: fadi 1s 1;
+      -moz-animation: fadi 1s 1;
+    }
+
+    pre.text {
+      font: 12px monospace;
+      color: rgba(0,255,0,1);
+      margin-top: 125px;
+      text-align: center;
+      padding-right: 400px;
 
       -webkit-animation: fadi 1s 1;
       -moz-animation: fadi 1s 1;
@@ -28,7 +52,7 @@
   </style>
 </head>
 <body>
-<pre>                                                                                                                                                                                                        
+<pre class="logo">
                                                                                                                                                                                                         
                                                                                                                                                                                                         
                                                                                                                                                                                                         
@@ -117,10 +141,13 @@
                                                                                           ,;;:::::::::::::.......................`                                                                      
                                                                                              ,;::::::::::::...................                                                                          
                                                                                                 `::::::::::,.............`                                                                              
+                                                                                                `::::::::::,.............`                                                                              
                                                                                                      .,:::::.....``                                                                                     
                                                                                                                                                                                                         
                                                                                                                                                                                                         
                                                                                                                                                                                                         
 </pre>
+</pre>
+<pre class="text"></pre>
 </body>
 </html>

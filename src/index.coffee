@@ -1,7 +1,7 @@
 Promise    = require('bluebird')      
 bodyParser = require('body-parser')   # POST requests
 
-
+Connector  = require('./graph/index')
 Operations = require('./operations')
 Database   = require('./database')
 Routes     = require('./routes')
@@ -14,33 +14,19 @@ module.exports =
   class WeaverServer
     
     constructor: (port, host, @opts) ->
-
       @database = new Database(port, host)
       @plugins  = []
       
     connect: ->
+      @connector  = new Connector()
+      @operations = new Operations(@database, @connector, @opts)
+      @routes     = new Routes(@operations, @opts)  # Accepting socket connections
+      @rest       = new REST(@operations, @opts)    # Accepting rest calls
+    
       @database.connect()
 
     addPlugin: (plugin) ->
       @plugins.push(plugin)
-
-    setConnector: (connector) ->
-      @connector = connector
-      @connector.init().then(
-
-        # resolved
-        =>
-          @operations = new Operations(@database, @connector, @opts)
-          @routes     = new Routes(@operations, @opts)  # Accepting socket connections
-          @rest       = new REST(@operations, @opts)    # Accepting rest calls
-
-          logger.log('debug', 'connector init succeeded')
-          Promise.resolve()
-
-        # rejected
-        (error) ->
-          Promise.reject(error)
-      )
 
     wire: (app, http) ->
 

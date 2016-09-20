@@ -81,7 +81,7 @@ module.exports =
           (error) ->
             logger.error('create call failed for payload with error: '+error)
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
 
         )
       )
@@ -106,8 +106,7 @@ module.exports =
           (error) ->
             logger.error('create/bulk call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
-
+            ack({code: 503, message: error, payload})
         )
       )
 
@@ -129,10 +128,13 @@ module.exports =
             ack(result)
 
           (error) ->
-            logger.error('read call failed for')
-            logger.error(payload)
-            ack(error)
-
+            # Check if its a read error
+            if(error.code and error.message and error.payload?)
+              ack(error)
+            else
+              errorObject = {code: 503, message: error, payload}
+              logger.error('read call failed for payload ' + JSON.stringify(payload) + ' because of error: ' + error)
+              ack(errorObject)
         )
       )
 
@@ -157,7 +159,7 @@ module.exports =
           (error) ->
             logger.error('update call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
         )
       )
 
@@ -182,7 +184,7 @@ module.exports =
           (error) ->
             logger.error('remove call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
 
         )
       )
@@ -208,7 +210,7 @@ module.exports =
           (error) ->
             logger.error('link call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
         )
       )
 
@@ -233,7 +235,7 @@ module.exports =
           (error) ->
             logger.error('unlink call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
         )
       )
       
@@ -258,7 +260,7 @@ module.exports =
           (error) ->
             logger.error('destroy call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
         )
       )
 
@@ -282,7 +284,7 @@ module.exports =
           (error) ->
             logger.error('nativeQuery call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
         )
       )
 
@@ -306,7 +308,7 @@ module.exports =
           (error) ->
             logger.error('queryFromView call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
         )
       )
 
@@ -330,7 +332,7 @@ module.exports =
           (error) ->
             logger.error('queryFromFilters call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
         )
       )
 
@@ -353,7 +355,7 @@ module.exports =
           (error) ->
             logger.error('wipe call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
         )
       )
 
@@ -377,7 +379,7 @@ module.exports =
           (error) ->
             logger.error('dump call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
         )
       )
 
@@ -400,7 +402,7 @@ module.exports =
 
           (error) ->
             logger.error('bootstrapFromJson call failed: ' + error)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
         )
       )
 
@@ -424,7 +426,7 @@ module.exports =
           (error) ->
             logger.error('bootstrapFromUrl call failed for')
             logger.error(payload)
-            ack('ERROR: '+error)
+            ack({code: 503, message: error, payload})
         )
       )
 

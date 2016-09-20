@@ -112,11 +112,13 @@ module.exports =
         # Get properties
         self.redis.hgetall(id).then((properties) ->
 
-          if Object.keys(properties).length is 0
+          # Only on the first id
+          if Object.keys(properties).length is 0 and visited.length is 1
             err =
               code: 404
               message: 'Entity not found'
               payload: payload
+              
             return Promise.reject(err)
 
           for key,val of properties
