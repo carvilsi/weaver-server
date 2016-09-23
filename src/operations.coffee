@@ -110,28 +110,48 @@ module.exports =
 
 
     read: (payload, opts) ->
+
+      console.log '=^^=|_'.green
+
+      console.log payload
+
       opts = {} if not opts?
 
       payload = new WeaverCommons.read.Entity(payload)
-      return Promise.reject('read call not valid') if not payload.isValid()
 
+      # console.log payload
+      #
+      # return Promise.reject('read call not valid') if not payload.isValid()
+      #
+      # Promise.resolve(payload)
+
+      proms = []
+
+      if payload.isValid()
+        proms.push(
+          @connector.readIndividual(payload.id, payload.opts.eagerness)
+        )
+
+      Promise.all(proms)
 
       # We need to check if this ID exists in Redis. If it doesnt, then it must exists in the Graph database.
+      # We do not want redis any more....
+      # TODO: Maybe we can put here something like a cache......
 
-      try
-
-        @database.read(payload).then((result) ->
-          logger.log('debug', result)
-          if result?
-            Promise.resolve(result)
-          else
-
-            # Not found in Redis, try the database
-
-            Promise.reject('entity not found, request payload: '+payload)
-        )
-      catch error
-        Promise.reject('error during read call: '+error)
+      # try
+      #
+      #   @database.read(payload).then((result) ->
+      #     logger.log('debug', result)
+      #     if result?
+      #       Promise.resolve(result)
+      #     else
+      #
+      #       # Not found in Redis, try the database
+      #
+      #       Promise.reject('entity not found, request payload: '+payload)
+      #   )
+      # catch error
+      #   Promise.reject('error during read call: '+error)
 
 
 

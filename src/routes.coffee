@@ -4,22 +4,22 @@ logger    = require('./logger')
 
 # This is the main entry point of any new socket connection.
 module.exports =
-  
+
   class Routes
     constructor: (@operations, @opts) ->
-      
+
     wire: (socket) ->
-              
+
       # If no tokens are set, read and write are per default permitted
       socket.readPermitted  = not @opts['readToken']?
       socket.writePermitted = not @opts['writeToken']?
-      
+
       noReadPermission = (socket, ack) ->
         if not socket.readPermitted
           ack('unauthorized to read operations')
-          
+
         not socket.readPermitted
-          
+
       noWritePermission = (socket, ack) ->
         if not socket.writePermitted
           ack('unauthorized to write operations')
@@ -29,17 +29,17 @@ module.exports =
       socket.on('authenticate', (token, ack) =>
         if token is @opts['readToken']
           socket.readPermitted  = true
-        else if token is @opts['writeToken'] 
+        else if token is @opts['writeToken']
           socket.readPermitted  = true
           socket.writePermitted = true
-        
+
         ack({read: socket.readPermitted, write: socket.writePermitted})
       )
-      
+
       socket.on('error',  (err) ->
         logger.log('error', err.stack)
       )
-      
+
       self = @
 
       # Event
@@ -110,19 +110,23 @@ module.exports =
         )
       )
 
-      
+
       #
       socket.on('read', (payload, ack) ->
 
+        console.log '=^^=|_'.cyan
+
+        console.log payload
+
         logger.log('debug', 'read event on socket, with payload:')
         logger.log('debug', payload)
-        
+
         return if noReadPermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.read(payload).then(
           (result) ->
             ack(result)
@@ -143,13 +147,13 @@ module.exports =
 
         logger.log('debug', 'update event on socket, with payload:')
         logger.log('debug', payload)
-        
+
         return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.update(payload).then(
 
           (result) ->
@@ -174,7 +178,7 @@ module.exports =
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.destroyAttribute(payload).then(
 
           (result) ->
@@ -200,7 +204,7 @@ module.exports =
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.link(payload).then(
 
           (result) ->
@@ -219,13 +223,13 @@ module.exports =
 
         logger.log('debug', 'unlink event on socket, with payload:')
         logger.log('debug', payload)
-        
+
         return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.unlink(payload).then(
 
           (result) ->
@@ -238,19 +242,19 @@ module.exports =
             ack({code: 503, message: error, payload})
         )
       )
-      
+
       # Destroys entity
       socket.on('destroy', (payload, ack) ->
 
         logger.log('debug', 'destroy event on socket, with payload:')
         logger.log('debug', payload)
-        
+
         return if noWritePermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.destroyEntity(payload).then(
 
           (result) ->
@@ -269,13 +273,13 @@ module.exports =
 
         logger.log('debug', 'nativeQuery event on socket, with payload:')
         logger.log('debug', payload)
-        
+
         return if noReadPermission(socket, ack)
-        
+
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.nativeQuery(payload).then(
 
           (result) ->
@@ -293,13 +297,13 @@ module.exports =
 
         logger.log('debug', 'queryFromView event on socket, with payload:')
         logger.log('debug', payload)
-        
+
         return if noReadPermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.queryFromView(payload).then(
 
           (result) ->
@@ -317,13 +321,13 @@ module.exports =
 
         logger.log('debug', 'queryFromFilters event on socket, with payload:')
         logger.log('debug', payload)
-        
+
         return if noReadPermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.queryFromFilters(payload).then(
 
           (result) ->
@@ -346,7 +350,7 @@ module.exports =
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.wipe().then(
 
           (result) ->
@@ -364,13 +368,13 @@ module.exports =
 
         logger.log('debug', 'dump event on socket, with payload:')
         logger.log('debug', payload)
-        
+
         return if noReadPermission(socket, ack)
 
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.dump().then(
 
           (result) ->
@@ -394,7 +398,7 @@ module.exports =
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.bootstrapFromJson(payload).then(
 
           () ->
@@ -411,13 +415,13 @@ module.exports =
 
         logger.log('debug', 'Bootstrap event on socket, with payload:')
         logger.log('debug', payload)
-        
+
         return if noWritePermission(socket, ack)
-        
+
         if not ack?
           logger.log('error', 'no ack function')
           throw new Error('no ack function')
-        
+
         self.operations.bootstrapFromUrl(payload).then(
 
           () ->

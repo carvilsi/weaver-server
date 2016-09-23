@@ -1,27 +1,32 @@
 Promise = require('bluebird')
 request = require('request')
+colors = require('colors')
 
 module.exports =
   class GraphDatabase
 
     constructor: (@options) ->
-      
+
     readIndividual: (id, eagerness) ->
+
+      console.log(colors.green('The id: %s'),id)
+      console.log(colors.green('The eagerness: %s'),eagerness)
+
       new Promise((resolve, reject) =>
 
         options =
           method: 'GET',
           url:    'http://localhost:9474/read/individual'
           qs:     {id, eagerness}
-        
+
         request(options, (error, response, body) ->
           if error? then reject(error) else resolve(body)
         )
       )
-      
+
     createIndividual: (individual) ->
       new Promise((resolve, reject) =>
-        
+
         options =
           method: 'POST',
           url:    'http://localhost:9474/create/individual'
@@ -38,7 +43,7 @@ module.exports =
         originId: valueProperty.relations.subject
         predicate: valueProperty.relations.predicate
         value: valueProperty.attributes.object
-                
+
       new Promise((resolve, reject) =>
 
         options =
@@ -50,7 +55,7 @@ module.exports =
           if error? then reject(error) else resolve()
         )
       )
-      
+
 
     createIndividualProperty: (individualProperty) ->
       payload =
@@ -60,18 +65,18 @@ module.exports =
         targetId: individualProperty.relations.object
 
       new Promise((resolve, reject) =>
-  
+
         options =
           method: 'POST',
           url:    'http://localhost:9474/create/relation'
           body:   JSON.stringify(payload)
-  
+
         request(options, (error) ->
           if error? then reject(error) else resolve()
         )
       )
-      
-      
+
+
 
     updateIndividualProperty: (individualProperty) ->
       payload =
@@ -80,7 +85,7 @@ module.exports =
         targetId: individualProperty.object
 
       new Promise((resolve, reject) =>
-  
+
         options =
           method: 'POST',
           url:    'http://localhost:9474/update/relation'
@@ -89,15 +94,15 @@ module.exports =
           if error? then reject(error) else resolve()
         )
       )
-      
+
 
     updateValueProperty: (valueProperty) ->
       payload =
         nodeId: valueProperty.subject
         predicate: valueProperty.predicate
-        
+
       new Promise((resolve, reject) =>
-  
+
         options =
           method: 'POST',
           url:    'http://localhost:9474/update/value'
@@ -107,7 +112,7 @@ module.exports =
           if error? then reject(error) else resolve()
         )
       )
-    
+
 
     deleteObject: (nodeId) ->
       new Promise((resolve, reject) =>
@@ -120,6 +125,6 @@ module.exports =
           if error? then reject(error) else resolve()
         )
       )
-      
+
     wipe: ->
       return
