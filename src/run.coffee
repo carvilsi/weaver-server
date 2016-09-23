@@ -27,7 +27,7 @@ app.get('/', (req, res) ->
 app.use('/img', express.static('img'));
 app.use('/sdk', express.static('node_modules/weaver-sdk/dist'));
 
-getWithDefault = (env, defaultValue) -> 
+getWithDefault = (env, defaultValue) ->
   if env? then env else defaultValue
 
 port =        getWithDefault(process.env.PORT,          9487)
@@ -40,6 +40,7 @@ redisPort =   getWithDefault(process.env.REDIS_PORT,    '6379')
 # Options
 opts =
   wipeEnabled: wipeEnabled
+  ignoreLog: true
 
 # Authentication options
 opts.writeToken = writeToken if writeToken?

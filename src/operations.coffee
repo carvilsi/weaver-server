@@ -4,6 +4,8 @@ http = require('http')
 https = require('https')
 cuid = require('cuid')
 
+require('colors')
+
 WeaverCommons  = require('weaver-commons-js')
 RedisBuffer    = require('./redis-buffer')
 
@@ -23,15 +25,18 @@ module.exports =
 
     logPayload: (action, payload) ->
 
-      @database.redis.incr('payloadIndex').then((payloadIndex) =>
+      console.log action .green
+      console.log payload .green
 
-        # Add payload ID to payloads set
-        payloadId = 'payload:' + payloadIndex + ':' + cuid()
-        @database.redis.rpush('payloads', payloadId)
-
-        # Save payload as map
-        @database.redis.hmset(payloadId, {timestamp: new Date().getTime(), action: action, payload: JSON.stringify(payload)})
-      )
+      # @database.redis.incr('payloadIndex').then((payloadIndex) =>
+      #
+      #   # Add payload ID to payloads set
+      #   payloadId = 'payload:' + payloadIndex + ':' + cuid()
+      #   @database.redis.rpush('payloads', payloadId)
+      #
+      #   # Save payload as map
+      #   @database.redis.hmset(payloadId, {timestamp: new Date().getTime(), action: action, payload: JSON.stringify(payload)})
+      # )
 
 
 
@@ -39,17 +44,19 @@ module.exports =
 
     create: (payload, opts) ->
       opts = {} if not opts?
-      
+
       payload = new WeaverCommons.create.Entity(payload)
       return Promise.reject('create call not valid') if not payload.isValid()
 
       try
 
+        console.log 'ignoreLog: ' + opts.ignoreLog + ''.green
+
         @logPayload('create', payload) if not opts.ignoreLog
 
         proms = []
-        
-        proms.push(@database.create(payload, opts))
+
+        # proms.push(@database.create(payload, opts))
 
         if payload.type is '$INDIVIDUAL'
 
@@ -68,7 +75,7 @@ module.exports =
 
           if individualProperty.isValid()
             proms.push(
-              @connector.createIndividualProperty(individualProperty)   
+              @connector.createIndividualProperty(individualProperty)
             )
 
           else
@@ -90,7 +97,7 @@ module.exports =
 
           if predicate.isValid()
               proms.push(
-               @connector.createIndividual(predicate) 
+               @connector.createIndividual(predicate)
               )
 
           else
@@ -108,9 +115,9 @@ module.exports =
       payload = new WeaverCommons.read.Entity(payload)
       return Promise.reject('read call not valid') if not payload.isValid()
 
-      
+
       # We need to check if this ID exists in Redis. If it doesnt, then it must exists in the Graph database.
-      
+
       try
 
         @database.read(payload).then((result) ->
@@ -118,9 +125,9 @@ module.exports =
           if result?
             Promise.resolve(result)
           else
-            
+
             # Not found in Redis, try the database
-            
+
             Promise.reject('entity not found, request payload: '+payload)
         )
       catch error
@@ -165,7 +172,7 @@ module.exports =
 
         if opts.ignoreConnector
           return @database.update(payload, opts)
-        
+
         proms.push(@database.update(payload, opts))
 
         if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
@@ -191,10 +198,10 @@ module.exports =
         @logPayload('update', payload) if not opts.ignoreLog
 
         proms = []
-        
-        if opts.ignoreConnector 
+
+        if opts.ignoreConnector
           return @database.link(payload, opts)
-        
+
         proms.push(@database.link(payload, opts))
 
         if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
@@ -244,7 +251,7 @@ module.exports =
 
         if opts.ignoreConnector
           return @database.destroyEntity(payload, opts)
-        
+
         proms.push(@database.destroyEntity(payload, opts))
 
 
@@ -423,9 +430,9 @@ module.exports =
     bootstrapFromJson: (logArray) ->
       console.log("Payload " + Operations.payloadCount)
       Operations.payloadCount++
-      
+
       connectorImport = @connector.bulkInsert(logArray)
-      
+
       buffer = new RedisBuffer(@database.host)
       redisImport = new Promise((resolve, reject) =>
 
@@ -477,7 +484,7 @@ module.exports =
 
         processBatch(logArray)
       )
-      
+
       # Run
       connectorImport
       .then(->
