@@ -41,6 +41,8 @@ redisPort =   getWithDefault(process.env.REDIS_PORT,    '6379')
 opts =
   wipeEnabled: wipeEnabled
   ignoreLog: true
+  weaverServiceIp: 'localhost'
+  weaverServicePort: 9474
 
 # Authentication options
 opts.writeToken = writeToken if writeToken?
@@ -57,16 +59,19 @@ weaver.connect().then(->
   # Launch
   server = http.listen(port, ->
 
-    top      = '┌──────────────────────────────────────┐'
-    title    = '│ Weaver Server BETA'
-    endTitle =                                       ' │'
-    ready    = '│ Ready to serve clients on port: '
-    endReady =                                       ' │'
-    bottom   = '└──────────────────────────────────────┘'
+    top       = '┌─────────────────────────────────────────────────┐'
+    title     = '│ Weaver Server BETA                       '
+    endTitle  =                                                  ' │'
+    rdyCnn    = '│ Using weaver-service at:  '
+    endRdyCnn =                                                  ' │'
+    ready     = '│ Ready to serve clients on port:            '
+    endReady  =                                                  ' │'
+    bottom    = '└─────────────────────────────────────────────────┘'
 
     spaces = ''
-    spaces += ' ' while (spaces.length + pjson.version.length + 1 + title.length + endTitle.length < 40)
-
-    console.log(top + '\n' + title + spaces + 'v' + pjson.version + endTitle + '\n' + ready + port + endReady + '\n' + bottom)
+    spaces += ' ' while (spaces.length + rdyCnn.length + 1 + opts.weaverServiceIp.length + opts.weaverServicePort.length  < 40)
+    # spaces += ' ' while (spaces.length + pjson.version.length + 1 + title.length + endTitle.length +  < 40)
+    splash = top + '\n' + title + spaces + 'v' + pjson.version + endTitle + '\n' + ready + port + endReady + '\n' + rdyCnn + opts.weaverServiceIp + ':' + opts.weaverServicePort + endRdyCnn + '\n' + bottom
+    console.log(splash .green)
   )
 )

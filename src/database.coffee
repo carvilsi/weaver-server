@@ -54,6 +54,8 @@ module.exports =
 
     create: (payload, opts) ->
 
+      console.log payload
+
       logger.log('info', payload)
       redis = if opts.buffer? then opts.buffer else @redis
 

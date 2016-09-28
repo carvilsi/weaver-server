@@ -16,7 +16,7 @@ module.exports =
 
         options =
           method: 'GET',
-          url:    'http://localhost:9474/read/individual'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/read/individual'
           qs:     {id, eagerness}
 
         request(options, (error, response, body) ->
@@ -29,7 +29,7 @@ module.exports =
 
         options =
           method: 'POST',
-          url:    'http://localhost:9474/create/individual'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/create/individual'
           body:   JSON.stringify(individual)
 
         request(options, (error) ->
@@ -48,7 +48,7 @@ module.exports =
 
         options =
           method: 'POST',
-          url:    'http://localhost:9474/create/value'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/create/value'
           body:   JSON.stringify(payload)
 
         request(options, (error) ->
@@ -68,7 +68,7 @@ module.exports =
 
         options =
           method: 'POST',
-          url:    'http://localhost:9474/create/relation'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/create/relation'
           body:   JSON.stringify(payload)
 
         request(options, (error) ->
@@ -88,7 +88,7 @@ module.exports =
 
         options =
           method: 'POST',
-          url:    'http://localhost:9474/update/relation'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/update/relation'
           qs: payload
         request(options, (error) ->
           if error? then reject(error) else resolve()
@@ -105,7 +105,7 @@ module.exports =
 
         options =
           method: 'POST',
-          url:    'http://localhost:9474/update/value'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/update/value'
           qs:      payload
           body:    valueProperty.object
         request(options, (error) ->
@@ -119,7 +119,7 @@ module.exports =
 
         options =
           method: 'POST',
-          url:    'http://localhost:9474/destroy/individual'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/destroy/individual'
           qs:      {nodeId}
         request(options, (error) ->
           if error? then reject(error) else resolve()

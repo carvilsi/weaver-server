@@ -1,4 +1,4 @@
-Promise    = require('bluebird')      
+Promise    = require('bluebird')
 bodyParser = require('body-parser')   # POST requests
 
 Connector  = require('./graph/index')
@@ -10,19 +10,20 @@ REST       = require('./rest')
 logger    = require('./logger')
 
 
-module.exports = 
+module.exports =
   class WeaverServer
-    
+
     constructor: (port, host, @opts) ->
       @database = new Database(port, host)
       @plugins  = []
-      
+      # console.log @opts
+
     connect: ->
-      @connector  = new Connector()
+      @connector  = new Connector(@opts)
       @operations = new Operations(@database, @connector, @opts)
       @routes     = new Routes(@operations, @opts)  # Accepting socket connections
       @rest       = new REST(@operations, @opts)    # Accepting rest calls
-    
+
       @database.connect()
 
     addPlugin: (plugin) ->
@@ -33,12 +34,12 @@ module.exports =
       # For POST requests
       app.use(bodyParser.json({limit: '1000000mb'})) # Support json encoded bodies
       app.use(bodyParser.urlencoded({limit: '1000000mb', extended: true })) # Support encoded bodies
-            
+
       # Connection test
       app.get('/connection', (req, res) ->
         res.status(204).send()
       )
-    
+
       # Socket io
       io = require('socket.io')(http)
       self = @
@@ -46,14 +47,12 @@ module.exports =
         logger.log('debug', 'socket connection started with socket.io, wire it to routes')
         self.routes.wire(socket)
       )
-      
-      # REST   
+
+      # REST
       logger.log('debug', 'wire app to rest')
       @rest.wire(app)
-      
+
       # Loop through plugins
       for plugin in @plugins
         plugin.setDatabase(@operations) if plugin.setDatabase?
         plugin.wire(app, http)
-
-
