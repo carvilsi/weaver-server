@@ -62,7 +62,7 @@ weaver.connect().then(->
     top       = '┌─────────────────────────────────────────────────┐'
     title     = '│ Weaver Server BETA                       '
     endTitle  =                                                  ' │'
-    rdyCnn    = '│ Using weaver-service at:  '
+    rdyCnn    = '│ Using weaver-service at:         '
     endRdyCnn =                                                  ' │'
     ready     = '│ Ready to serve clients on port:            '
     endReady  =                                                  ' │'

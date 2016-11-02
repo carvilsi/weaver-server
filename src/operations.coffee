@@ -20,13 +20,10 @@ module.exports =
 
     constructor: (@database, @connector, @opts) ->
 
-
-
-
     logPayload: (action, payload) ->
 
       console.log action .green
-      console.log payload .green
+      console.log payload
 
       # @database.redis.incr('payloadIndex').then((payloadIndex) =>
       #
@@ -43,81 +40,91 @@ module.exports =
 
 
     create: (payload, opts) ->
-      opts = {} if not opts?
-
-      payload = new WeaverCommons.create.Entity(payload)
-      return Promise.reject('create call not valid') if not payload.isValid()
-
+      
+      console.log('This is comming from the weaver sdk ATTTTTTT')
+      console.log(payload);
+      proms = []
       try
-
-        console.log 'ignoreLog: ' + opts.ignoreLog + ''.green
-
-        @logPayload('create', payload) if not opts.ignoreLog
-
-        proms = []
-
-        # proms.push(@database.create(payload, opts))
-
-        if payload.type is '$INDIVIDUAL'
-
-          individual = new WeaverCommons.create.Individual(payload)
-
-          if individual.isValid()
-            proms.push(
-              @connector.createIndividual(individual)
-            )
-
-          else
-            return Promise.reject('This payload does not contain a valid $INDIVIDUAL object')
-
-        if payload.type is '$INDIVIDUAL_PROPERTY'
-          individualProperty = new WeaverCommons.create.IndividualProperty(payload)
-
-          if individualProperty.isValid()
-            proms.push(
-              @connector.createIndividualProperty(individualProperty)
-            )
-
-          else
-            return Promise.reject('This payload does not contain a valid $INDIVIDUAL_PROPERTY object')
-
-        else if payload.type is '$VALUE_PROPERTY'
-          valueProperty = new WeaverCommons.create.ValueProperty(payload)
-
-          if valueProperty.isValid()
-            proms.push(
-              @connector.createValueProperty(valueProperty)
-            )
-
-          else
-            return Promise.reject('This payload does not contain a valid $VALUE_PROPERTY object')
-
-        else if payload.type is '$PREDICATE'
-          predicate = new WeaverCommons.create.Predicate(payload)
-
-          if predicate.isValid()
-              proms.push(
-               @connector.createIndividual(predicate)
-              )
-
-          else
-            return Promise.reject('This payload does not contain a valid $PREDICATE object')
-
+        console.log '=^^=|____'.cyan
+        proms.push(
+          @connector.createIndividual(payload)
+        )
         Promise.all(proms)
-
       catch error
-        Promise.reject('error during create call: '+error)
+        Promise.reject('error during create call: ' + error)
+      
+      
+      # opts = {} if not opts?
+      #
+      # payload = new WeaverCommons.create.Entity(payload)
+      # return Promise.reject('create call not valid') if not payload.isValid()
+
+      # try
+      #
+      #   console.log 'ignoreLog: ' + opts.ignoreLog
+      #
+      #   @logPayload('create', payload) if not opts.ignoreLog
+      #
+      #   proms = []
+      #
+      #   # proms.push(@database.create(payload, opts))
+      #
+      #   if payload.type is '$INDIVIDUAL'
+      #
+      #     individual = new WeaverCommons.create.Individual(payload)
+      #
+      #     if individual.isValid()
+      #       proms.push(
+      #         @connector.createIndividual(individual)
+      #       )
+      #
+      #     else
+      #       return Promise.reject('This payload does not contain a valid $INDIVIDUAL object')
+      #
+      #   if payload.type is '$INDIVIDUAL_PROPERTY'
+      #     individualProperty = new WeaverCommons.create.IndividualProperty(payload)
+      #
+      #     if individualProperty.isValid()
+      #       proms.push(
+      #         @connector.createIndividualProperty(individualProperty)
+      #       )
+      #
+      #     else
+      #       return Promise.reject('This payload does not contain a valid $INDIVIDUAL_PROPERTY object')
+      #
+      #   else if payload.type is '$VALUE_PROPERTY'
+      #     valueProperty = new WeaverCommons.create.ValueProperty(payload)
+      #
+      #     if valueProperty.isValid()
+      #       proms.push(
+      #         @connector.createValueProperty(valueProperty)
+      #       )
+      #
+      #     else
+      #       return Promise.reject('This payload does not contain a valid $VALUE_PROPERTY object')
+      #
+      #   else if payload.type is '$PREDICATE'
+      #     predicate = new WeaverCommons.create.Predicate(payload)
+      #
+      #     if predicate.isValid()
+      #         proms.push(
+      #          @connector.createIndividual(predicate)
+      #         )
+      #
+      #     else
+      #       return Promise.reject('This payload does not contain a valid $PREDICATE object')
+      #
+      #   Promise.all(proms)
+      #
+      # catch error
+      #   Promise.reject('error during create call: '+error)
 
 
     read: (payload, opts) ->
-
-      console.log '=^^=|_'.green
-
-      console.log payload
-
       opts = {} if not opts?
 
       payload = new WeaverCommons.read.Entity(payload)
+      
 
       # console.log payload
       #
@@ -128,9 +135,14 @@ module.exports =
       proms = []
 
       if payload.isValid()
+        # console.log @connector.readIndividual(payload.id, payload.opts.eagerness)
+        console.log 'LOL______'.green
         proms.push(
           @connector.readIndividual(payload.id, payload.opts.eagerness)
         )
+        
+        console.log 'The proms stuff: '
+        console.log proms
 
       Promise.all(proms)
 
@@ -171,12 +183,6 @@ module.exports =
 
       else
         return Promise.reject('update called not for value or target')
-
-
-
-
-
-
 
     updateAttributeLink: (payload, opts) ->
       opts = {} if not opts?

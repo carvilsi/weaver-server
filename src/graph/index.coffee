@@ -9,14 +9,18 @@ module.exports =
 
     readIndividual: (id, eagerness) ->
 
-      console.log(colors.green('The id: %s'),id)
-      console.log(colors.green('The eagerness: %s'),eagerness)
+      
 
       new Promise((resolve, reject) =>
+        
+        console.log(colors.green('The id: %s'),id)
+        console.log(colors.green('The eagerness: %s'),eagerness)
+        
+        console.log '=^^=|_READING_WEAVER_SERVER'.cyan
 
         options =
           method: 'GET',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/read/individual'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/read/individual'
           qs:     {id, eagerness}
 
         request(options, (error, response, body) ->
@@ -25,11 +29,35 @@ module.exports =
       )
 
     createIndividual: (individual) ->
+      
+      console.log JSON.stringify(individual)
+      
       new Promise((resolve, reject) =>
+        
+        ###
+         Workaround to deal with the new object
+         This must be implemented at the weaver-commons-js
+         Now this part is on the weaver-sdk
+        ###
+        
+        # attributes = []
+        # relations = []
+        #
+        # if Object.keys(individual.attributes).length != 0
+        #   attributes.push(individual.attributes)
+        # individual.attributes = attributes
+        #
+        # if Object.keys(individual.relations).length != 0
+        #   relations.push(individual.relations)
+        # individual.relations = relations
+        #
+        #
+        # console.log '--------------' .green
+        # console.log JSON.stringify(individual)
 
         options =
           method: 'POST',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/create/individual'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/write/weaverEntity'
           body:   JSON.stringify(individual)
 
         request(options, (error) ->
@@ -48,7 +76,7 @@ module.exports =
 
         options =
           method: 'POST',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/create/value'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/create/value'
           body:   JSON.stringify(payload)
 
         request(options, (error) ->
@@ -68,7 +96,7 @@ module.exports =
 
         options =
           method: 'POST',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/create/relation'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/create/relation'
           body:   JSON.stringify(payload)
 
         request(options, (error) ->
@@ -88,7 +116,7 @@ module.exports =
 
         options =
           method: 'POST',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/update/relation'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/update/relation'
           qs: payload
         request(options, (error) ->
           if error? then reject(error) else resolve()
@@ -105,7 +133,7 @@ module.exports =
 
         options =
           method: 'POST',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/update/value'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/update/value'
           qs:      payload
           body:    valueProperty.object
         request(options, (error) ->
