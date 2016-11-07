@@ -34,7 +34,7 @@ port =        getWithDefault(process.env.PORT,          9487)
 logDebug =    getWithDefault(process.env.LOG_DEBUG,     'false') == 'true'
 wipeEnabled = getWithDefault(process.env.WIPE_ENABLED,  'true')  == 'true'
 graphPrefix = getWithDefault(process.env.GRAPH_PREFIX,  'http://weaverplatform.com/test#')
-redisHost =   getWithDefault(process.env.REDIS_HOST,    'docker')
+redisHost =   getWithDefault(process.env.REDIS_HOST,    'localhost')
 redisPort =   getWithDefault(process.env.REDIS_PORT,    '6379')
 
 # Options

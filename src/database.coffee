@@ -37,136 +37,33 @@ module.exports =
   class Database
 
     constructor: (@port, @host) ->
-      # @redis = new Redis({@port, @host, lazyConnect: true, connectTimeout: 1500})
+      @redis = new Redis({@port, @host, lazyConnect: true, connectTimeout: 1500})
 
     connect: ->
       deferred = Promise.defer()
-      # @redis.connect((error) =>
-      #   @connected = not error?
-      #
-      #   if @connected
-      #     deferred.resolve()
-      #   else
-      #     deferred.reject('Could not connect to Redis')
-      # )
+      @redis.connect((error) =>
+        @connected = not error?
+      
+        if @connected
+          deferred.resolve()
+        else
+          deferred.reject('Could not connect to Redis')
+      )
       deferred.resolve()
       deferred.promise
-
-    create: (payload, opts) ->
-
-      console.log payload
-
-      logger.log('info', payload)
-      redis = if opts.buffer? then opts.buffer else @redis
-
-      for key, val of payload.attributes
-        payload.attributes[key] = encode(val)
-
-      # Example: user, session, project, model
-      type = payload.type
-      type = '$ROOT' if not type?
-
-      # ID
-      id = payload.id
-
-      # Data
-      data = payload.attributes
-      data = {} if not data?
-
-      # Save type to @redis set
-      # redis.sadd(type, id)
-
-      # Append type to data
-      data.type = type
-
-      if data and Object.keys(data).length isnt 0
-        redis.hmset(id, data)
-
-
-
-
-      # do a link for each relations field
-      if payload.relations?
-        for key, value of payload.relations       # todo unlink
-
-          # add key to object as dependencies
-          redis.sadd(id + ':_LINKS', key)
-
-          # save link
-          redis.set(id + ':' + key, value)
-
-      Promise.resolve() # todo reject
-
-      # TODO: fire onCreated
-
-    read: (payload) ->
-
-      # Assume eagerness = 1
-
-      # Prevention of circular references blowing up the recursion chain
-      visited = []
-
+      
+    createDict: (payload) ->
+      @redis.set(payload.id, JSON.stringify(payload.attributes))
+    
+    readDict: (payload) ->
       self = @
-      read = (id, eagerness) ->
-        object = {}
-        visited.push(id)
-
-        # Get properties
-        self.redis.hgetall(id).then((properties) ->
-
-          # Only on the first id
-          if Object.keys(properties).length is 0 and visited.length is 1
-            err =
-              code: 404
-              message: 'Entity not found'
-              payload: payload
-
-            return Promise.reject(err)
-
-          for key,val of properties
-            properties[key] = decode(val)
-
-          object._ATTRIBUTES = properties
-
-          # Save meta information
-          object._META = {fetched: false, type: object._ATTRIBUTES.type, id}
-
-          # Remove type from object
-          delete object._ATTRIBUTES.type
-
-        ).then(->
-          # Stop condition
-          if eagerness isnt 0
-
-            # Set fetched tag to true
-            object._META.fetched = true
-
-            # Get links
-            self.redis.smembers(id + ':_LINKS').each((link) ->
-              self.redis.get(id + ':' + link).then((linkId) ->
-
-                # Init if not set
-                object._RELATIONS = {} if not object._RELATIONS?
-
-                if visited.indexOf(linkId) is -1
-                  read(linkId, eagerness - 1).then((result) ->
-                    object._RELATIONS[link] = result
-                  )
-                else
-                  object._RELATIONS[link] = {'_REF': linkId}
-              )
-            )
-        ).then(->
-           object
-        )
-
-
-      # ID
-      id   = payload.id
-      opts = payload.opts
-
-      read(id, opts.eagerness)
-
+      self.redis.get(payload.id).then((res) ->
+        if res
+          payload.data = JSON.parse(res)
+          Promise.resolve(payload)
+        else
+          Promise.reject('The value does not exits @REDIS')
+      )
 
     update: (payload, opts) ->
 

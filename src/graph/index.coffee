@@ -6,18 +6,14 @@ module.exports =
   class GraphDatabase
 
     constructor: (@options) ->
-
-    readIndividual: (id, eagerness) ->
-
       
-
+    ###
+     Reads a weaver entity with optional eagerness
+     GET /read/individual
+    ###
+    
+    readIndividual: (id, eagerness) ->
       new Promise((resolve, reject) =>
-        
-        console.log(colors.green('The id: %s'),id)
-        console.log(colors.green('The eagerness: %s'),eagerness)
-        
-        console.log '=^^=|_READING_WEAVER_SERVER'.cyan
-
         options =
           method: 'GET',
           url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/read/individual'
@@ -28,43 +24,26 @@ module.exports =
         )
       )
 
+    ###
+     Creates a weaver entry
+     POST /write/weaverEntity
+    ###
+    
     createIndividual: (individual) ->
-      
-      console.log JSON.stringify(individual)
-      
       new Promise((resolve, reject) =>
-        
-        ###
-         Workaround to deal with the new object
-         This must be implemented at the weaver-commons-js
-         Now this part is on the weaver-sdk
-        ###
-        
-        # attributes = []
-        # relations = []
-        #
-        # if Object.keys(individual.attributes).length != 0
-        #   attributes.push(individual.attributes)
-        # individual.attributes = attributes
-        #
-        # if Object.keys(individual.relations).length != 0
-        #   relations.push(individual.relations)
-        # individual.relations = relations
-        #
-        #
-        # console.log '--------------' .green
-        # console.log JSON.stringify(individual)
-
         options =
           method: 'POST',
           url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/write/weaverEntity'
           body:   JSON.stringify(individual)
-
-        request(options, (error) ->
-          if error? then reject(error) else resolve()
+        request(options, (error, response, body) ->
+          if error? then reject(error) else resolve(JSON.parse(body))
         )
       )
 
+    ###
+     TODO: adapt to new format
+    ###
+    
     createValueProperty: (valueProperty) ->
       payload =
         id: valueProperty.id
@@ -84,23 +63,20 @@ module.exports =
         )
       )
 
+    ###
+     Creates a call to the weaver-service to create a relationship
+     POST /create/relation
+    ###
+    
 
     createIndividualProperty: (individualProperty) ->
-      payload =
-        id: individualProperty.id
-        originId: individualProperty.relations.subject
-        predicate: individualProperty.relations.predicate
-        targetId: individualProperty.relations.object
-
       new Promise((resolve, reject) =>
-
         options =
           method: 'POST',
           url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/create/relation'
-          body:   JSON.stringify(payload)
-
-        request(options, (error) ->
-          if error? then reject(error) else resolve()
+          body:   JSON.stringify(individualProperty)
+        request(options, (error, response, body) ->
+          if error? then reject(error) else resolve(JSON.parse(body))
         )
       )
 

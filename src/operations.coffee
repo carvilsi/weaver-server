@@ -22,150 +22,51 @@ module.exports =
 
     logPayload: (action, payload) ->
 
-      console.log action .green
-      console.log payload
-
-      # @database.redis.incr('payloadIndex').then((payloadIndex) =>
-      #
-      #   # Add payload ID to payloads set
-      #   payloadId = 'payload:' + payloadIndex + ':' + cuid()
-      #   @database.redis.rpush('payloads', payloadId)
-      #
-      #   # Save payload as map
-      #   @database.redis.hmset(payloadId, {timestamp: new Date().getTime(), action: action, payload: JSON.stringify(payload)})
-      # )
-
-
-
-
-
     create: (payload, opts) ->
       
-      console.log('This is comming from the weaver sdk ATTTTTTT')
-      console.log(payload);
       proms = []
       try
-        console.log '=^^=|____'.cyan
         proms.push(
           @connector.createIndividual(payload)
         )
         Promise.all(proms)
       catch error
         Promise.reject('error during create call: ' + error)
-      
-      
-      # opts = {} if not opts?
-      #
-      # payload = new WeaverCommons.create.Entity(payload)
-      # return Promise.reject('create call not valid') if not payload.isValid()
 
-      # try
-      #
-      #   console.log 'ignoreLog: ' + opts.ignoreLog
-      #
-      #   @logPayload('create', payload) if not opts.ignoreLog
-      #
-      #   proms = []
-      #
-      #   # proms.push(@database.create(payload, opts))
-      #
-      #   if payload.type is '$INDIVIDUAL'
-      #
-      #     individual = new WeaverCommons.create.Individual(payload)
-      #
-      #     if individual.isValid()
-      #       proms.push(
-      #         @connector.createIndividual(individual)
-      #       )
-      #
-      #     else
-      #       return Promise.reject('This payload does not contain a valid $INDIVIDUAL object')
-      #
-      #   if payload.type is '$INDIVIDUAL_PROPERTY'
-      #     individualProperty = new WeaverCommons.create.IndividualProperty(payload)
-      #
-      #     if individualProperty.isValid()
-      #       proms.push(
-      #         @connector.createIndividualProperty(individualProperty)
-      #       )
-      #
-      #     else
-      #       return Promise.reject('This payload does not contain a valid $INDIVIDUAL_PROPERTY object')
-      #
-      #   else if payload.type is '$VALUE_PROPERTY'
-      #     valueProperty = new WeaverCommons.create.ValueProperty(payload)
-      #
-      #     if valueProperty.isValid()
-      #       proms.push(
-      #         @connector.createValueProperty(valueProperty)
-      #       )
-      #
-      #     else
-      #       return Promise.reject('This payload does not contain a valid $VALUE_PROPERTY object')
-      #
-      #   else if payload.type is '$PREDICATE'
-      #     predicate = new WeaverCommons.create.Predicate(payload)
-      #
-      #     if predicate.isValid()
-      #         proms.push(
-      #          @connector.createIndividual(predicate)
-      #         )
-      #
-      #     else
-      #       return Promise.reject('This payload does not contain a valid $PREDICATE object')
-      #
-      #   Promise.all(proms)
-      #
-      # catch error
-      #   Promise.reject('error during create call: '+error)
 
+    createDict: (payload) ->
+      
+      proms = []
+      try
+        proms.push(
+          @database.createDict(payload, 'lol')
+        )
+        Promise.all(proms)
+      catch error
+        Promise.reject('error during create call for REDIS: ' + error)
+        
+    readDict: (id) ->
+      proms = []
+      try
+        proms.push(
+          @database.readDict(id)
+        )
+        Promise.all(proms)
+      catch error
+        Promise.reject('error reading from REDIS ' + error )
 
     read: (payload, opts) ->
       opts = {} if not opts?
 
       payload = new WeaverCommons.read.Entity(payload)
       
-
-      # console.log payload
-      #
-      # return Promise.reject('read call not valid') if not payload.isValid()
-      #
-      # Promise.resolve(payload)
-
       proms = []
 
       if payload.isValid()
-        # console.log @connector.readIndividual(payload.id, payload.opts.eagerness)
-        console.log 'LOL______'.green
         proms.push(
           @connector.readIndividual(payload.id, payload.opts.eagerness)
         )
-        
-        console.log 'The proms stuff: '
-        console.log proms
-
       Promise.all(proms)
-
-      # We need to check if this ID exists in Redis. If it doesnt, then it must exists in the Graph database.
-      # We do not want redis any more....
-      # TODO: Maybe we can put here something like a cache......
-
-      # try
-      #
-      #   @database.read(payload).then((result) ->
-      #     logger.log('debug', result)
-      #     if result?
-      #       Promise.resolve(result)
-      #     else
-      #
-      #       # Not found in Redis, try the database
-      #
-      #       Promise.reject('entity not found, request payload: '+payload)
-      #   )
-      # catch error
-      #   Promise.reject('error during read call: '+error)
-
-
 
     # deprecated, please use updateAttributeLink or updateEntityLink
     update: (payload, opts) ->
@@ -293,21 +194,15 @@ module.exports =
 
 
 
-    link: (payload, opts) ->
-      opts = {} if not opts?
-
-      payload = new WeaverCommons.link.Link(payload)
-      return Promise.reject('link call not valid') if not payload.isValid()
-
+    link: (payload) ->
+      proms = []
       try
-
-        @logPayload('link', payload) if not opts.ignoreLog
-
-        @database.link(payload, opts)
-
+        proms.push(
+          @connector.createIndividualProperty(payload)
+        )
+        Promise.all(proms)
       catch error
-        Promise.reject('error during link call: '+error)
-
+        Promise.reject('error during create call: ' + error)
 
 
     unlink: (payload, opts) ->

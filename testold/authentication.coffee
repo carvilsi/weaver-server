@@ -14,7 +14,7 @@ describe 'Authentication', ->
   mockConnector = null
 
   beforeEach ->
-    server = new WeaverServer(6379, process.env.REDIS_HOST or "192.168.99.100", {wipeEnabled: true})
+    server = new WeaverServer(6379, process.env.REDIS_HOST or "localhost", {wipeEnabled: true})
     
     mockConnector =  {}
     mockConnector.init = sinon.stub()

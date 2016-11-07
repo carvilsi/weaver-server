@@ -56,11 +56,9 @@ module.exports =
 
         logger.log('debug', 'disconnect event on socket, with payload:')
         logger.log('debug', payload)
-
-
       )
 
-      # Create
+      # Create over Neo4j
       socket.on('create', (payload, ack) ->
 
         logger.log('debug', 'create event on socket, with payload:')
@@ -76,13 +74,61 @@ module.exports =
 
           (result) ->
             socket.broadcast.emit(payload.type + ':created', payload.id)
-            ack(result)
+            ack(result[0])
 
           (error) ->
             logger.error('create call failed for payload with error: '+error)
             logger.error(payload)
             ack({code: 503, message: error, payload})
 
+        )
+      )
+      
+      # Create over Dict (REDIS)
+      socket.on('createDict', (payload, ack) ->
+        logger.log('debug','create object on REDIS')
+        logger.log('debug', payload)
+                
+        return if noWritePermission(socket, ack)
+
+        if not ack?
+          logger.log('error', 'no ack function')
+          throw new Error('no ack function')
+          
+        self.operations.createDict(payload).then(
+        
+          (result) ->
+            socket.broadcast.emit(payload.id + ' :created', payload)
+            ack(result)
+          
+          (error) ->
+            logger.error('create call to REDIS failed for payload with error: ' + error)
+            logger.error(payload)
+            ack({code: 503, message: error, payload})
+        )
+      )
+      
+      socket.on('readDict', (id, ack) ->
+        logger.log('debug', 'readDict event on socket')
+        logger.log('debug', id)
+
+        return if noWritePermission(socket, ack)
+
+        if not ack?
+          logger.log('error', 'no ack function')
+          throw new Error('no ack function')
+          
+        self.operations.readDict(id).then(
+          
+          (result) ->
+            socket.broadcast.emit(id + ' :read', result)
+            ack(result)
+            
+          (error) ->
+            logger.error('read call to REDIS failed for id with error: ' + error)
+            logger.error(id)
+            ack({code: 503, message: error, id})
+            
         )
       )
 
@@ -111,12 +157,8 @@ module.exports =
       )
 
 
-      #
+      # reading over Neo4j
       socket.on('read', (payload, ack) ->
-
-        console.log '=^^=|_'.cyan
-
-        console.log payload
 
         logger.log('debug', 'read event on socket, with payload:')
         logger.log('debug', payload)
