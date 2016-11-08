@@ -101,19 +101,15 @@ module.exports =
 
 
     updateValueProperty: (valueProperty) ->
-      payload =
-        nodeId: valueProperty.subject
-        predicate: valueProperty.predicate
-
+      
       new Promise((resolve, reject) =>
 
         options =
           method: 'POST',
           url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/update/value'
-          qs:      payload
-          body:    valueProperty.object
-        request(options, (error) ->
-          if error? then reject(error) else resolve()
+          body:   JSON.stringify(valueProperty)
+        request(options, (error, response, body) ->
+          if error? then reject(error) else resolve(JSON.parse(body))
         )
       )
 
@@ -123,12 +119,49 @@ module.exports =
 
         options =
           method: 'POST',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServiceIp + '/destroy/individual'
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/destroy/individual'
           qs:      {nodeId}
-        request(options, (error) ->
+        request(options, (error, response, body) ->
           if error? then reject(error) else resolve()
+        )
+      )
+      
+    deleteRelation: (payload) ->
+      new Promise((resolve, reject) =>
+        
+        console.log '=^^=|_DeleteRelation!!!!!!'
+        console.log payload
+        options =
+          method: 'POST',
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/destroy/relation'
+          qs:      JSON.stringify(payload)
+          
+        console.log options
+        request(options, (error, response, body) ->
+          if error? then reject(error) else resolve(body)
         )
       )
 
     wipe: ->
-      return
+      new Promise((resolve, reject) =>
+        
+        options =
+          method: 'POST',
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/wipe/db',
+          qs: {}
+        request(options, (error, response, body) ->
+          if error? then reject(error) else resolve(body)
+        )
+      )
+
+    wipeWeaver: ->
+      new Promise((resolve, reject) =>
+        
+        options =
+          method: 'POST',
+          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/wipe/weaver',
+          qs: {}
+        request(options, (error, response, body) ->
+          if error? then reject(error) else resolve(body)
+        )
+      )

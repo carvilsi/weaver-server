@@ -1,8 +1,10 @@
 require("./test-suite")()
-sinon = require('sinon')
-WeaverServer = require('./../src/index')
+sinon           = require('sinon')
+WeaverServer    = require('./../src/index')
 express         = require('express')
 pjson           = require('../package.json')
+Sdk = require('weaver-sdk')
+# sdk             = require('../node_modules/weaver-sdk/dist/weaver-sdk.full.js')
 
 # runner  = require('./../src/run')
 
@@ -56,6 +58,9 @@ beforeEach ->
 
   # Init
   weaver = new WeaverServer(redisPort, redisHost, opts)
+  
+  @sdk = new Sdk()
+  @sdk.connect('localhost:9487')
 
   # Connect
   weaver.connect().then(->
@@ -86,6 +91,14 @@ beforeEach ->
 describe 'SDK', ->
   
   it 'Should creates an entity', (done) ->
+    # console.log @sdk
+    # @sdk.node({name:'Thoshiiiio'},'toshio').then((res, err) =>
+    #   if err
+    #     console.log err
+    #   else
+    #     console.log res
+    # )
+    
     weaver.connect().then(->
       connection = io.connect('http://localhost:9487')
       connection.emit("create", {id:'one'}, (response) ->

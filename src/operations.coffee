@@ -4,6 +4,10 @@ http = require('http')
 https = require('https')
 cuid = require('cuid')
 
+loki     = require('lokijs')
+request = require('request')
+
+
 require('colors')
 
 WeaverCommons  = require('weaver-commons-js')
@@ -12,13 +16,26 @@ RedisBuffer    = require('./redis-buffer')
 
 logger    = require('./logger')
 
+bulk = false
+
+db = new loki('loki.json')
+individualCollection = db.addCollection('individual')
+valuePropertyCollection = db.addCollection('valueProperty')
+individualPropertyCollection = db.addCollection('individualProperty')
+predicateCollection = db.addCollection('predicateProperty')
+
+
 # This is the main entry point of any new socket connection.
 module.exports =
 
   class Operations
     @payloadCount: 1
+    @neo4j_service_ip
+    @neo4j_service_port
 
     constructor: (@database, @connector, @opts) ->
+      @neo4j_service_ip = @opts.weaverServiceIp
+      @neo4j_service_port = @opts.weaverServicePort
 
     logPayload: (action, payload) ->
 
@@ -27,7 +44,11 @@ module.exports =
       proms = []
       try
         proms.push(
-          @connector.createIndividual(payload)
+          if !bulk
+            @connector.createIndividual(payload)
+          if bulk
+            individualCollection.insert(individual)
+            Promise.resolve()
         )
         Promise.all(proms)
       catch error
@@ -68,22 +89,17 @@ module.exports =
         )
       Promise.all(proms)
 
-    # deprecated, please use updateAttributeLink or updateEntityLink
+    
     update: (payload, opts) ->
-      opts = {} if not opts?
-
-      payload = JSON.parse(payload) if typeof payload is 'string'
-
-      # pointing to a value
-      if payload.target? and payload.target.value?
-        @updateAttributeLink(payload, opts)
-
-        # pointing to an individual
-      else if payload.target? and payload.target.id?
-        @updateEntityLink(payload, opts)
-
-      else
-        return Promise.reject('update called not for value or target')
+      
+      proms = []
+      try
+        proms.push(
+          @connector.updateValueProperty(payload)
+        )
+        Promise.all(proms)
+      catch error
+        Promise.reject('error during create call: ' + error)
 
     updateAttributeLink: (payload, opts) ->
       opts = {} if not opts?
@@ -202,23 +218,33 @@ module.exports =
         )
         Promise.all(proms)
       catch error
-        Promise.reject('error during create call: ' + error)
+        Promise.reject('error during link call: ' + error)
 
 
-    unlink: (payload, opts) ->
-      opts = {} if not opts?
-
-      payload = new WeaverCommons.unlink.Link(payload)
-      return Promise.reject('unlink call not valid') if not payload.isValid()
-
+    unlink: (payload) ->
+      
+      proms = []
       try
-
-        @logPayload('unlink', payload) if not opts.ignoreLog
-
-        @database.unlink(payload, opts)
-
+        proms.push(
+          @connector.deleteRelation(payload)
+        )
+        Promise.all(proms)
       catch error
-        Promise.reject('error during unlink call: '+error)
+        Promise.reject('error during unlink call: ' + error)
+      
+      # opts = {} if not opts?
+      #
+      # payload = new WeaverCommons.unlink.Link(payload)
+      # return Promise.reject('unlink call not valid') if not payload.isValid()
+
+      # try
+      #
+      #   @logPayload('unlink', payload) if not opts.ignoreLog
+      #
+      #   @database.unlink(payload, opts)
+      #
+      # catch error
+      #   Promise.reject('error during unlink call: '+error)
 
 
 
@@ -301,6 +327,44 @@ module.exports =
       proms.push(@database.wipe())
 
       Promise.all(proms)
+
+    wipeWeaver: ->
+
+      if not @opts? or not @opts['wipeEnabled']? or not @opts['wipeEnabled']
+        throw new Error('wiping disabled')
+
+      proms = []
+      # todo: cleanup state / re-init ????
+      proms.push(@connector.wipeWeaver())
+      # proms.push(@database.wipe())
+
+      Promise.all(proms)
+
+      
+    bulkEnd: ->
+      try
+        if bulk
+          _this = @
+          Promise.resolve(_this.processValues())
+        else
+          Promise.reject()
+      catch error
+        Promise.reject()
+
+
+    bulkStart: ->
+      try
+        bulk = true
+        console.log(@neo4j_service_ip)
+        console.log(@neo4j_service_port)
+        db = new loki('loki.json')
+        individualCollection = db.addCollection('individual')
+        valuePropertyCollection = db.addCollection('valueProperty')
+        individualPropertyCollection = db.addCollection('individualProperty')
+        predicateCollection = db.addCollection('predicateProperty')
+        Promise.resolve()
+      catch error
+        Promise.reject()
 
 
     dump: ->

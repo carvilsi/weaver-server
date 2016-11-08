@@ -131,6 +131,54 @@ module.exports =
             
         )
       )
+      
+      
+      socket.on('bulkEnd', (action, ack) ->
+
+        return if noWritePermission(socket, ack)
+
+        if not ack?
+          logger.log('error', 'no ack function')
+          throw new Error('no ack function')
+
+        self.operations.bulkEnd().then(
+          (result) ->
+            console.log(result)
+            # ack('OK')
+            ack(result)
+
+          (error) ->
+            console.log error
+            ack('ERROR: ' + error)
+
+        )
+      )
+
+
+      socket.on('bulkStart', (action, ack) ->
+
+        return if noWritePermission(socket, ack)
+
+        if not ack?
+          logger.log('error', 'no ack function')
+          throw new Error('no ack function')
+
+        self.operations.bulkStart().then(
+          (result) ->
+            console.log(result)
+            setTimeout ->
+              ack(result)
+            , 2000
+            # ack(result)
+            # ack('OK')
+
+          (error) ->
+            console.log error
+            ack('ERROR: ' + error)
+
+        )
+      )
+
 
       # Create Bulk
       socket.on('create/bulk', (payload, ack) ->
@@ -394,6 +442,29 @@ module.exports =
           throw new Error('no ack function')
 
         self.operations.wipe().then(
+
+          (result) ->
+            ack(result)
+
+          (error) ->
+            logger.error('wipe call failed for')
+            logger.error(payload)
+            ack({code: 503, message: error, payload})
+        )
+      )
+
+      # Wipe Weaver DB
+      socket.on('wipeWeaver', (payload, ack) ->
+
+        logger.log('debug', 'wipe event on socket')
+
+        return if noWritePermission(socket, ack)
+
+        if not ack?
+          logger.log('error', 'no ack function')
+          throw new Error('no ack function')
+
+        self.operations.wipeWeaver().then(
 
           (result) ->
             ack(result)
