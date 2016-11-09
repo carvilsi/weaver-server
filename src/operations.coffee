@@ -79,16 +79,33 @@ module.exports =
     read: (payload, opts) ->
       opts = {} if not opts?
 
-      payload = new WeaverCommons.read.Entity(payload)
+      # payload = new WeaverCommons.read.Entity(payload)
       
       proms = []
 
-      if payload.isValid()
-        proms.push(
-          @connector.readIndividual(payload.id, payload.opts.eagerness)
-        )
+      # if payload.isValid()
+      proms.push(
+        @connector.readIndividual(payload.id, payload.opts.eagerness)
+      )
       Promise.all(proms)
 
+    bulkNodes: (payload) ->
+      proms = []
+
+      # if payload.isValid()
+      proms.push(
+        @connector.bulkNodes(payload)
+      )
+      Promise.all(proms)
+
+    bulkRelations: (payload) ->
+      proms = []
+
+      # if payload.isValid()
+      proms.push(
+        @connector.bulkRelations(payload)
+      )
+      Promise.all(proms)
     
     update: (payload, opts) ->
       
@@ -180,35 +197,15 @@ module.exports =
 
 
     # renamed from destroy
-    destroyEntity: (payload, opts) ->
-      opts = {} if not opts?
-
-      payload = new WeaverCommons.destroyEntity.Entity(payload)
-      return Promise.reject('destroy entity call not valid') if not payload.isValid()
-
+    destroyEntity: (payload) ->
       try
-
-        @logPayload('destroyEntity', payload) if not opts.ignoreLog
-
         proms = []
-
-        if opts.ignoreConnector
-          return @database.destroyEntity(payload, opts)
-
-        proms.push(@database.destroyEntity(payload, opts))
-
-
-        if payload.type is '$INDIVIDUAL' or payload.type is '$INDIVIDUAL_PROPERTY' or payload.type is '$VALUE_PROPERTY'
-          proms.push(
-            @connector.deleteObject(payload)
-          )
-
+        proms.push(
+          @connector.deleteObject(payload)
+        )
         Promise.all(proms)
-
       catch error
         Promise.reject('error during destroy entity call: '+error)
-
-
 
     link: (payload) ->
       proms = []
@@ -231,22 +228,7 @@ module.exports =
         Promise.all(proms)
       catch error
         Promise.reject('error during unlink call: ' + error)
-      
-      # opts = {} if not opts?
-      #
-      # payload = new WeaverCommons.unlink.Link(payload)
-      # return Promise.reject('unlink call not valid') if not payload.isValid()
-
-      # try
-      #
-      #   @logPayload('unlink', payload) if not opts.ignoreLog
-      #
-      #   @database.unlink(payload, opts)
-      #
-      # catch error
-      #   Promise.reject('error during unlink call: '+error)
-
-
+        
 
     nativeQuery: (payload) ->
 

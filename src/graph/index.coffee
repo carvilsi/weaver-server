@@ -14,14 +14,17 @@ module.exports =
     
     readIndividual: (id, eagerness) ->
       new Promise((resolve, reject) =>
-        options =
-          method: 'GET',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/read/individual'
-          qs:     {id, eagerness}
+        try
+          options =
+            method: 'GET',
+            url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/read/individual'
+            qs:     {id, eagerness}
 
-        request(options, (error, response, body) ->
-          if error? then reject(error) else resolve(body)
-        )
+          request(options, (error, response, body) ->
+            if error? then reject(error) else resolve(body)
+          )
+        catch error
+          reject()
       )
 
     ###
@@ -31,13 +34,16 @@ module.exports =
     
     createIndividual: (individual) ->
       new Promise((resolve, reject) =>
-        options =
-          method: 'POST',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/write/weaverEntity'
-          body:   JSON.stringify(individual)
-        request(options, (error, response, body) ->
-          if error? then reject(error) else resolve(JSON.parse(body))
-        )
+        try
+          options =
+            method: 'POST',
+            url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/write/weaverEntity'
+            body:   JSON.stringify(individual)
+          request(options, (error, response, body) ->
+            if error? then reject(error) else resolve(JSON.parse(body))
+          )
+        catch error
+          reject(error)
       )
 
     ###
@@ -113,55 +119,87 @@ module.exports =
         )
       )
 
-
-    deleteObject: (nodeId) ->
+    # TODO: Maybe is better to send just the id as qs instead to send a payload
+    deleteObject: (payload) ->
       new Promise((resolve, reject) =>
-
-        options =
-          method: 'POST',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/destroy/individual'
-          qs:      {nodeId}
-        request(options, (error, response, body) ->
-          if error? then reject(error) else resolve()
-        )
+        try
+          options =
+            method: 'POST',
+            url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/destroy/individual'
+            body:   JSON.stringify(payload)
+          request(options, (error, response, body) ->
+            if error? then reject(error) else resolve(body)
+          )
+        catch error
+          reject(error)
       )
       
     deleteRelation: (payload) ->
       new Promise((resolve, reject) =>
-        
-        console.log '=^^=|_DeleteRelation!!!!!!'
-        console.log payload
-        options =
-          method: 'POST',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/destroy/relation'
-          qs:      JSON.stringify(payload)
-          
-        console.log options
-        request(options, (error, response, body) ->
-          if error? then reject(error) else resolve(body)
-        )
+        try
+          options =
+            method: 'POST',
+            url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/destroy/relation'
+            body:   JSON.stringify(payload)
+          request(options, (error, response, body) ->
+            if error? then reject(error) else resolve(body)
+          )
+        catch error
+          reject(error)
       )
 
     wipe: ->
       new Promise((resolve, reject) =>
-        
-        options =
-          method: 'POST',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/wipe/db',
-          qs: {}
-        request(options, (error, response, body) ->
-          if error? then reject(error) else resolve(body)
-        )
+        try
+          options =
+            method: 'POST',
+            url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/wipe/db',
+            qs: {}
+          request(options, (error, response, body) ->
+            if error? then reject(error) else resolve(body)
+          )
+        catch error
+          reject(error)
       )
 
     wipeWeaver: ->
       new Promise((resolve, reject) =>
-        
-        options =
-          method: 'POST',
-          url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/wipe/weaver',
-          qs: {}
-        request(options, (error, response, body) ->
-          if error? then reject(error) else resolve(body)
-        )
+        try
+          options =
+            method: 'POST',
+            url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/wipe/weaver',
+            qs: {}
+          request(options, (error, response, body) ->
+            if error? then reject(error) else resolve(body)
+          )
+        catch error
+          reject(error)
+      )
+    
+    bulkNodes: (payload) ->
+      new Promise((resolve, reject) =>
+        try
+          options =
+            method: 'POST',
+            url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/write/bulk/weaverEntity',
+            body: JSON.stringify(payload)
+          request(options, (error, response, body) ->
+            if error? then reject(error) else resolve(body)
+          )
+        catch error
+          reject(error)
+      )
+    
+    bulkRelations: (payload) ->
+      new Promise((resolve, reject) =>
+        try
+          options =
+            method: 'POST',
+            url:    'http://' + @options.weaverServiceIp + ':' + @options.weaverServicePort + '/create/bulk/relation',
+            body: JSON.stringify(payload)
+          request(options, (error, response, body) ->
+            if error? then reject(error) else resolve(body)
+          )
+        catch error
+          reject(error)
       )

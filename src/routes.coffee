@@ -178,6 +178,38 @@ module.exports =
 
         )
       )
+      
+      socket.on('bulkNodes', (payload, ack) ->
+        return if noWritePermission(socket, ack)
+
+        if not ack?
+          logger.log('error', 'no ack function')
+          throw new Error('no ack function')
+          
+        self.operations.bulkNodes(payload).then(
+          (result) ->
+            ack(result)
+            
+          (error) ->
+            ack('ERROR: ' + error)
+        )
+      )
+      
+      socket.on('bulkRelations', (payload, ack) ->
+        return if noWritePermission(socket, ack)
+
+        if not ack?
+          logger.log('error', 'no ack function')
+          throw new Error('no ack function')
+          
+        self.operations.bulkRelations(payload).then(
+          (result) ->
+            ack(result)
+            
+          (error) ->
+            ack('ERROR: ' + error)
+        )
+      )
 
 
       # Create Bulk
