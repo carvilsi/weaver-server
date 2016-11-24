@@ -40,9 +40,9 @@ redisPort =   getWithDefault(process.env.REDIS_PORT,    '6379')
 # Options
 opts =
   wipeEnabled: wipeEnabled
-  ignoreLog: true
-  weaverServiceIp: 'localhost'
-  weaverServicePort: 9474
+  ignoreLog: getWithDefault(process.env.IGNORE_LOG, true)
+  weaverServiceIp: getWithDefault(process.env.SERVICE_IP, 'localhost')
+  weaverServicePort: getWithDefault(process.env.SERVICE_PORT, 9474)
 
 # Authentication options
 opts.writeToken = writeToken if writeToken?
