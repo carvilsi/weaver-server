@@ -4,152 +4,119 @@ http = require('http')
 https = require('https')
 cuid = require('cuid')
 
+loki     = require('lokijs')
+request = require('request')
+
+
+require('colors')
+
 WeaverCommons  = require('weaver-commons-js')
 RedisBuffer    = require('./redis-buffer')
 
 
 logger    = require('./logger')
 
+bulk = false
+
+db = new loki('loki.json')
+individualCollection = db.addCollection('individual')
+valuePropertyCollection = db.addCollection('valueProperty')
+individualPropertyCollection = db.addCollection('individualProperty')
+predicateCollection = db.addCollection('predicateProperty')
+
+
 # This is the main entry point of any new socket connection.
 module.exports =
 
   class Operations
     @payloadCount: 1
+    @neo4j_service_ip
+    @neo4j_service_port
 
     constructor: (@database, @connector, @opts) ->
-
-
-
+      @neo4j_service_ip = @opts.weaverServiceIp
+      @neo4j_service_port = @opts.weaverServicePort
 
     logPayload: (action, payload) ->
 
-      @database.redis.incr('payloadIndex').then((payloadIndex) =>
-
-        # Add payload ID to payloads set
-        payloadId = 'payload:' + payloadIndex + ':' + cuid()
-        @database.redis.rpush('payloads', payloadId)
-
-        # Save payload as map
-        @database.redis.hmset(payloadId, {timestamp: new Date().getTime(), action: action, payload: JSON.stringify(payload)})
-      )
-
-
-
-
-
     create: (payload, opts) ->
-      opts = {} if not opts?
       
-      payload = new WeaverCommons.create.Entity(payload)
-      return Promise.reject('create call not valid') if not payload.isValid()
-
+      proms = []
       try
-
-        @logPayload('create', payload) if not opts.ignoreLog
-
-        proms = []
-        
-        proms.push(@database.create(payload, opts))
-
-        if payload.type is '$INDIVIDUAL'
-
-          individual = new WeaverCommons.create.Individual(payload)
-
-          if individual.isValid()
-            proms.push(
-              @connector.createIndividual(individual)
-            )
-
-          else
-            return Promise.reject('This payload does not contain a valid $INDIVIDUAL object')
-
-        if payload.type is '$INDIVIDUAL_PROPERTY'
-          individualProperty = new WeaverCommons.create.IndividualProperty(payload)
-
-          if individualProperty.isValid()
-            proms.push(
-              @connector.createIndividualProperty(individualProperty)   
-            )
-
-          else
-            return Promise.reject('This payload does not contain a valid $INDIVIDUAL_PROPERTY object')
-
-        else if payload.type is '$VALUE_PROPERTY'
-          valueProperty = new WeaverCommons.create.ValueProperty(payload)
-
-          if valueProperty.isValid()
-            proms.push(
-              @connector.createValueProperty(valueProperty)
-            )
-
-          else
-            return Promise.reject('This payload does not contain a valid $VALUE_PROPERTY object')
-
-        else if payload.type is '$PREDICATE'
-          predicate = new WeaverCommons.create.Predicate(payload)
-
-          if predicate.isValid()
-              proms.push(
-               @connector.createIndividual(predicate) 
-              )
-
-          else
-            return Promise.reject('This payload does not contain a valid $PREDICATE object')
-
+        proms.push(
+          if !bulk
+            @connector.createIndividual(payload)
+          if bulk
+            individualCollection.insert(individual)
+            Promise.resolve()
+        )
         Promise.all(proms)
-
       catch error
-        Promise.reject('error during create call: '+error)
+        Promise.reject('error during create call: ' + error)
 
+
+    createDict: (payload) ->
+      
+      proms = []
+      try
+        proms.push(
+          @database.createDict(payload, 'lol')
+        )
+        Promise.all(proms)
+      catch error
+        Promise.reject('error during create call for REDIS: ' + error)
+        
+    readDict: (id) ->
+      proms = []
+      try
+        proms.push(
+          @database.readDict(id)
+        )
+        Promise.all(proms)
+      catch error
+        Promise.reject('error reading from REDIS ' + error )
 
     read: (payload, opts) ->
       opts = {} if not opts?
 
-      payload = new WeaverCommons.read.Entity(payload)
-      return Promise.reject('read call not valid') if not payload.isValid()
-
+      # payload = new WeaverCommons.read.Entity(payload)
       
-      # We need to check if this ID exists in Redis. If it doesnt, then it must exists in the Graph database.
-      
-      try
+      proms = []
 
-        @database.read(payload).then((result) ->
-          logger.log('debug', result)
-          if result?
-            Promise.resolve(result)
-          else
-            
-            # Not found in Redis, try the database
-            
-            Promise.reject('entity not found, request payload: '+payload)
-        )
-      catch error
-        Promise.reject('error during read call: '+error)
+      # if payload.isValid()
+      proms.push(
+        @connector.readIndividual(payload.id, payload.opts.eagerness)
+      )
+      Promise.all(proms)
 
+    bulkNodes: (payload) ->
+      proms = []
 
+      # if payload.isValid()
+      proms.push(
+        @connector.bulkNodes(payload)
+      )
+      Promise.all(proms)
 
-    # deprecated, please use updateAttributeLink or updateEntityLink
+    bulkRelations: (payload) ->
+      proms = []
+
+      # if payload.isValid()
+      proms.push(
+        @connector.bulkRelations(payload)
+      )
+      Promise.all(proms)
+    
     update: (payload, opts) ->
-      opts = {} if not opts?
-
-      payload = JSON.parse(payload) if typeof payload is 'string'
-
-      # pointing to a value
-      if payload.target? and payload.target.value?
-        @updateAttributeLink(payload, opts)
-
-        # pointing to an individual
-      else if payload.target? and payload.target.id?
-        @updateEntityLink(payload, opts)
-
-      else
-        return Promise.reject('update called not for value or target')
-
-
-
-
-
-
+      
+      proms = []
+      try
+        proms.push(
+          @connector.updateValueProperty(payload)
+        )
+        Promise.all(proms)
+      catch error
+        Promise.reject('error during create call: ' + error)
 
     updateAttributeLink: (payload, opts) ->
       opts = {} if not opts?
@@ -165,7 +132,7 @@ module.exports =
 
         if opts.ignoreConnector
           return @database.update(payload, opts)
-        
+
         proms.push(@database.update(payload, opts))
 
         if payload.source.type is '$VALUE_PROPERTY' and payload.key is 'object'
@@ -191,10 +158,10 @@ module.exports =
         @logPayload('update', payload) if not opts.ignoreLog
 
         proms = []
-        
-        if opts.ignoreConnector 
+
+        if opts.ignoreConnector
           return @database.link(payload, opts)
-        
+
         proms.push(@database.link(payload, opts))
 
         if payload.source.type is '$INDIVIDUAL_PROPERTY' and payload.key is 'object'
@@ -230,69 +197,38 @@ module.exports =
 
 
     # renamed from destroy
-    destroyEntity: (payload, opts) ->
-      opts = {} if not opts?
-
-      payload = new WeaverCommons.destroyEntity.Entity(payload)
-      return Promise.reject('destroy entity call not valid') if not payload.isValid()
-
+    destroyEntity: (payload) ->
       try
-
-        @logPayload('destroyEntity', payload) if not opts.ignoreLog
-
         proms = []
-
-        if opts.ignoreConnector
-          return @database.destroyEntity(payload, opts)
-        
-        proms.push(@database.destroyEntity(payload, opts))
-
-
-        if payload.type is '$INDIVIDUAL' or payload.type is '$INDIVIDUAL_PROPERTY' or payload.type is '$VALUE_PROPERTY'
-          proms.push(
-            @connector.deleteObject(payload)
-          )
-
+        proms.push(
+          @connector.deleteObject(payload)
+        )
         Promise.all(proms)
-
       catch error
         Promise.reject('error during destroy entity call: '+error)
 
-
-
-    link: (payload, opts) ->
-      opts = {} if not opts?
-
-      payload = new WeaverCommons.link.Link(payload)
-      return Promise.reject('link call not valid') if not payload.isValid()
-
+    link: (payload) ->
+      proms = []
       try
-
-        @logPayload('link', payload) if not opts.ignoreLog
-
-        @database.link(payload, opts)
-
+        proms.push(
+          @connector.createIndividualProperty(payload)
+        )
+        Promise.all(proms)
       catch error
-        Promise.reject('error during link call: '+error)
+        Promise.reject('error during link call: ' + error)
 
 
-
-    unlink: (payload, opts) ->
-      opts = {} if not opts?
-
-      payload = new WeaverCommons.unlink.Link(payload)
-      return Promise.reject('unlink call not valid') if not payload.isValid()
-
+    unlink: (payload) ->
+      
+      proms = []
       try
-
-        @logPayload('unlink', payload) if not opts.ignoreLog
-
-        @database.unlink(payload, opts)
-
+        proms.push(
+          @connector.deleteRelation(payload)
+        )
+        Promise.all(proms)
       catch error
-        Promise.reject('error during unlink call: '+error)
-
-
+        Promise.reject('error during unlink call: ' + error)
+        
 
     nativeQuery: (payload) ->
 
@@ -374,6 +310,44 @@ module.exports =
 
       Promise.all(proms)
 
+    wipeWeaver: ->
+
+      if not @opts? or not @opts['wipeEnabled']? or not @opts['wipeEnabled']
+        throw new Error('wiping disabled')
+
+      proms = []
+      # todo: cleanup state / re-init ????
+      proms.push(@connector.wipeWeaver())
+      # proms.push(@database.wipe())
+
+      Promise.all(proms)
+
+      
+    bulkEnd: ->
+      try
+        if bulk
+          _this = @
+          Promise.resolve(_this.processValues())
+        else
+          Promise.reject()
+      catch error
+        Promise.reject()
+
+
+    bulkStart: ->
+      try
+        bulk = true
+        console.log(@neo4j_service_ip)
+        console.log(@neo4j_service_port)
+        db = new loki('loki.json')
+        individualCollection = db.addCollection('individual')
+        valuePropertyCollection = db.addCollection('valueProperty')
+        individualPropertyCollection = db.addCollection('individualProperty')
+        predicateCollection = db.addCollection('predicateProperty')
+        Promise.resolve()
+      catch error
+        Promise.reject()
+
 
     dump: ->
 
@@ -423,9 +397,9 @@ module.exports =
     bootstrapFromJson: (logArray) ->
       console.log("Payload " + Operations.payloadCount)
       Operations.payloadCount++
-      
+
       connectorImport = @connector.bulkInsert(logArray)
-      
+
       buffer = new RedisBuffer(@database.host)
       redisImport = new Promise((resolve, reject) =>
 
@@ -477,7 +451,7 @@ module.exports =
 
         processBatch(logArray)
       )
-      
+
       # Run
       connectorImport
       .then(->
