@@ -4,7 +4,7 @@
 
 Promise = require('bluebird')
 Redis   = require('ioredis')
-logger  = require('./logger')
+logger  = require('./../logger')
 
 # Append type
 isNumber  = (a) -> Object.prototype.toString.call(a) is '[object Number]'
