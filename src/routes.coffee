@@ -1,5 +1,5 @@
-WEAVER = require('route-registry').get("weaver")
-ADMIN  = require('route-registry').get("admin")
+WEAVER = require('route-handler').get("weaver")
+ADMIN  = require('route-handler').get("admin")
 
 
 # Weaver routes

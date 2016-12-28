@@ -1,4 +1,3 @@
-module.exports =
 class RouteHandler
 
   constructor: (@name) ->
@@ -14,4 +13,7 @@ class RouteHandler
     
   handleGet: (route, req, res) ->
     @bus.emit(route, req, res)
-    
+
+
+Registry = require('registry')
+module.exports = new Registry(RouteHandler)

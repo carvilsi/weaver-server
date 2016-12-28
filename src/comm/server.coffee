@@ -39,7 +39,7 @@ module.exports =
       )
       
       # Retrieve routes
-      @routes = require('route-registry').get(@options.routes)
+      @routes = require('route-handler').get(@options.routes)
       
       # Wire HTTP
       @httpComm  = new HttpComm(@routes)
