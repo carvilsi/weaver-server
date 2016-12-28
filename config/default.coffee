@@ -15,16 +15,16 @@ module.exports =
       
   services:
     redis:
-      ip: 'localhost'
+      host: 'localhost'
       port: 6379
     connector:
-      ip: 'localhost'
+      host: 'localhost'
       port: 9474
     chirql:
-      ip: 'localhost'
+      host: 'localhost'
       port: 9573
     flock:
-      ip: 'localhost'
+      host: 'localhost'
       port: 7343
 
   logging:
