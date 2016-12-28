@@ -14,6 +14,7 @@ class HTTP
     @routeHandler.getRoutes.forEach((route) =>
       app.get(@transform(route), (req, res) =>
         
+        req.payload = req.query['payload']
         req.payload = "{}" if not req.payload?
         
         @routeHandler.handleGet(route, req, res)
