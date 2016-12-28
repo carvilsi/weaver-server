@@ -26,7 +26,6 @@
     "request": "^2.74.0",
     "socket.io": "1.4.5",
     "tmp": "0.0.28",
-    "weaver-commons-js": "2.0.0-beta.1",
     "weaver-sdk": "2.0.0-beta.1",
     "winston": "^2.2.0"
   },

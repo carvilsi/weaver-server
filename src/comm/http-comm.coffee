@@ -11,12 +11,14 @@ class HTTP
   wire: (app) ->
     
     # Wire GET requests
-    @routeHandler.getRoutes.forEach((route) =>
+    @routeHandler.allRoutes().forEach((route) =>
       app.get(@transform(route), (req, res) =>
         
         req.payload = req.query['payload']
         req.payload = "{}" if not req.payload?
         
+        res.ok    = -> res.status(200).send()
+        res.error = (error) -> res.status(503).send(error) 
         @routeHandler.handleGet(route, req, res)
       )
     )

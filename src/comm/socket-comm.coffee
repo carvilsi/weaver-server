@@ -1,5 +1,6 @@
 Promise  = require('bluebird')
 socketIO = require('socket.io')
+ERROR    = require('error')
 
 module.exports =
   class Socket
@@ -32,6 +33,12 @@ module.exports =
             req = {payload}
             res =
               send: ack
+              ok: ->
+                ack(200)
+              error: (error) ->
+                ack(error)
+              status: ->
+                send: ack
               render: -> ack('unavailable')
             
             @routeHandler.handleGet(route, req, res)

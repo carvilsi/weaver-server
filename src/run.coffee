@@ -24,6 +24,7 @@ require('app-module-path').addPath('src/' + path) for path in paths
 runlist = [
   './routes'
   'application-ctrl'
+  'node-ctrl'
 ]
 require(run) for run in runlist
 
