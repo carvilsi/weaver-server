@@ -9,7 +9,7 @@
 
 
 # Path resolving local directories, making it non-relative accessible from any location.
-# In other words, require('../../../../application/logger') translates to require('logger')
+# In other words, require('../../../../application/logger') becomes require('logger')
 paths = [
   'admin'
   'application'
@@ -20,7 +20,7 @@ paths = [
 require('app-module-path').addPath('src/' + path) for path in paths
 
 
-# Init routes and controllers by running the code once
+# Init routes and controllers by running once
 runlist = [
   './routes'
   'application-ctrl'
