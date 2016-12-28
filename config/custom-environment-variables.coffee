@@ -1,4 +1,4 @@
 module.exports =
   server:
     weaver:
-      port: "PORT"
+      port: "WEAVER.PORT"

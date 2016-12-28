@@ -22,7 +22,7 @@ require('app-module-path').addPath('src/' + path) for path in paths
 
 # Init routes and controllers by running the code once
 runlist = [
-  './routes2'
+  './routes'
   'application-ctrl'
 ]
 require(run) for run in runlist
@@ -31,7 +31,6 @@ require(run) for run in runlist
 # Run servers
 Server = require('server')
 conf   = require('config')   # Configuration loads files in the root config directory
-
 
 new Server({
   port:   conf.get('server.weaver.port')
