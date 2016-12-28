@@ -21,7 +21,7 @@ module.exports =
         )
 
         # Wire GET requests
-        @routeHandler.getRoutes.forEach((route) =>
+        @routeHandler.allRoutes().forEach((route) =>
           socket.on(route, (payload, ack) =>
             # Must always give a ack function from client
             return if not ack?

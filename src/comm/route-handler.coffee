@@ -13,6 +13,9 @@ class RouteHandler
   POST: (route) ->
     @postRoutes.push(route)
     
+  allRoutes: ->
+    @getRoutes.concat(@postRoutes)
+    
   handleGet: (route, req, res) ->
     
     # Test payload
