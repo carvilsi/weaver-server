@@ -19,7 +19,7 @@ module.exports =
       @operations = new Operations(@database, @connector, @opts)
       @routes     = new Routes(@operations, @opts)  # Accepting socket connections
       @rest       = new REST(@operations, @opts)    # Accepting rest calls
-      
+
       @plugins   = []
 
     addPlugin: (plugin) ->

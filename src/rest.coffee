@@ -1,6 +1,5 @@
 Promise = require('bluebird')
-
-logger    = require('./logger')
+logger  = require('./logger')
 
 # This is the main entry point of any new socket connection.
 module.exports =
@@ -235,7 +234,7 @@ module.exports =
         logger.log('debug', 'queryFromView event on rest, with payload:')
         logger.log('debug', payload)
 
-        if not res?
+        if not res? 
           logger.log('error', 'no response')
           throw new Error('no response')
 

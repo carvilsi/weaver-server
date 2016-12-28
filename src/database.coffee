@@ -1,7 +1,11 @@
+# Why use Redis
+# http://stackoverflow.com/questions/7888880/what-is-redis-and-what-do-i-use-it-for
+# Disable it in the SDK
+
 Promise = require('bluebird')
 Redis   = require('ioredis')
+logger  = require('./logger')
 
-logger    = require('./logger')
 # Append type
 isNumber  = (a) -> Object.prototype.toString.call(a) is '[object Number]'
 isBoolean = (a) -> Object.prototype.toString.call(a) is '[object Boolean]'
@@ -38,19 +42,14 @@ module.exports =
 
     constructor: (@port, @host) ->
       @redis = new Redis({@port, @host, lazyConnect: true, connectTimeout: 1500})
-
-    connect: ->
-      deferred = Promise.defer()
-      @redis.connect((error) =>
-        @connected = not error?
-      
-        if @connected
-          deferred.resolve()
-        else
-          deferred.reject('Could not connect to Redis')
+      @redis.connect().catch( =>
+        logger.log('error','Could not connect to Redis');
       )
-      deferred.resolve()
-      deferred.promise
+      
+      # Could not connect because Redis isnt running
+      @redis.on('error', (error) =>
+        @redis.disconnect() if error.code is 'ECONNREFUSED'
+      )
       
     createDict: (payload) ->
       @redis.set(payload.id, JSON.stringify(payload.attributes))
@@ -162,21 +161,5 @@ module.exports =
 
       Promise.resolve() # todo reject
 
-
-
-    # TODO
-    onUpdate: (id, callback) ->
-      return
-
-    # TODO
-    onLinked: (id, callback) ->
-      return
-
-    # TODO
-    onUnlinked: (id, callback) ->
-      return
-
-    # todo process the boolean this function returns
     wipe: ->
-      throw Error('Redis not connected') if not @connected
       @redis.call('flushall')

@@ -1,29 +1,13 @@
 Promise = require('bluebird')
-util = require('util')
-http = require('http')
-https = require('https')
-cuid = require('cuid')
-
-loki     = require('lokijs')
+util    = require('util')
+http    = require('http')
+https   = require('https')
+cuid    = require('cuid')
 request = require('request')
-
-
-require('colors')
+logger  = require('./logger')
 
 WeaverCommons  = require('weaver-commons-js')
 RedisBuffer    = require('./redis-buffer')
-
-
-logger    = require('./logger')
-
-bulk = false
-
-db = new loki('loki.json')
-individualCollection = db.addCollection('individual')
-valuePropertyCollection = db.addCollection('valueProperty')
-individualPropertyCollection = db.addCollection('individualProperty')
-predicateCollection = db.addCollection('predicateProperty')
-
 
 # This is the main entry point of any new socket connection.
 module.exports =
@@ -44,11 +28,7 @@ module.exports =
       proms = []
       try
         proms.push(
-          if !bulk
             @connector.createIndividual(payload)
-          if bulk
-            individualCollection.insert(individual)
-            Promise.resolve()
         )
         Promise.all(proms)
       catch error
@@ -281,77 +261,11 @@ module.exports =
         )
       )
 
-
-
-
-
-    # TODO
-    onUpdate: (id, callback) ->
-      return
-
-    # TODO
-    onLinked: (id, callback) ->
-      return
-
-    # TODO
-    onUnlinked: (id, callback) ->
-      return
-
-
     wipe: ->
-
-      if not @opts? or not @opts['wipeEnabled']? or not @opts['wipeEnabled']
-        throw new Error('wiping disabled')
-
-      proms = []
-      # todo: cleanup state / re-init ????
-      proms.push(@connector.wipe())
-      proms.push(@database.wipe())
-
-      Promise.all(proms)
-
-    wipeWeaver: ->
-
-      if not @opts? or not @opts['wipeEnabled']? or not @opts['wipeEnabled']
-        throw new Error('wiping disabled')
-
-      proms = []
-      # todo: cleanup state / re-init ????
-      proms.push(@connector.wipeWeaver())
-      # proms.push(@database.wipe())
-
-      Promise.all(proms)
-
-      
-    bulkEnd: ->
-      try
-        if bulk
-          _this = @
-          Promise.resolve(_this.processValues())
-        else
-          Promise.reject()
-      catch error
-        Promise.reject()
-
-
-    bulkStart: ->
-      try
-        bulk = true
-        console.log(@neo4j_service_ip)
-        console.log(@neo4j_service_port)
-        db = new loki('loki.json')
-        individualCollection = db.addCollection('individual')
-        valuePropertyCollection = db.addCollection('valueProperty')
-        individualPropertyCollection = db.addCollection('individualProperty')
-        predicateCollection = db.addCollection('predicateProperty')
-        Promise.resolve()
-      catch error
-        Promise.reject()
+      Promise.all([@connector.wipe(), @database.wipe()])
 
 
     dump: ->
-
-
       payloads = []
       @database.redis.lrange('payloads', 0, -1).bind(@).each((payloadId) ->
         @database.redis.hgetall(payloadId).then((payload) ->
