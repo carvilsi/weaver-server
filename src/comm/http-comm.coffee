@@ -13,6 +13,9 @@ class HTTP
     # Wire GET requests
     @routeHandler.getRoutes.forEach((route) =>
       app.get(@transform(route), (req, res) =>
+        
+        req.payload = "{}" if not req.payload?
+        
         @routeHandler.handleGet(route, req, res)
       )
     )

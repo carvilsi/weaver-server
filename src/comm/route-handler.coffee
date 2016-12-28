@@ -1,3 +1,5 @@
+ERROR = require('error')
+
 class RouteHandler
 
   constructor: (@name) ->
@@ -12,6 +14,14 @@ class RouteHandler
     @postRoutes.push(route)
     
   handleGet: (route, req, res) ->
+    
+    # Test payload
+    try
+      req.payload = JSON.parse(req.payload)
+    catch error
+      res.send(ERROR('invalid json payload', req.payload))
+      return
+    
     @bus.emit(route, req, res)
 
 

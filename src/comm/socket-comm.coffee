@@ -27,10 +27,9 @@ module.exports =
             return if not ack?
               
             # Payload object must never be undefined
-            payload = {} if not payload?
-            
-            # Prepare standard arguments matching http
-            req = payload
+            payload = "{}" if not payload?
+
+            req = {payload}
             res =
               send: ack
               render: -> ack('unavailable')
