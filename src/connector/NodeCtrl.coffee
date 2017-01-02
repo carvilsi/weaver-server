@@ -1,6 +1,6 @@
 OperationHandler = require('OperationHandler')
 
-bus     = require('event-bus').get('weaver')
+bus     = require('EventBus').get('weaver')
 handler = new OperationHandler()
 
     

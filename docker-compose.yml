@@ -1,23 +1,44 @@
 version: '2'
 services:
-  redis:
-    image: redis:3.2
-    expose:
-     - "6379"
+  virtuoso:
+    image: tenforce/virtuoso:1.0.0-virtuoso7.2.2
+    expose: 
+     - "1111"
+     - "8890"
     ports:
-     - "6379:6379"
-    command: redis-server --appendonly yes
-    
-  weaver:
-    image: sysunite/weaver-server-beta:0.0.1
-    ports:
-     - "9487:9487"
-    depends_on:
-      - redis
-    links:
-      - redis
+     - "1111:1111"
+     - "8890:8890"
     environment:
-      - PORT=9487
-      - WIPE_ENABLED=true
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+     - DBA_PASSWORD=myDbaPassword
+     - SPARQL_UPDATE=true
+     - DEFAULT_GRAPH=http://www.example.com/my-graph
+
+#  redis:
+#    image: redis:3.2
+#    expose:
+#     - "6379"
+#    ports:
+#     - "6379:6379"
+#    command: redis-server --appendonly yes
+
+#  weaver:
+#    image: sysunite/weaver-server-virtuoso:0.4.1
+#    ports:
+#     - "9487:9487"
+#    depends_on:
+#      - virtuoso
+#      - redis
+#    links:
+#      - virtuoso
+#      - redis
+#    environment:
+#      - PORT=9487
+#      - WIPE_ENABLED=true
+#      - REDIS_HOST=redis
+#      - REDIS_PORT=6379
+#      - VIRTUOSO_HOST=virtuoso
+#      - VIRTUOSO_PORT=1111
+#      - VIRTUOSO_CHECK_PORT=8890
+#      - VIRTUOSO_PASSWORD=myDbaPassword
+#      - READ_TOKEN=adsfasdf
+#      - WRITE_TOKEN=fkdskdff

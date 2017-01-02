@@ -4,7 +4,7 @@ class RouteHandler
   constructor: (@name) ->
     @getRoutes  = []
     @postRoutes = []
-    @bus        = require('event-bus').get(@name)
+    @bus        = require('EventBus').get(@name)
 
   GET: (route) ->
     @getRoutes.push(route)

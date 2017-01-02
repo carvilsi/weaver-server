@@ -23,8 +23,8 @@ require('app-module-path').addPath('src/' + path) for path in paths
 # Init routes and controllers by running once
 runlist = [
   './routes'
-  'application-ctrl'
-  'node-ctrl'
+  'ApplicationCtrl'
+  'NodeCtrl'
 ]
 require(run) for run in runlist
 

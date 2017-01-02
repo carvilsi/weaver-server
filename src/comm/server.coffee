@@ -1,8 +1,8 @@
 express         = require('express')
 mustacheExpress = require('mustache-express')   # Templating
 bodyParser      = require('body-parser')        # POST requests
-HttpComm        = require('http-comm')
-SocketComm      = require('socket-comm')
+HttpComm        = require('HttpComm')
+SocketComm      = require('SocketComm')
 
 module.exports = 
   class Server
@@ -39,7 +39,7 @@ module.exports =
       )
       
       # Retrieve routes
-      @routes = require('route-handler').get(@options.routes)
+      @routes = require('RouteHandler').get(@options.routes)
       
       # Wire HTTP
       @httpComm  = new HttpComm(@routes)
