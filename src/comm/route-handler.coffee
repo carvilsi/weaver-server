@@ -1,4 +1,3 @@
-ERROR = require('error')
 
 class RouteHandler
 
@@ -22,7 +21,7 @@ class RouteHandler
       req.payload = JSON.parse(req.payload)
     catch error
       console.log(error)
-      res.send(ERROR('invalid json payload', req.payload))
+      #res.send(ERROR('invalid json payload', req.payload))
       return
 
 
@@ -32,7 +31,7 @@ class RouteHandler
         response = "OK" if not response?
         res.send(response)
       ).catch((err) ->
-        res.error(err.message)
+        res.error(err)
       )
 
     @bus.emit(route, req, res)

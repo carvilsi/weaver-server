@@ -1,6 +1,5 @@
 Promise  = require('bluebird')
 socketIO = require('socket.io')
-ERROR    = require('error')
 
 module.exports =
   class Socket
