@@ -15,7 +15,7 @@ paths = [
   'application'
   'auth'
   'comm'
-  'connector'
+  'database'
 ]
 require('app-module-path').addPath('src/' + path) for path in paths
 
