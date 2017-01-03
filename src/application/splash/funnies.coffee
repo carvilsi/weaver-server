@@ -1,4 +1,5 @@
 messages = [
+  "Have you ever seen a mingushead before?"
   "Reticulating splines..."
   "Generating witty dialog..."
   "Swapping time and space..."
