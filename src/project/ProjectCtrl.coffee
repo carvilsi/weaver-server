@@ -17,16 +17,16 @@ bus.on('project', (req, res) ->
 )
 
 bus.on('project.create', (req, res) ->
-  if !req.body.name?
+  if !req.payload.name?
     res.error("Expects name parameter")
   else
-    doCall(res, "create/#{req.body.name}")
+    doCall(res, "create/#{req.payload.name}")
 )
 
 bus.on('project.delete', (req, res) ->
-  if !req.body.id?
+  if !req.payload.id?
     res.error("Expects id parameter")
   else
-    doCall(res, "delete/#{req.body.id}")
+    doCall(res, "delete/#{req.payload.id}")
 )
 
