@@ -10,8 +10,20 @@ class HTTP
 
   wire: (app) ->
      # Wire GET requests
-     @routeHandler.allRoutes().forEach((route) =>
+     @routeHandler.getRoutes.forEach((route) =>
        app.get(@transform(route), (req, res) =>
+
+         req.payload = req.query['payload']
+         req.payload = "{}" if not req.payload?
+
+         res.ok    = -> res.status(200).send()
+         res.error = (error) -> res.status(503).send(error)
+         @routeHandler.handleRequest(route, req, res)
+       )
+     )
+     
+     @routeHandler.postRoutes.forEach((route) =>
+       app.post(@transform(route), (req, res) =>
 
          req.payload = req.query['payload']
          req.payload = "{}" if not req.payload?
