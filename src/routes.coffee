@@ -8,5 +8,7 @@ WEAVER.GET   "application.version"    # Application version
 WEAVER.GET   "read"                   # Reads a single entity
 WEAVER.POST  "write"                  # Execute Create, Update and Delete operations in bulk
 
+WEAVER.GET "logIn"
+
 # Admin routes
 ADMIN.POST   "wipe"                   # Wipe entire database
