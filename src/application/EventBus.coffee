@@ -1,17 +1,22 @@
-events = require('events');
+events = require('events')
+
+EventEmitterEnhancer = require('event-emitter-enhancer')
 
 module.exports=
 
-class EventBus 
-  
+class EventBus
   constructor: (@name) ->
-    @eventEmitter = new events.EventEmitter();
+    EnhancedEventEmitter = EventEmitterEnhancer.extend(events.EventEmitter)
+    @eventEmitter = new EnhancedEventEmitter()
 
   on: (event, func) ->
     @eventEmitter.on(event, func)
     
   emit: (event, arg1, arg2, arg3) ->
     @eventEmitter.emit(event, arg1, arg2, arg3)
+
+  filter: (event, func) ->
+    @eventEmitter.filter(event, func)
     
 
 Registry = require('registry')
