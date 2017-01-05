@@ -29,7 +29,12 @@ module.exports =
             # Payload object must never be undefined
             payload = "{}" if not payload?
 
-            req = {payload}
+            try
+              req = { payload: JSON.parse(payload) }
+            catch error
+              ack("Invalid json payload")
+              return
+            
             res =
               send: ack
               ok: ->
