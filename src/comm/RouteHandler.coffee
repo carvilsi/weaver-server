@@ -15,8 +15,9 @@ class RouteHandler
   allRoutes: ->
     @getRoutes.concat(@postRoutes)
     
-  handleGet: (route, req, res) ->
+  handleRequest: (route, req, res) ->
     # Test payload
+    console.log("Handling route: #{route}")
     try
       req.payload = JSON.parse(req.payload)
     catch error

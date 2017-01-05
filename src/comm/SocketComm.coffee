@@ -40,7 +40,7 @@ module.exports =
                 send: ack
               render: -> ack('unavailable')
             
-            @routeHandler.handleGet(route, req, res)
+            @routeHandler.handleRequest(route, req, res)
           )
         )
       )
