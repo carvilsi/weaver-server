@@ -14,6 +14,9 @@ class EventBus
     
   emit: (event, arg1, arg2, arg3) ->
     @eventEmitter.emit(event, arg1, arg2, arg3)
+
+  filter: (event, func) ->
+    @eventEmitter.filter(event, func)
     
 
 Registry = require('registry')
