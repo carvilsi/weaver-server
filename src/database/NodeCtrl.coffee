@@ -5,9 +5,9 @@ handler = new OperationHandler()
 
     
 bus.on('read', (req, res)->
-  res.promise(handler.readNode(req.payload))
+  handler.readNode(req.payload)
 )
 
 bus.on('write', (req, res)->
-  res.promise(handler.write(req.payload))
+  handler.write(req.payload)
 )
