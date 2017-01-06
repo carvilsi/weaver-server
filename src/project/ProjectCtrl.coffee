@@ -6,21 +6,15 @@ createUri = (suffix) ->
   "#{config.get('services.project.endpoint')}/#{suffix}"
 
 doCall = (suffix, parameterName) -> (req, res) ->
-  if parameterName?
-    parameter = req.payload[parameterName]
-    if parameter?
-      callParameter = suffix + parameter
-    else
-      res.error("Expects #{parameterName} parameter")
-      return
+  if parameterName? and !req.payload[parameterName]?
+    res.error("Expects #{parameterName} parameter")
   else
-    callParameter = suffix
-
-  res.promise(
-    rp({
-      uri: createUri(callParameter)
-    })
-  )
+    callParameter = suffix + (req.payload[parameterName] if parameterName?)
+    res.promise(
+      rp({
+        uri: createUri(callParameter)
+      })
+    )
 
 bus.on('project', doCall("list"))
 bus.on('project.create', doCall("create/", "name"))
