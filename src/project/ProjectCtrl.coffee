@@ -5,28 +5,23 @@ rp     = require('request-promise')
 createUri = (suffix) ->
   "#{config.get('services.project.endpoint')}/#{suffix}"
 
-doCall = (res, suffix) ->
+doCall = (suffix, parameterName) -> (req, res) ->
+  if parameterName?
+    parameter = req.payload[parameterName]
+    if parameter?
+      callParameter = suffix + parameter
+    else
+      res.error("Expects #{parameterName} parameter")
+      return
+  else
+    callParameter = suffix
+
   res.promise(
     rp({
-      uri: createUri(suffix)
+      uri: createUri(callParameter)
     })
   )
 
-bus.on('project', (req, res) ->
-  doCall(res, "list")
-)
-
-bus.on('project.create', (req, res) ->
-  if !req.payload.name?
-    res.error("Expects name parameter")
-  else
-    doCall(res, "create/#{req.payload.name}")
-)
-
-bus.on('project.delete', (req, res) ->
-  if !req.payload.id?
-    res.error("Expects id parameter")
-  else
-    doCall(res, "delete/#{req.payload.id}")
-)
-
+bus.on('project', doCall("list"))
+bus.on('project.create', doCall("create/", "name"))
+bus.on('project.delete', doCall("delete/", "id"))
