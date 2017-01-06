@@ -1,4 +1,6 @@
-Promise = require('bluebird')
+Promise     = require('bluebird')
+Error       = require('weaver-commons').Error
+WeaverError = require('weaver-commons').WeaverError
 
 module.exports =
 class HTTP 
@@ -19,7 +21,8 @@ class HTTP
          try
            req.payload = JSON.parse(req.payload)
          catch error
-           res.status(400).send("Invalid json: #{error}")
+           res.status(400).send(Error(WeaverError.INVALID_JSON, "Invalid json: #{error}"))
+           return
 
          res.ok    = -> res.status(200).send()
          res.error = (error) -> res.status(503).send(error)
