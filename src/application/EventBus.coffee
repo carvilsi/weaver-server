@@ -1,23 +1,29 @@
-events = require('events')
-
-EventEmitterEnhancer = require('event-emitter-enhancer')
-
 module.exports=
 
 class EventBus
   constructor: (@name) ->
-    EnhancedEventEmitter = EventEmitterEnhancer.extend(events.EventEmitter)
-    @eventEmitter = new EnhancedEventEmitter()
+    @filters = {}
+    @listeners = {}
 
   on: (event, func) ->
-    @eventEmitter.on(event, func)
+    @listeners[event] = [] if !@listeners[event]?
+    @listeners[event].push(func)
+    
+  fire: (event, arg1, arg2, arg3) ->
+    promises = []
+    promises.push(f(arg1, arg2, arg3)) for f in @listeners[event]
+    Promise.all(promises)
     
   emit: (event, arg1, arg2, arg3) ->
-    @eventEmitter.emit(event, arg1, arg2, arg3)
+    if !@filters[event]?
+      @fire(event, arg1, arg2, arg3)
+    else
+      @filters[event](arg1, arg2, arg3).then(=>
+        @fire(event, arg1, arg2, arg3)
+      )
 
   filter: (event, func) ->
-    @eventEmitter.filter(event, func)
-    
+    @filters[event] = func
 
 Registry = require('registry')
-module.exports = new Registry(EventBus)  
+module.exports = new Registry(EventBus)

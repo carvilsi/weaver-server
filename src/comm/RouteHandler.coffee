@@ -25,16 +25,23 @@ class RouteHandler
       return
 
 
-    # Add promise call
-    res.promise = (promise) ->
-      promise.then((response) ->
-        response = "OK" if not response?
-        res.send(response)
-      ).catch((err) ->
-        res.error(err)
-      )
+    # # Add promise call
+    # res.promise = (promise) ->
+    #   promise.then((response) ->
+    #     response = "OK" if not response?
+    #     res.send(response)
+    #   ).catch((err) ->
+    #     res.error(err)
+    #   )
 
     @bus.emit(route, req, res)
+    .then((response)->
+      response = "OK" if not response?
+      res.send(response)
+    )
+    .catch((e) ->
+      res.error(e)
+    )
 
 
 Registry = require('registry')
