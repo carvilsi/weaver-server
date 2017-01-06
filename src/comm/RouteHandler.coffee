@@ -15,16 +15,7 @@ class RouteHandler
   allRoutes: ->
     @getRoutes.concat(@postRoutes)
     
-  handleGet: (route, req, res) ->
-    # Test payload
-    try
-      req.payload = JSON.parse(req.payload)
-    catch error
-      console.log(error)
-      #res.send(ERROR('invalid json payload', req.payload))
-      return
-
-
+  handleRequest: (route, req, res) ->
     # Add promise call
     res.promise = (promise) ->
       promise.then((response) ->

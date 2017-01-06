@@ -16,6 +16,7 @@ paths = [
   'auth'
   'comm'
   'database'
+  'project'
 ]
 require('app-module-path').addPath('src/' + path) for path in paths
 
@@ -25,6 +26,7 @@ runlist = [
   './routes'
   'ApplicationCtrl'
   'NodeCtrl'
+  'ProjectCtrl'
 ]
 require(run) for run in runlist
 
