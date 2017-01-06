@@ -7,7 +7,6 @@ Promise      = require('bluebird')
 
 
 createUri = (suffix) ->
-  console.log "#{config.get('services.flock.prot')}://#{config.get('services.flock.host')}:#{config.get('services.flock.port')}#{config.get('services.flock.endPoint')}/#{suffix}"
   "#{config.get('services.flock.prot')}://#{config.get('services.flock.host')}:#{config.get('services.flock.port')}#{config.get('services.flock.endPoint')}/#{suffix}"
 
 doLogInCall = (res, suffix, usr, pass) ->
@@ -17,12 +16,7 @@ doLogInCall = (res, suffix, usr, pass) ->
     uri: createUri(suffix),
     headers:{'Authorization':auth},
     json: true
-  }).then((res) ->
-    res
-  )
-  .catch((err) ->
-    err
-  )
+  })
 
 doPermissionCall = (res, suffix, token) ->
   rp({
@@ -30,12 +24,7 @@ doPermissionCall = (res, suffix, token) ->
     uri: createUri(suffix),
     headers:{'Authorization':token},
     json: true
-  }).then((res) ->
-    Promise.resolve(res)
-  )
-  .catch((err) ->
-    Promise.reject()
-  )
+  })
   
   
 ###
