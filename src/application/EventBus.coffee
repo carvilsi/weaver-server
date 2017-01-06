@@ -10,8 +10,7 @@ class EventBus
     @listeners[event].push(func)
     
   fire: (event, arg1, arg2, arg3) ->
-    promises = []
-    promises.push(f(arg1, arg2, arg3)) for f in @listeners[event]
+    promises = ((f(arg1, arg2, arg3)) for f in @listeners[event])
     Promise.all(promises)
     
   emit: (event, arg1, arg2, arg3) ->

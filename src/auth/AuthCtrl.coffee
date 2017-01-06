@@ -7,7 +7,7 @@ Promise      = require('bluebird')
 
 
 createUri = (suffix) ->
-  "#{config.get('services.flock.prot')}://#{config.get('services.flock.host')}:#{config.get('services.flock.port')}#{config.get('services.flock.endPoint')}/#{suffix}"
+  "#{config.get('services.flock.endPoint')}/#{suffix}"
 
 doLogInCall = (res, suffix, usr, pass) ->
   auth = 'Basic ' + new Buffer(usr + ':' + pass).toString('base64')
