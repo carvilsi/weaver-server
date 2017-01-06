@@ -9,7 +9,7 @@ doCall = (suffix, parameterName) -> (req, res) ->
   if parameterName? and !req.payload[parameterName]?
     res.error("Expects #{parameterName} parameter")
   else
-    callParameter = suffix + (req.payload[parameterName] if parameterName?)
+    callParameter = suffix + (if parameterName? then req.payload[parameterName] else "")
     res.promise(
       rp({
         uri: createUri(callParameter)
