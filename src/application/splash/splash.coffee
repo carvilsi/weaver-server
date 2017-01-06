@@ -27,6 +27,7 @@ _ "Connector:  #{conf.get('services.connector.host')}:#{conf.get('services.conne
 _ "Redis:      #{conf.get('services.redis.host')}:#{conf.get('services.redis.port')}"
 _ "ChirQL:     #{conf.get('services.chirql.host')}:#{conf.get('services.chirql.port')}"
 _ "Flock:      #{conf.get('services.flock.host')}:#{conf.get('services.flock.port')}"
+_ "Project:    #{conf.get('services.project.endpoint')}"
 _ ""
 _ "# Logging"
 _ "Console:   #{conf.get('logging.console')}"
