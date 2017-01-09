@@ -16,7 +16,6 @@ module.exports=
       register Action.CREATE_NODE,              'CreateNode'
       register Action.UPDATE_NODE_ATTRIBUTE,    'UpdateNodeAttribute'
       register Action.REMOVE_NODE_ATTRIBUTE,    'RemoveNodeAttribute'
-      
     readNode: () ->
       Promise.resolve()
       
