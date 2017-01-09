@@ -58,6 +58,6 @@
     }
   },
   "bin": {
-    "weaver-server": "./lib/run.js"
+    "weaver-server": "./lib/index.js"
   }
 }

@@ -5,7 +5,7 @@ handler = new OperationHandler()
 
     
 bus.on('read', (req, res)->
-  handler.readNode(req.payload)
+  handler.readNode(req.payload.id)
 )
 
 bus.on('write', (req, res)->

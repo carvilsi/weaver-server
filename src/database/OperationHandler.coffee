@@ -1,22 +1,20 @@
 Promise      = require('bluebird')
 Error        = require('weaver-commons').Error
 WeaverError  = require('weaver-commons').WeaverError
-Action       = require('weaver-commons').WriteOperation.Action
+DatabaseConnection = require('DatabaseConnection')
     
 
 module.exports=
   class OperationHandler
     
     constructor: ->
-      # Define handlers
-      @handler = {}
-      register = (code, operation) =>
-        @handler[code] = require('./operation/' + operation)
+      @connection = new DatabaseConnection('http://localhost:9474')
 
-    readNode: () ->
-      Promise.resolve()
+
+    readNode: (id) ->
+
+      @connection.read(id)
       
     write: (operations) ->
-        
-      promises = (@handler[op.code](op) for op in operations)
-      Promise.all(promises)
+
+      @connection.send(operations)
