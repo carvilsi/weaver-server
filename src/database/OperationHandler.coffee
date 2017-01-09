@@ -13,9 +13,6 @@ module.exports=
       register = (code, operation) =>
         @handler[code] = require('./operation/' + operation)
 
-      register Action.CREATE_NODE,              'CreateNode'
-      register Action.UPDATE_NODE_ATTRIBUTE,    'UpdateNodeAttribute'
-      register Action.REMOVE_NODE_ATTRIBUTE,    'RemoveNodeAttribute'
     readNode: () ->
       Promise.resolve()
       
