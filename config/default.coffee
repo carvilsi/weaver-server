@@ -17,9 +17,6 @@ module.exports =
     redis:
       host: 'localhost'
       port: 6379
-    connector:
-      host: 'localhost'
-      port: 9474
     chirql:
       host: 'localhost'
       port: 9573

@@ -1,7 +1,7 @@
 Promise      = require('bluebird')
 Error        = require('weaver-commons').Error
 WeaverError  = require('weaver-commons').WeaverError
-Code         = require('weaver-commons').WriteOperation.Code
+Action       = require('weaver-commons').WriteOperation.Action
     
 
 handler = (operation) ->
