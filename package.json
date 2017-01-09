@@ -25,11 +25,12 @@
     "moment": "^2.13.0",
     "mustache-express": "^1.2.2",
     "request": "^2.74.0",
+    "request-promise": "^4.1.1",
     "socket.io": "1.4.5",
     "tmp": "0.0.28",
+    "weaver-commons": "2.0.0-beta.1",
     "weaver-sdk": "2.0.0-beta.1",
-    "winston": "^2.2.0",
-    "weaver-commons": "2.0.0-beta.1"
+    "winston": "^2.2.0"
   },
   "devDependencies": {
     "blanket": "^1.2.3",
@@ -46,7 +47,7 @@
     "npm": ">=3.10"
   },
   "scripts": {
-    "start": "node ./lib/index.js",
+    "start": "./node_modules/coffee-script/bin/coffee src/index.coffee",
     "prepublish": "./node_modules/coffee-script/bin/coffee -o lib -c src && echo '#!/usr/bin/env node' | cat - ./lib/index.js > ./lib/index-exe.js && mv ./lib/index-exe.js ./lib/index.js",
     "test": "./node_modules/.bin/mocha && ./node_modules/.bin/istanbul report"
   },

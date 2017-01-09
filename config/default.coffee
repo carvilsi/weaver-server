@@ -22,7 +22,10 @@ module.exports =
       port: 9573
     flock:
       host: 'localhost'
-      port: 7343
+      port: 4567
+      endpoint:'http://localhost:4567/api/v1'
+    project:
+      endpoint: 'http://localhost:9888/api/v1'
 
   logging:
     console: 'ERROR'

@@ -188,6 +188,9 @@ messages = [
   "Go ahead hold your breath and do ironman plank till loading complete"
   "Bored of slow loading spinner buy more RAM!"
   "Help I'm trapped in a loader!"
+  "Keep on believing, make all the things and have fun during the day"
+  "Keep calm and finish that s**t"
+  "It is not a bug it is an undocumented feature"
 ]
 
 # Returns a random integer between min (inclusive) and max (inclusive)

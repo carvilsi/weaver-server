@@ -1,6 +1,6 @@
 # __          __                          _____
 # \ \        / /                         / ____|
-#  \ \  /\  / /__  __ ___   _____ _ __  | (___   ___ _ ____   _____ _ __ 
+#  \ \  /\  / /__  __ ___   _____ _ __  | (___   ___ _ ____   _____ _ __
 #   \ \/  \/ / _ \/ _` \ \ / / _ \ '__|  \___ \ / _ \ '__\ \ / / _ \ '__|
 #    \  /\  /  __/ (_| |\ V /  __/ |     ____) |  __/ |   \ V /  __/ |
 #     \/  \/ \___|\__,_| \_/ \___|_|    |_____/ \___|_|    \_/ \___|_|
@@ -16,6 +16,7 @@ paths = [
   'auth'
   'comm'
   'database'
+  'project'
 ]
 require('app-module-path').addPath('src/' + path) for path in paths
 
@@ -25,6 +26,8 @@ runlist = [
   './routes'
   'ApplicationCtrl'
   'NodeCtrl'
+  'AuthCtrl'
+  'ProjectCtrl'
 ]
 require(run) for run in runlist
 

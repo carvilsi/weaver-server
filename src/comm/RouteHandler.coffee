@@ -21,10 +21,9 @@ class RouteHandler
       req.payload = JSON.parse(req.payload)
     catch error
       console.log(error)
-      #res.send(ERROR('invalid json payload', req.payload))
       return
 
-
+  handleRequest: (route, req, res) ->
     # Add promise call
     res.promise = (promise) ->
       promise.then((response) ->
@@ -35,6 +34,13 @@ class RouteHandler
       )
 
     @bus.emit(route, req, res)
+    .then((response)->
+      response = "OK" if not response?
+      res.send(response)
+    )
+    .catch((e) ->
+      res.error(e)
+    )
 
 
 Registry = require('registry')
