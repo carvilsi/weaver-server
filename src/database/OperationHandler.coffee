@@ -10,11 +10,8 @@ module.exports=
     constructor: ->
       @connection = new DatabaseConnection('http://localhost:9474')
 
-
-    readNode: (id) ->
-
+    read: (id) ->
       @connection.read(id)
       
     write: (operations) ->
-
-      @connection.send(operations)
+      @connection.write(operations)
