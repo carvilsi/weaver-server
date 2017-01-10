@@ -6,7 +6,7 @@
         <link rel="icon" type="image/png" href="img/favicon.png">
         <script type="application/javascript" src="sdk/weaver-sdk.full.js"></script>
         <script>
-            window.weaver = new Weaver().connect(window.location.href);
+            Weaver.initialize(window.location.href)
         </script>
         <style>
             body {
