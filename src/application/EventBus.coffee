@@ -11,7 +11,11 @@ class EventBus
     
   fire: (event, arg1, arg2, arg3) ->
     promises = ((f(arg1, arg2, arg3)) for f in @listeners[event])
-    Promise.all(promises)
+    Promise.all(promises).then((result) ->
+      
+      # Return single result if only 1 listener responded, else the array of results
+      if result.length is 1 then result[0] else result
+    )
     
   emit: (event, arg1, arg2, arg3) ->
     if !@filters[event]?

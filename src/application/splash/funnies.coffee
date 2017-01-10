@@ -191,6 +191,7 @@ messages = [
   "Keep on believing, make all the things and have fun during the day"
   "Keep calm and finish that s**t"
   "It is not a bug it is an undocumented feature"
+  "Booting Io, Ganymede, Europa and Callisto into orbit..."
 ]
 
 # Returns a random integer between min (inclusive) and max (inclusive)

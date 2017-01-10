@@ -26,15 +26,6 @@ class RouteHandler
   handleRequest: (route, req, res) ->
     
     if route
-      # Add promise call
-      res.promise = (promise) ->
-        promise.then((response) ->
-          response = "OK" if not response?
-          res.send(response)
-        ).catch((err) ->
-          res.error(err)
-        )
-        
       @bus.emit(route, req, res)
       .then((response)->
         response = "OK" if not response?
