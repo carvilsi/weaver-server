@@ -189,6 +189,9 @@ messages = [
   "Keep calm and finish that s**t"
   "It is not a bug it is an undocumented feature"
   "Booting Io, Ganymede, Europa and Callisto into orbit..."
+  "Cogito ergo sum."
+  "Power and Thermal Calibration in progress..."
+  "Light and heat creates and violently reacts water into dropped sodium."
 ]
 
 # Returns a random integer between min (inclusive) and max (inclusive)
