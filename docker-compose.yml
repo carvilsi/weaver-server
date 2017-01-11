@@ -1,8 +1,8 @@
 version: '2'
 services:
-  virtuoso:
-    image: tenforce/virtuoso:1.0.0-virtuoso7.2.2
-    expose: 
+  tenforce-virtuoso:
+    image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
+    expose:
      - "1111"
      - "8890"
     ports:
@@ -13,32 +13,18 @@ services:
      - SPARQL_UPDATE=true
      - DEFAULT_GRAPH=http://www.example.com/my-graph
 
-#  redis:
-#    image: redis:3.2
-#    expose:
-#     - "6379"
-#    ports:
-#     - "6379:6379"
-#    command: redis-server --appendonly yes
-
-#  weaver:
-#    image: sysunite/weaver-server-virtuoso:0.4.1
-#    ports:
-#     - "9487:9487"
-#    depends_on:
-#      - virtuoso
-#      - redis
-#    links:
-#      - virtuoso
-#      - redis
-#    environment:
-#      - PORT=9487
-#      - WIPE_ENABLED=true
-#      - REDIS_HOST=redis
-#      - REDIS_PORT=6379
-#      - VIRTUOSO_HOST=virtuoso
-#      - VIRTUOSO_PORT=1111
-#      - VIRTUOSO_CHECK_PORT=8890
-#      - VIRTUOSO_PASSWORD=myDbaPassword
-#      - READ_TOKEN=adsfasdf
-#      - WRITE_TOKEN=fkdskdff
+  weaver-database-virtuoso:
+    image: sysunite/weaver-database-virtuoso:0.0.3
+    expose:
+     - "9474"
+    ports:
+     - "9474:9474"
+    depends_on:
+     - tenforce-virtuoso
+    links:
+     - tenforce-virtuoso
+    environment:
+      - WEAVER_VIRTUOSO_SERVICE_PORT=9474
+      - VIRTUOSO_DB_USER=dba
+      - VIRTUOSO_DB_PASSWORD=myDbaPassword
+      - VIRTUOSO_DB_PATH=jdbc:virtuoso://tenforce-virtuoso:1111
