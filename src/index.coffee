@@ -25,6 +25,7 @@ paths = [
   'comm'
   'database'
   'project'
+  'auth/schemas'
 ]
 require('app-module-path').addPath('src/' + path) for path in paths
 
