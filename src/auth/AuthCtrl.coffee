@@ -36,6 +36,13 @@ doSignUpCall = (res, suffix, token, newUserCredentials) ->
     json: true
   })
   
+doSignOffCall = (res, suffix, token, user) ->
+  rp({
+    method: 'DELETE',
+    uri: createUri(suffix),
+    headers: {'Authorization':token},
+    json: true
+  })
 
 validateJSONSchema = (jsonReq, jsonSch) ->
   v = new Validator()
@@ -59,6 +66,8 @@ bus.on('logIn', (req, res) ->
     doLogInCall(res, 'token',req.payload.user,req.payload.password)
 )
 
+
+
 ###
  Basic sign up action.
  Only an authentifyed user (with valid token) can performs this action (creates a user)
@@ -77,6 +86,21 @@ bus.on('signUp', (req,res) ->
     doSignUpCall(res,'users',req.payload.access_token,req.payload.newUserCredentials)
 )
 
+###
+  Deletes a user from weaver-flock
+  http://localhost:9487/signOff
+  {"user":"aquarius","access_token":"eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1zIjpbImRlbGV0ZV9hcHBsaWNhdGlvbiIsInJlYWRfYXBwbGljYXRpb24iLCJjcmVhdGVfcm9sZSIsImRlbGV0ZV9yb2xlIiwiY3JlYXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfYXBwbGljYXRpb24iLCJkZWxldGVfZGlyZWN0b3J5IiwiZGVsZXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfZGlyZWN0b3J5IiwicmVhZF91c2VyIiwiY3JlYXRlX3VzZXIiLCJyZWFkX3Blcm1pc3Npb24iLCJkZWxldGVfdXNlciIsInJlYWRfcm9sZSIsInJlYWRfZGlyZWN0b3J5Il0sInN1YiI6Im9yZy5wYWM0ai5tb25nby5wcm9maWxlLk1vbmdvUHJvZmlsZSNwaG9lbml4IiwiJGludF9yb2xlcyI6WyJwaG9lbml4Il0sIl9pZCI6IjU4NzYwMTRjNDEwZGY4MDAwMWQ3NWNiYyIsImV4cCI6MTQ4NDIyMzYxNywiaWF0IjoxNDg0MTM3MjE3fQ.bKt1nsTm5srgdZKJb-PUvZDkkTlZ1xCLSuffzimmE6xui27C5QuTr1-yjzqwxE97WwiNxETvLE3_AnAF9nXjnXy9815CxHkjb6wVC2T6NB6tMdosRn7i8xNPWpdlUwGDJIjiwtp9OUE7k3CCZj9SWAfavOvNzlclEtSC2a8jaKJWqQba7_pgOHPXeAAvjXsyI7UYUiSKNXMKQN1UITCxI7CONKYNFpDiZT5MfyXkH4ShX5poZmElO4FNGelManIDmdsUMFsjD7qxXpcL0-vXbbVgPzX04hqNwOSvHKMP2cRTqe2IDJ5wNpgipX6wsVqHNe0xP56kqXlZLd2U5rxXiQ"}
+###
+
+bus.on('signOff', (req, res) ->
+  if !req.payload.access_token?
+    Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
+  else if !req.payload.user?
+    Promise.reject(Error WeaverError.USERNAME_MISSING, 'USERNAME_MISSING')
+  else
+    doSignOffCall(res,"users/#{req.payload.user}",req.payload.access_token)
+  
+)
 
 ###
  Adding the filters, by now just for reading
