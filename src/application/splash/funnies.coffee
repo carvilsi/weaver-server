@@ -192,6 +192,7 @@ messages = [
   "Keep calm and finish that s**t"
   "It is not a bug it is an undocumented feature"
   "Booting Io, Ganymede, Europa and Callisto into orbit..."
+  "I'm afraid I can't let you do that #{process.env.USER}"
 ]
 
 # Returns a random integer between min (inclusive) and max (inclusive)
