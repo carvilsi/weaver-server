@@ -126,6 +126,11 @@ bus.filter('read', (req, res) ->
   else if !req.payload.access_token?
     Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
   else
-    doPermissionCall(res,"users/permissions/#{req.payload.user}",req.payload.access_token)
+    doPermissionCall(res,"users/permissions/#{req.payload.user}",req.payload.access_token).then((res)->
+      if 'read_role' in res
+        Promise.resolve()
+      else
+        Promise.reject(Error WeaverError.INVALID_SESSION_TOKEN,'INVALID_SESSION_TOKEN')
+    )
 )
 
