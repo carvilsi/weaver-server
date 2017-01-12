@@ -5,5 +5,6 @@ module.exports =
 
   services:
     project:
-      endpoint: "SERVICES_PROJECT_ENDPOINT"
-
+      endpoint: "SERVICES_PROJECT_ENDPOINT"    
+    database:
+      endpoint: "SERVICES_DATABASE_ENDPOINT"
