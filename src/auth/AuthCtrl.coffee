@@ -63,7 +63,11 @@ bus.on('logIn', (req, res) ->
   else if !validateJSONSchema(req.payload,authSchemas.userCredentials)
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'DATATYPE_INVALID')
   else
-    doLogInCall(res, 'token',req.payload.user,req.payload.password)
+    doLogInCall(res, 'token',req.payload.user,req.payload.password).then((re)->
+      Promise.resolve(re)
+    ).catch((err) ->
+      Promise.reject(Error WeaverError.USERNAME_NOT_FOUND,'USERNAME_NOT_FOUND')
+    )
 )
 
 
@@ -100,6 +104,16 @@ bus.on('signOff', (req, res) ->
   else
     doSignOffCall(res,"users/#{req.payload.user}",req.payload.access_token)
   
+)
+
+bus.on('permissions', (req, res) ->
+  console.log req
+  if !req.payload.access_token?
+    Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
+  else if !req.payload.user?
+    Promise.reject(Error WeaverError.USERNAME_MISSING, 'USERNAME_MISSING')
+  else
+    doPermissionCall(res,"users/permissions/#{req.payload.user}",req.payload.access_token)
 )
 
 ###
