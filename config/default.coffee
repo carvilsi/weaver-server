@@ -14,9 +14,8 @@ module.exports =
       enable: true
       
   services:
-    redis:
-      host: 'localhost'
-      port: 6379
+    database:
+      endpoint: 'http://localhost:9474'
     chirql:
       host: 'localhost'
       port: 9573
