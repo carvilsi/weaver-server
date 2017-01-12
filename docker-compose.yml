@@ -14,7 +14,7 @@ services:
      - DEFAULT_GRAPH=http://www.example.com/my-graph
 
   weaver-database-virtuoso:
-    image: sysunite/weaver-database-virtuoso:0.0.3
+    image: sysunite/weaver-database-virtuoso:0.0.4
     expose:
      - "9474"
     ports:
