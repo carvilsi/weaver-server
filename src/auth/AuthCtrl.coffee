@@ -107,7 +107,6 @@ bus.on('signOff', (req, res) ->
 )
 
 bus.on('permissions', (req, res) ->
-  console.log req
   if !req.payload.access_token?
     Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
   else if !req.payload.user?
