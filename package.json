@@ -21,6 +21,7 @@
     "event-emitter-enhancer": "^1.0.23",
     "express": "^4.13.4",
     "ioredis": "2.0.1",
+    "jsonschema": "^1.1.1",
     "lokijs": "^1.4.1",
     "moment": "^2.13.0",
     "mustache-express": "^1.2.2",
@@ -58,6 +59,6 @@
     }
   },
   "bin": {
-    "weaver-server": "./lib/run.js"
+    "weaver-server": "./lib/index.js"
   }
 }

@@ -37,7 +37,6 @@ messages = [
   "The bits are flowing slowly today"
   "Dig on the 'X' for buried treasure... ARRR!"
   "It's still faster than you could draw it"
-  "The last time I tried this the monkey didn't survive. Let's hope it works better this time."
   "I should have had a V8 this morning."
   "My other loading screen is much faster."
   "Testing on Timmy... We're going to need another Timmy."
@@ -91,7 +90,6 @@ messages = [
   "Load it and they will come"
   "Convincing AI not to turn evil.."
   "There is no spoon. Because we are not done loading it"
-  "Your left thumb points to the right and your right thumb points to the left."
   "How did you get here?"
   "Wait do you smell something burning?"
   "Computing the secret to life the universe and everything."
@@ -130,7 +128,6 @@ messages = [
   "What is the airspeed velocity of an unladen swallow?"
   "Hello IT... Have you tried forcing an unexpected reboot?"
   "They just toss us away like yesterday's jam."
-  "They're fairly regular the beatings yes. I'd say we're on a bi-weekly beating."
   "The Elders of the Internet would never stand for it."
   "Space is invisible mind dust and stars are but wishes."
   "Didn't know paint dried so quickly."
@@ -193,6 +190,9 @@ messages = [
   "It is not a bug it is an undocumented feature"
   "Booting Io, Ganymede, Europa and Callisto into orbit..."
   "I'm afraid I can't let you do that #{process.env.USER}"
+  "Cogito ergo sum."
+  "Power and Thermal Calibration in progress..."
+  "Light and heat creates and violently reacts water into dropped sodium."
 ]
 
 # Returns a random integer between min (inclusive) and max (inclusive)
