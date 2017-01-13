@@ -24,7 +24,7 @@ module.exports =
       port: 4567
       endpoint:'http://localhost:4567/api/v1'
     project:
-      endpoint: 'http://localhost:9888/api/v1'
+      endpoint: 'http://localhost:9888'
 
   logging:
     console: 'ERROR'

@@ -189,6 +189,7 @@ messages = [
   "Keep calm and finish that s**t"
   "It is not a bug it is an undocumented feature"
   "Booting Io, Ganymede, Europa and Callisto into orbit..."
+  "I'm afraid I can't let you do that #{process.env.USER}"
   "Cogito ergo sum."
   "Power and Thermal Calibration in progress..."
   "Light and heat creates and violently reacts water into dropped sodium."
