@@ -63,7 +63,11 @@ bus.on('logIn', (req, res) ->
   else if !validateJSONSchema(req.payload,authSchemas.userCredentials)
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'DATATYPE_INVALID')
   else
-    doLogInCall(res, 'token',req.payload.user,req.payload.password)
+    doLogInCall(res, 'token',req.payload.user,req.payload.password).then((re)->
+      Promise.resolve(re)
+    ).catch((err) ->
+      Promise.reject(Error WeaverError.USERNAME_NOT_FOUND,'USERNAME_NOT_FOUND')
+    )
 )
 
 
@@ -72,47 +76,61 @@ bus.on('logIn', (req, res) ->
  Basic sign up action.
  Only an authentifyed user (with valid token) can performs this action (creates a user)
  http://localhost:9487/signUp
- {"newUserCredentials":{"userName": "aquarius","userEmail": "aqua@universe.uni","userPassword": "aquarius","directoryName":"SYSUNITE"},"access_token":"eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1zIjpbImRlbGV0ZV9hcHBsaWNhdGlvbiIsInJlYWRfYXBwbGljYXRpb24iLCJjcmVhdGVfcm9sZSIsImRlbGV0ZV9yb2xlIiwiY3JlYXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfYXBwbGljYXRpb24iLCJkZWxldGVfZGlyZWN0b3J5IiwiZGVsZXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfZGlyZWN0b3J5IiwicmVhZF91c2VyIiwiY3JlYXRlX3VzZXIiLCJyZWFkX3Blcm1pc3Npb24iLCJkZWxldGVfdXNlciIsInJlYWRfcm9sZSIsInJlYWRfZGlyZWN0b3J5Il0sInN1YiI6Im9yZy5wYWM0ai5tb25nby5wcm9maWxlLk1vbmdvUHJvZmlsZSNwaG9lbml4IiwiJGludF9yb2xlcyI6WyJwaG9lbml4Il0sIl9pZCI6IjU4NmY1OGNiYTFkMTQ3MTk0OTM2YTI2YSIsImV4cCI6MTQ4NDE1MDM1MCwiaWF0IjoxNDg0MDYzOTUwfQ.pfuWfiD3G6ZwLcAXaR_Ry4uWidOEpEVM1FHLQ9Bfs6RD0tpLxGtEtWnTX3h5F3AHqUkLP-D_e8k_cJhgLqxOu9Fh8AWcjllUEPcm2r8YshgeOuiGRNOCxMbRHHpl1_15sniXf6G4bLoUtAO402SDqdcwRy2flPLOunYbXCUz_kuMaSaMTJcKVGcmTdL5OM6GxwiNxzT6UXW7hzRkC5etUtDFVHSYmQBj9bBhatkPjOnuliXr6hOjvHjCOHKPFmb8W9Zy429mXMcc40AqeyUnDEN9Y7IXd-FEZaKNbf3BPf17p6dHtD7RrXj40XsMrIeO-zeVx6WKJElc3W7dHvg5_g"}
+ {"newUserCredentials":{"userName": "aquarius","userEmail": "aqua@universe.uni","userPassword": "aquarius","directoryName":"SYSUNITE"},"accessToken":"eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1zIjpbImRlbGV0ZV9hcHBsaWNhdGlvbiIsInJlYWRfYXBwbGljYXRpb24iLCJjcmVhdGVfcm9sZSIsImRlbGV0ZV9yb2xlIiwiY3JlYXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfYXBwbGljYXRpb24iLCJkZWxldGVfZGlyZWN0b3J5IiwiZGVsZXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfZGlyZWN0b3J5IiwicmVhZF91c2VyIiwiY3JlYXRlX3VzZXIiLCJyZWFkX3Blcm1pc3Npb24iLCJkZWxldGVfdXNlciIsInJlYWRfcm9sZSIsInJlYWRfZGlyZWN0b3J5Il0sInN1YiI6Im9yZy5wYWM0ai5tb25nby5wcm9maWxlLk1vbmdvUHJvZmlsZSNwaG9lbml4IiwiJGludF9yb2xlcyI6WyJwaG9lbml4Il0sIl9pZCI6IjU4NmY1OGNiYTFkMTQ3MTk0OTM2YTI2YSIsImV4cCI6MTQ4NDE1MDM1MCwiaWF0IjoxNDg0MDYzOTUwfQ.pfuWfiD3G6ZwLcAXaR_Ry4uWidOEpEVM1FHLQ9Bfs6RD0tpLxGtEtWnTX3h5F3AHqUkLP-D_e8k_cJhgLqxOu9Fh8AWcjllUEPcm2r8YshgeOuiGRNOCxMbRHHpl1_15sniXf6G4bLoUtAO402SDqdcwRy2flPLOunYbXCUz_kuMaSaMTJcKVGcmTdL5OM6GxwiNxzT6UXW7hzRkC5etUtDFVHSYmQBj9bBhatkPjOnuliXr6hOjvHjCOHKPFmb8W9Zy429mXMcc40AqeyUnDEN9Y7IXd-FEZaKNbf3BPf17p6dHtD7RrXj40XsMrIeO-zeVx6WKJElc3W7dHvg5_g"}
 ###
 
 bus.on('signUp', (req,res) ->
-  if !req.payload.access_token?
+  if !req.payload.accessToken?
     Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
   else if !req.payload.newUserCredentials?
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'DATATYPE_INVALID')
   else if !validateJSONSchema(req.payload.newUserCredentials,authSchemas.newUserCredentials)
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'DATATYPE_INVALID')
   else
-    doSignUpCall(res,'users',req.payload.access_token,req.payload.newUserCredentials)
+    doSignUpCall(res,'users',req.payload.accessToken,req.payload.newUserCredentials)
 )
 
 ###
   Deletes a user from weaver-flock
   http://localhost:9487/signOff
-  {"user":"aquarius","access_token":"eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1zIjpbImRlbGV0ZV9hcHBsaWNhdGlvbiIsInJlYWRfYXBwbGljYXRpb24iLCJjcmVhdGVfcm9sZSIsImRlbGV0ZV9yb2xlIiwiY3JlYXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfYXBwbGljYXRpb24iLCJkZWxldGVfZGlyZWN0b3J5IiwiZGVsZXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfZGlyZWN0b3J5IiwicmVhZF91c2VyIiwiY3JlYXRlX3VzZXIiLCJyZWFkX3Blcm1pc3Npb24iLCJkZWxldGVfdXNlciIsInJlYWRfcm9sZSIsInJlYWRfZGlyZWN0b3J5Il0sInN1YiI6Im9yZy5wYWM0ai5tb25nby5wcm9maWxlLk1vbmdvUHJvZmlsZSNwaG9lbml4IiwiJGludF9yb2xlcyI6WyJwaG9lbml4Il0sIl9pZCI6IjU4NzYwMTRjNDEwZGY4MDAwMWQ3NWNiYyIsImV4cCI6MTQ4NDIyMzYxNywiaWF0IjoxNDg0MTM3MjE3fQ.bKt1nsTm5srgdZKJb-PUvZDkkTlZ1xCLSuffzimmE6xui27C5QuTr1-yjzqwxE97WwiNxETvLE3_AnAF9nXjnXy9815CxHkjb6wVC2T6NB6tMdosRn7i8xNPWpdlUwGDJIjiwtp9OUE7k3CCZj9SWAfavOvNzlclEtSC2a8jaKJWqQba7_pgOHPXeAAvjXsyI7UYUiSKNXMKQN1UITCxI7CONKYNFpDiZT5MfyXkH4ShX5poZmElO4FNGelManIDmdsUMFsjD7qxXpcL0-vXbbVgPzX04hqNwOSvHKMP2cRTqe2IDJ5wNpgipX6wsVqHNe0xP56kqXlZLd2U5rxXiQ"}
+  {"user":"aquarius","accessToken":"eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1zIjpbImRlbGV0ZV9hcHBsaWNhdGlvbiIsInJlYWRfYXBwbGljYXRpb24iLCJjcmVhdGVfcm9sZSIsImRlbGV0ZV9yb2xlIiwiY3JlYXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfYXBwbGljYXRpb24iLCJkZWxldGVfZGlyZWN0b3J5IiwiZGVsZXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfZGlyZWN0b3J5IiwicmVhZF91c2VyIiwiY3JlYXRlX3VzZXIiLCJyZWFkX3Blcm1pc3Npb24iLCJkZWxldGVfdXNlciIsInJlYWRfcm9sZSIsInJlYWRfZGlyZWN0b3J5Il0sInN1YiI6Im9yZy5wYWM0ai5tb25nby5wcm9maWxlLk1vbmdvUHJvZmlsZSNwaG9lbml4IiwiJGludF9yb2xlcyI6WyJwaG9lbml4Il0sIl9pZCI6IjU4NzYwMTRjNDEwZGY4MDAwMWQ3NWNiYyIsImV4cCI6MTQ4NDIyMzYxNywiaWF0IjoxNDg0MTM3MjE3fQ.bKt1nsTm5srgdZKJb-PUvZDkkTlZ1xCLSuffzimmE6xui27C5QuTr1-yjzqwxE97WwiNxETvLE3_AnAF9nXjnXy9815CxHkjb6wVC2T6NB6tMdosRn7i8xNPWpdlUwGDJIjiwtp9OUE7k3CCZj9SWAfavOvNzlclEtSC2a8jaKJWqQba7_pgOHPXeAAvjXsyI7UYUiSKNXMKQN1UITCxI7CONKYNFpDiZT5MfyXkH4ShX5poZmElO4FNGelManIDmdsUMFsjD7qxXpcL0-vXbbVgPzX04hqNwOSvHKMP2cRTqe2IDJ5wNpgipX6wsVqHNe0xP56kqXlZLd2U5rxXiQ"}
 ###
 
 bus.on('signOff', (req, res) ->
-  if !req.payload.access_token?
+  if !req.payload.accessToken?
     Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
   else if !req.payload.user?
     Promise.reject(Error WeaverError.USERNAME_MISSING, 'USERNAME_MISSING')
   else
-    doSignOffCall(res,"users/#{req.payload.user}",req.payload.access_token)
+    doSignOffCall(res,"users/#{req.payload.user}",req.payload.accessToken)
   
+)
+
+bus.on('permissions', (req, res) ->
+  if !req.payload.accessToken?
+    Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
+  else if !req.payload.user?
+    Promise.reject(Error WeaverError.USERNAME_MISSING, 'USERNAME_MISSING')
+  else
+    doPermissionCall(res,"users/permissions/#{req.payload.user}",req.payload.accessToken)
 )
 
 ###
  Adding the filters, by now just for reading
- http://localhost:9487/read?payload={"user":"phoenix","access_token":"eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1zIjpbImRlbGV0ZV9hcHBsaWNhdGlvbiIsInJlYWRfYXBwbGljYXRpb24iLCJjcmVhdGVfcm9sZSIsImRlbGV0ZV9yb2xlIiwiY3JlYXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfYXBwbGljYXRpb24iLCJkZWxldGVfZGlyZWN0b3J5IiwiZGVsZXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfZGlyZWN0b3J5IiwicmVhZF91c2VyIiwiY3JlYXRlX3VzZXIiLCJyZWFkX3Blcm1pc3Npb24iLCJkZWxldGVfdXNlciIsInJlYWRfcm9sZSIsInJlYWRfZGlyZWN0b3J5Il0sInN1YiI6Im9yZy5wYWM0ai5tb25nby5wcm9maWxlLk1vbmdvUHJvZmlsZSNwaG9lbml4IiwiJGludF9yb2xlcyI6WyJwaG9lbml4Il0sIl9pZCI6IjU4NmY1OGNiYTFkMTQ3MTk0OTM2YTI2YSIsImV4cCI6MTQ4NDA0MDQwMSwiaWF0IjoxNDgzOTU0MDAxfQ.H7CEIbc_9157SHrU7VO0aBV9a40AAavPY4HEPm6Qw1AS0mrXWW5Ae4Sv-4lm0PwxvG1LhTsp9ZFW-faeNWhmJN0Aj37ZLLV5MEpFyVIpl91FnA_g0jKHWedRdzX8NvPcNMGqempWc49hgzLyFsm71Zcqp1ah2IaZ_oIHOGahz-DyUzkFI3hEF67iZeYrAfQp42a-Gi40QYUKOUPxbNBfAMQe5QcbyB1Qs75RwXg5AwJknGfyrfz4gNkkIEkAV5kvvoSoLFBsvi-v_NzkgQjh1DQbjim4X8dXIDEq7GX5b8OxEg6zrwKcdEQazdyYm1g8HgerivcdYOBB8Z9HKy3vAQ"}
+ http://localhost:9487/read?payload={"user":"phoenix","accessToken":"eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1zIjpbImRlbGV0ZV9hcHBsaWNhdGlvbiIsInJlYWRfYXBwbGljYXRpb24iLCJjcmVhdGVfcm9sZSIsImRlbGV0ZV9yb2xlIiwiY3JlYXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfYXBwbGljYXRpb24iLCJkZWxldGVfZGlyZWN0b3J5IiwiZGVsZXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfZGlyZWN0b3J5IiwicmVhZF91c2VyIiwiY3JlYXRlX3VzZXIiLCJyZWFkX3Blcm1pc3Npb24iLCJkZWxldGVfdXNlciIsInJlYWRfcm9sZSIsInJlYWRfZGlyZWN0b3J5Il0sInN1YiI6Im9yZy5wYWM0ai5tb25nby5wcm9maWxlLk1vbmdvUHJvZmlsZSNwaG9lbml4IiwiJGludF9yb2xlcyI6WyJwaG9lbml4Il0sIl9pZCI6IjU4NmY1OGNiYTFkMTQ3MTk0OTM2YTI2YSIsImV4cCI6MTQ4NDA0MDQwMSwiaWF0IjoxNDgzOTU0MDAxfQ.H7CEIbc_9157SHrU7VO0aBV9a40AAavPY4HEPm6Qw1AS0mrXWW5Ae4Sv-4lm0PwxvG1LhTsp9ZFW-faeNWhmJN0Aj37ZLLV5MEpFyVIpl91FnA_g0jKHWedRdzX8NvPcNMGqempWc49hgzLyFsm71Zcqp1ah2IaZ_oIHOGahz-DyUzkFI3hEF67iZeYrAfQp42a-Gi40QYUKOUPxbNBfAMQe5QcbyB1Qs75RwXg5AwJknGfyrfz4gNkkIEkAV5kvvoSoLFBsvi-v_NzkgQjh1DQbjim4X8dXIDEq7GX5b8OxEg6zrwKcdEQazdyYm1g8HgerivcdYOBB8Z9HKy3vAQ"}
 ###
 
 bus.filter('read', (req, res) ->
   if !req.payload.user?
     Promise.reject(Error WeaverError.USERNAME_MISSING, 'USERNAME_MISSING')
-  else if !req.payload.access_token?
+  else if !req.payload.accessToken?
     Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
   else
-    doPermissionCall(res,"users/permissions/#{req.payload.user}",req.payload.access_token)
+    doPermissionCall(res,"users/permissions/#{req.payload.user}",req.payload.accessToken).then((res)->
+      if 'read_role' in res
+        Promise.resolve()
+      else
+        Promise.reject(Error WeaverError.INVALID_SESSION_TOKEN,'INVALID_SESSION_TOKEN')
+    )
 )
 

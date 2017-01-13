@@ -9,6 +9,7 @@ WEAVER.GET  "read"                   # Reads a single entity
 WEAVER.POST "write"                  # Execute Create, Update and Delete operations in bulk
 
 WEAVER.GET  "logIn"                   # Execute a log in for an existing user
+WEAVER.GET  "permissions"             # Get the permissions for an existing user
 WEAVER.POST "signUp"                  # Creates new user
 WEAVER.POST "signOff"                  # Deletes an user
 
