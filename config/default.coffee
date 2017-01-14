@@ -2,7 +2,7 @@ module.exports =
   server:
     weaver:
       port: 9487                      # Port to connect to
-      cors: true                      # Allow cross origin requests
+      cors: true                      # Allow cross origin requests ! do ssomething with this
     admin:
       port: 9666
       password: 'yUU2PNzcs!69GZ4B4'

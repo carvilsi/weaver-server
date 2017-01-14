@@ -1,5 +1,4 @@
 module.exports=
-
 class EventBus
   constructor: (@name) ->
     @filters = {}

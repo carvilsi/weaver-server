@@ -8,5 +8,5 @@ bus.on('application.version', (req, res) ->
 
 # Index page
 bus.on('', (req, res) ->
-  res.render('weaver/index-img.html', {server : pjson.version})
+  res.render('index.html', {server : pjson.version})
 )

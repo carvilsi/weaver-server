@@ -1,4 +1,3 @@
-
 class RouteHandler
 
   constructor: (@name) ->

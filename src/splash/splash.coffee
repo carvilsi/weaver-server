@@ -1,6 +1,6 @@
 conf   = require('config')
-ascii  = require('./logo-ascii')
-pack   = require('../../../package.json')
+ascii  = require('./logo')
+pack   = require('../../package.json')
 splash = [] 
 
 BOOL = (val) -> if val then 'ON' else 'OFF'

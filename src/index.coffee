@@ -5,27 +5,19 @@
 #                ~```````~~~~~~~~___________~~~
 #                        ````~~~~~~_____                                     
 #
-#
-# __          __                          _____
-# \ \        / /                         / ____|
-#  \ \  /\  / /__  __ ___   _____ _ __  | (___   ___ _ ____   _____ _ __
-#   \ \/  \/ / _ \/ _` \ \ / / _ \ '__|  \___ \ / _ \ '__\ \ / / _ \ '__|
-#    \  /\  /  __/ (_| |\ V /  __/ |     ____) |  __/ |   \ V /  __/ |
-#     \/  \/ \___|\__,_| \_/ \___|_|    |_____/ \___|_|    \_/ \___|_|
-#
-#     "The secret of getting ahead is getting started." - Mark Twain
-
 
 # Path resolving local directories, making it non-relative accessible from any location.
-# In other words, require('../../../../application/logger') becomes require('logger')
+# In other words, require('../../../../util/logger') becomes require('logger')
 paths = [
   'admin'
   'application'
   'auth'
-  'comm'
-  'database'
-  'project'
   'auth/schemas'
+  'core'
+  'database'
+  'splash'
+  'project'
+  'util'
 ]
 require('app-module-path').addPath('src/' + path) for path in paths
 
@@ -58,4 +50,8 @@ new Server({
 
 # Print splash
 require('colors')
-console.log(require('splash/splash').cyan)
+console.log(require('splash').cyan)
+
+# Play chirp sound
+#player = require('play-sound')()
+#player.play('sounds/chirp.wav')
