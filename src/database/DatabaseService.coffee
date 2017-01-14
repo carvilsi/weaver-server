@@ -8,14 +8,14 @@ class DatabaseService
   read: (id) ->
     rp(
       method: 'GET'
-      uri:    @uri + '/read/' + id
+      uri:    "#{@uri}/read/#{id}"
       json:   true
     )
 
   write: (payload) ->
     rp(
       method: 'POST'
-      uri:    @uri + '/write'
+      uri:    "#{@uri}/write"
       body:   payload
       json:   true
     )

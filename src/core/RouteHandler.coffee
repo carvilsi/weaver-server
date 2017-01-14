@@ -22,20 +22,15 @@ class RouteHandler
       console.log(error)
       return
 
-  handleRequest: (route, req, res) ->
-    
-    if route
-      @bus.emit(route, req, res)
-      .then((response)->
-        response = "OK" if not response?
-        res.send(response)
-      )
-      .catch((e) ->
-        res.error(e)
-      )
-      
-    else
-      @bus.emit(route, req, res)
+  handleRequest: (route, req, res) -> 
+    @bus.emit(route, req, res)
+    .then((response)->
+      response = "OK" if not response?
+      res.send(response)
+    )
+    .catch((e) ->
+      res.error(e)
+    )
 
 
 Registry = require('registry')

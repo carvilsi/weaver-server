@@ -1,57 +1,77 @@
-#                                                    .
-#                                           `      ~~
-#                    ~~~~~~_____         ````  ~~~~~
-#                 ~~~~~~~~~~~~_________~~~~~~~~~~~
-#                ~```````~~~~~~~~___________~~~
-#                        ````~~~~~~_____                                     
-#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                    .                #
+#                                           `      ~~                 #
+#                    ~~~~~~_____         ````  ~~~~~                  #
+#                 ~~~~~~~~~~~~_________~~~~~~~~~~~                    #
+#                ~```````~~~~~~~~___________~~~                       #
+#                        ````~~~~~~_____                              #                      
+#                                                                     #
+#                                                       Weaver Server #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 
 # Path resolving local directories, making it non-relative accessible from any location.
 # In other words, require('../../../../util/logger') becomes require('logger')
-paths = [
+# Note: This must be the first running code in the application
+require('app-module-path').addPath("src/#{path}") for path in [
+  '.'
   'admin'
   'application'
   'auth'
   'auth/schemas'
+  'cli'
   'core'
   'database'
-  'splash'
   'project'
   'util'
 ]
-require('app-module-path').addPath('src/' + path) for path in paths
 
+
+# Load libs
+Promise = require('bluebird')
+conf    = require('config')       # Configuration loads files in the root config directory
+Server  = require('server')
+splash  = require('splash')
+sounds  = require('sounds')
+pjson   = require('../package.json')
 
 # Init routes and controllers by running once
-runlist = [
-  './routes'
+require(run) for run in [
+  'routes'
   'ApplicationCtrl'
-  'NodeCtrl'
   'AuthCtrl'
+  'ErrorHandler'
+  'NodeCtrl'
   'ProjectCtrl'
 ]
-require(run) for run in runlist
 
 
-# Run servers
-Server = require('server')
-conf   = require('config')   # Configuration loads files in the root config directory
-
-new Server({
-  port:   conf.get('server.weaver.port')
+# Init servers
+weaver = new Server({
   routes: 'weaver'
-}).run()
+  views:[
+    {path: '/', file: 'weaver/index.html', vars: {server : pjson.version}}
+  ]  
+  
+  port: conf.get('server.weaver.port')
+  cors: conf.get('server.weaver.cors')
+})
 
-new Server({
-  port:    conf.get('server.admin.port')
+admin = new Server({
   routes: 'admin'
-  host:   'localhost'
-}).run()
+  host:   '127.0.0.1'
+  views:[
+    {path: '/', file: 'admin/index.html', vars: {server : pjson.version}}
+  ]
+  static:
+    '/portal': 'admin'
+    
+  port: conf.get('server.admin.port')
+})
 
-# Print splash
-require('colors')
-console.log(require('splash').cyan)
 
-# Play chirp sound
-#player = require('play-sound')()
-#player.play('sounds/chirp.wav')
+# Run
+Promise.all([weaver.run(), admin.run()]).then(->
+  splash.printLoaded()
+  sounds.loaded()
+)

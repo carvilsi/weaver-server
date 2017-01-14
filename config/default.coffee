@@ -1,10 +1,17 @@
 module.exports =
+  application:
+    sounds:
+      muteAll: false
+      loaded:  true
+      errors:  true
+      
   server:
     weaver:
       port: 9487
       cors: true
     admin:
       port: 9666
+      enablePassword: true
       password: 'yUU2PNzcs!69GZ4B4'
   
   comm:

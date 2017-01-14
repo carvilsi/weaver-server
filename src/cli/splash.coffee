@@ -3,7 +3,8 @@ ascii  = require('./logo')
 pack   = require('../../package.json')
 splash = [] 
 
-BOOL = (val) -> if val then 'ON' else 'OFF'
+BOOL = (val) -> 
+  if val then 'ON' else 'OFF'
 
 _ = (e) -> splash.push(e)
 
@@ -32,6 +33,7 @@ _ "Console:   #{conf.get('logging.console')}"
 _ "File:      #{conf.get('logging.file')}"
 _ ""
 _ "# Settings"
+_ "CORS allow all:  #{BOOL conf.get('server.weaver.cors')}"
 _ "Admin password:  #{conf.get('server.admin.password')}"
 _ ""
 _ require('./funnies')()
@@ -52,4 +54,7 @@ text  = '┌'  + Array(max + 3).join('─') + '┐\n'
 text += '│ ' + compile(line, index) for line, index in splash
 text += '└'  + Array(max + 3).join('─') + '┘'
 
-module.exports = text
+module.exports = 
+  printLoaded: ->
+    require('colors')
+    console.log(text.cyan)
