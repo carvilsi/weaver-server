@@ -17,6 +17,6 @@ doCall = (suffix, parameterName) -> (req, res) ->
       uri: createUri(callParameter)
     })
 
-bus.on('project', doCall("list"))
+bus.on('project',        doCall("list"))
 bus.on('project.create', doCall("create/", "name"))
 bus.on('project.delete', doCall("delete/", "id"))

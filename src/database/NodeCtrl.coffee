@@ -1,13 +1,13 @@
-config       = require('config')
-DbConnection = require('DatabaseConnection')
-bus          = require('EventBus').get('weaver')
+config          = require('config')
+DatabaseService = require('DatabaseService')
+bus             = require('EventBus').get('weaver')
 
-connection = new DbConnection(config.get('services.database.endpoint'))
+db = new DatabaseService(config.get('services.database.endpoint'))
 
 bus.on('read', (req, res)->
-  connection.read(req.payload.nodeId)
+  db.read(req.payload.nodeId)
 )
 
 bus.on('write', (req, res)->
-  connection.write(req.payload)
+  db.write(req.payload)
 )

@@ -1,23 +1,21 @@
 rp = require('request-promise')
 
 module.exports =
-class DatabaseConnection
+class DatabaseService
   
   constructor: (@uri) ->
 
   read: (id) ->
-    options =
+    rp(
       method: 'GET'
       uri:    @uri + '/read/' + id
       json:   true
-
-    rp(options)
+    )
 
   write: (payload) ->
-    options =
+    rp(
       method: 'POST'
       uri:    @uri + '/write'
       body:   payload
       json:   true
-
-    rp(options)
+    )

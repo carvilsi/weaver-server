@@ -1,5 +1,6 @@
 Promise  = require('bluebird')
 socketIO = require('socket.io')
+logger   = require('logger')
 
 module.exports =
 class Socket
@@ -12,8 +13,7 @@ class Socket
 
       # Error handler
       socket.on('error',  (err) ->
-        console.log(err)
-        #logger.log('error', err.stack)
+        logger.log('error', err.stack)
       )
 
       # Disconnect

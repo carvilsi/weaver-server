@@ -1,7 +1,7 @@
 module.exports=
 class EventBus
   constructor: (@name) ->
-    @filters = {}
+    @filters   = {}
     @listeners = {}
 
   on: (event, func) ->
