@@ -7,4 +7,4 @@ module.exports=
     console.log(`'\033[0;0H'`)
     
   moveUp: ->
-    console.log(`'\033[3A'`)
+    console.log(`'\033[1A'`)

@@ -1,6 +1,9 @@
+require('colors')
 conf   = require('config')
-ascii  = require('./logo')
+logo  = require('./logo')
 pack   = require('../../package.json')
+cursor = require('cursor')
+delay  = require('delay')
 splash = [] 
 
 BOOL = (val) -> 
@@ -40,21 +43,41 @@ _ require('./funnies')()
 
 
 # Get longest line in splash
-max  = -1
-max  = line.length for line in splash when line.length > max
-max += ascii[0].length
+max = require('util/array').maxLength(splash)
+max += logo[0].length
+
+
+# DISCLAIMER
+# Apologies for all the code down below, its a bit complex and need refactoring or at least some more explaining
+
 
 compile = (line, index) ->
-  if not ascii[index]?
+  if not logo[index]?
     line + Array(max - line.length + 2).join(' ') + '│\n'
   else
-    line + Array(max - ascii[0].length - line.length + 2).join(' ') + ascii[index] + '│\n'
+    line + Array(max - logo[0].length - line.length + 2).join(' ') + logo[index] + '│\n'
 
-text  = '┌'  + Array(max + 3).join('─') + '┐\n'
-text += '│ ' + compile(line, index) for line, index in splash
-text += '└'  + Array(max + 3).join('─') + '┘'
+getText = (spaceUp) ->
+  logo = JSON.parse(JSON.stringify(require('./logo')))
+  for i in [0..spaceUp]
+    logo.unshift("                                     ")
 
-module.exports = 
+  text  = '┌'  + Array(max + 3).join('─') + '┐\n'
+  text += '│ ' + compile(line, index) for line, index in splash
+  text += '└'  + Array(max + 3).join('─') + '┘'
+  text
+
+module.exports =
+
   printLoaded: ->
-    require('colors')
-    console.log(text.cyan)
+    spaceUp = splash.length
+
+    print = ->
+      cursor.clear()
+      cursor.toTop()
+      console.log(getText(spaceUp).cyan)
+      spaceUp--
+      
+      delay(30, print) if spaceUp > 0
+      
+    print()
