@@ -5,4 +5,4 @@
 module.exports =
   application:
     sounds:
-      muteAll: true
+      muteAll: false
