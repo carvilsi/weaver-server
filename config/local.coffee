@@ -2,3 +2,7 @@
 # git update-index --assume-unchanged config/local.coffee
 #
 # Use it for custom local configuration here to override default configurations
+module.exports =
+  application:
+    sounds:
+      muteAll: false

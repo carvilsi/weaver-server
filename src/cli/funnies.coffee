@@ -1,3 +1,8 @@
+# Rules of contributing as strictly enforced by the fun police:
+#
+# 1. Keep the maximum length of a funny around 50 characters to not mess up the splash with line breaks
+# 2. Level of funniness should vary in the range of 0.23 LOL to 0.84 LEL
+
 messages = [
   "Have you ever seen a mingushead before?"
   "Reticulating splines..."
@@ -193,12 +198,11 @@ messages = [
   "Cogito ergo sum."
   "Power and Thermal Calibration in progress..."
   "Light and heat creates and violently reacts water into dropped sodium."
+  "I'm Blue da ba dee da ba daa"
+  "Realtime is relative"
+  "But will it blend?"
+  "Look! No hands!"
 ]
 
-# Returns a random integer between min (inclusive) and max (inclusive)
-# Using Math.round() will give you a non-uniform distribution!
-getRandomInt = (min, max) ->
-  Math.floor(Math.random() * (max - min + 1)) + min
-
 module.exports = ->
-  messages[getRandomInt(0, messages.length - 1)]
+  messages[require('util/random').integer(0, messages.length - 1)]

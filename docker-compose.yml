@@ -28,3 +28,20 @@ services:
       - VIRTUOSO_DB_USER=dba
       - VIRTUOSO_DB_PASSWORD=myDbaPassword
       - VIRTUOSO_DB_PATH=jdbc:virtuoso://tenforce-virtuoso:1111
+      
+  mongodb:
+    image: mongo:latest
+    volumes:
+     - './data:/data/db'
+    expose:
+     - "27017"
+    command: ["mongod", "--smallfiles"]
+    
+  weaverflock:
+    image: sysunite/weaver-flock:0.0.7 
+    environment:
+     MONGODB_URI: "mongodb://mongodb:27017/weavernest"
+    ports:
+     - "4567:4567"
+    links:
+     - mongodb

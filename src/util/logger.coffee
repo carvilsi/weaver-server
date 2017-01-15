@@ -12,7 +12,7 @@ formatter = (options) ->
   level   = options.level.toUpperCase()
   message = if options.message? then options.message else ''
   object  = if options.meta? && Object.keys(options.meta).length != 0 then ('\n\t'+ JSON.stringify(options.meta)) else ''
-  total   = time + ' | ' + level + ' | ' + message + object
+  total   = "#{time} | #{level} | #{message} #{object}"
   
   # Make message red if error
   total = total.red if level is 'ERROR'

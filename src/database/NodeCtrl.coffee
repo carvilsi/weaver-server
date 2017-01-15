@@ -1,13 +1,13 @@
-OperationHandler = require('OperationHandler')
+config          = require('config')
+DatabaseService = require('DatabaseService')
+bus             = require('EventBus').get('weaver')
 
-bus     = require('EventBus').get('weaver')
-handler = new OperationHandler()
-
+db = new DatabaseService(config.get('services.database.endpoint'))
 
 bus.on('read', (req, res)->
-  handler.read(req.payload.nodeId)
+  db.read(req.payload.nodeId)
 )
 
 bus.on('write', (req, res)->
-  handler.write(req.payload)
+  db.write(req.payload)
 )
