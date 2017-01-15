@@ -198,6 +198,10 @@ messages = [
   "Cogito ergo sum."
   "Power and Thermal Calibration in progress..."
   "Light and heat creates and violently reacts water into dropped sodium."
+  "I'm Blue da ba dee da ba daa"
+  "Realtime is relative"
+  "But will it blend?"
+  "Look! No hands!"
 ]
 
 module.exports = ->
