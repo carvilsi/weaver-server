@@ -6,6 +6,7 @@ WeaverError  = require('weaver-commons').WeaverError
 Promise      = require('bluebird')
 Validator    = require('jsonschema').Validator
 authSchemas  = require('authSchemas')
+logger       = require('logger')
 
 createUri = (suffix) ->
   "#{config.get('services.flock.endpoint')}/#{suffix}"
@@ -50,11 +51,8 @@ validateJSONSchema = (jsonReq, jsonSch) ->
   
 errorCodeParserFlock = (res) ->
   # For signUp error cases
-  if res.statusCode is 500
-    if !!~ res.error.Error.message.indexOf "userName"
-      Promise.reject(Error WeaverError.USERNAME_TAKEN, 'USERNAME_TAKEN')
-    else if !!~ res.error.Error.message.indexOf "userEmail"
-      Promise.reject(Error WeaverError.EMAIL_TAKEN, 'EMAIL_TAKEN')
+  if res.statusCode is 409
+    Promise.reject(Error WeaverError.DUPLICATE_VALUE, 'DUPLICATION ERROR, USERNAME OR EMAIL IS ALREADY TAKEN')
   else
     Promise.reject(Error WeaverError.OTHER_CAUSE, 'OTHER_CAUSE')
   

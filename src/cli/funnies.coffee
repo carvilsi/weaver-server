@@ -202,6 +202,7 @@ messages = [
   "Realtime is relative"
   "But will it blend?"
   "Look! No hands!"
+  "Sorry 12345 is already taken"
 ]
 
 module.exports = ->
