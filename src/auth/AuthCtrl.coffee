@@ -52,7 +52,7 @@ validateJSONSchema = (jsonReq, jsonSch) ->
 errorCodeParserFlock = (res) ->
   # For signUp error cases
   if res.statusCode is 409
-    Promise.reject(Error WeaverError.DUPLICATE_VALUE, 'DUPLICATION ERROR, USERNAME OR EMAIL IS ALREADY TAKEN')
+    Promise.reject(Error WeaverError.DUPLICATE_VALUE, 'Duplication error, username or email is already taken.')
   else
     Promise.reject(Error WeaverError.OTHER_CAUSE, 'OTHER_CAUSE')
   
