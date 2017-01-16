@@ -59,6 +59,8 @@ errorCodeParserFlock = (res) ->
       Promise.reject(Error WeaverError.USERNAME_NOT_FOUND, res.error.Error.message)
     else if !!~ res.error.Error.message.indexOf "credentials"
       Promise.reject(Error WeaverError.PASSWORD_INCORRECT, 'The password is incorrect')
+    else
+      Promise.reject(Error WeaverError.OTHER_CAUSE, 'OTHER_CAUSE')
   else
     Promise.reject(Error WeaverError.OTHER_CAUSE, 'OTHER_CAUSE')
   
