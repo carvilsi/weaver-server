@@ -53,6 +53,12 @@ errorCodeParserFlock = (res) ->
   # For signUp error cases
   if res.statusCode is 409
     Promise.reject(Error WeaverError.DUPLICATE_VALUE, 'Duplication error, username or email is already taken.')
+  # For logIn error cases
+  else if res.statusCode is 401
+    if !!~ res.error.Error.message.indexOf "account"
+      Promise.reject(Error WeaverError.USERNAME_NOT_FOUND, res.error.Error.message)
+    else if !!~ res.error.Error.message.indexOf "credentials"
+      Promise.reject(Error WeaverError.PASSWORD_INCORRECT, 'The password is incorrect')
   else
     Promise.reject(Error WeaverError.OTHER_CAUSE, 'OTHER_CAUSE')
   
@@ -74,7 +80,7 @@ bus.on('logIn', (req, res) ->
     .then((re)->
       Promise.resolve(re)
     ).catch((err) ->
-      Promise.reject(Error WeaverError.USERNAME_NOT_FOUND,'USERNAME_NOT_FOUND OR PASSWORD_WRONG')
+      errorCodeParserFlock(err)
     )
 )
 
