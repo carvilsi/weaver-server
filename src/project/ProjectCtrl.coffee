@@ -20,3 +20,6 @@ doCall = (suffix, parameterName) -> (req, res) ->
 bus.on('project',        doCall("list"))
 bus.on('project.create', doCall("create/", "name"))
 bus.on('project.delete', doCall("delete/", "id"))
+bus.on('getDatabaseForProject', (project) ->
+  Promise.resolve(config.get('services.database.endpoint'))
+)
