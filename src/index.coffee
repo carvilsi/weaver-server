@@ -1,61 +1,83 @@
-#                                                    .
-#                                           `      ~~
-#                    ~~~~~~_____         ````  ~~~~~
-#                 ~~~~~~~~~~~~_________~~~~~~~~~~~
-#                ~```````~~~~~~~~___________~~~
-#                        ````~~~~~~_____                                     
-#
-#
-# __          __                          _____
-# \ \        / /                         / ____|
-#  \ \  /\  / /__  __ ___   _____ _ __  | (___   ___ _ ____   _____ _ __
-#   \ \/  \/ / _ \/ _` \ \ / / _ \ '__|  \___ \ / _ \ '__\ \ / / _ \ '__|
-#    \  /\  /  __/ (_| |\ V /  __/ |     ____) |  __/ |   \ V /  __/ |
-#     \/  \/ \___|\__,_| \_/ \___|_|    |_____/ \___|_|    \_/ \___|_|
-#
-#     "The secret of getting ahead is getting started." - Mark Twain
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                    .                #
+#                                           `      ~~                 #
+#                    ~~~~~~_____         ````  ~~~~~                  #
+#                 ~~~~~~~~~~~~_________~~~~~~~~~~~                    #
+#                ~```````~~~~~~~~___________~~~                       #
+#                        ````~~~~~~_____                              #                      
+#                                                                     #
+#                                                       Weaver Server #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+# Loading
+console.log(`'\033[2J'`)             # Clear terminal
+console.log(`'\033[0;0H'`)           # To top
+console.log(`'\033[36mLoading...'`)  # Loading in cyan
 
 
 # Path resolving local directories, making it non-relative accessible from any location.
-# In other words, require('../../../../application/logger') becomes require('logger')
-paths = [
+# In other words, require('../../../../util/logger') becomes require('logger')
+# Note: This must be the first running code in the application before any require() works
+require('app-module-path').addPath("src/#{path}") for path in [
+  '.'
   'admin'
   'application'
   'auth'
-  'comm'
+  'auth/schemas'
+  'cli'
+  'core'
   'database'
   'project'
-  'auth/schemas'
+  'util'
 ]
-require('app-module-path').addPath('src/' + path) for path in paths
 
+
+# Load libs
+Promise = require('bluebird')
+conf    = require('config')       # Configuration loads files in the root config directory
+Server  = require('server')
+splash  = require('splash')
+sounds  = require('sounds')
+pjson   = require('../package.json')
 
 # Init routes and controllers by running once
-runlist = [
-  './routes'
+require(run) for run in [
+  'routes'
   'ApplicationCtrl'
-  'NodeCtrl'
   'AuthCtrl'
+  'ErrorHandler'
+  'NodeCtrl'
   'ProjectCtrl'
 ]
-require(run) for run in runlist
 
 
-# Run servers
-Server = require('server')
-conf   = require('config')   # Configuration loads files in the root config directory
-
-new Server({
-  port:   conf.get('server.weaver.port')
+# Init servers
+weaver = new Server({
   routes: 'weaver'
-}).run()
+  views:[
+    {path: '/', file: 'weaver/index.html', vars: {server : pjson.version}}
+  ]  
+  
+  port: conf.get('server.weaver.port')
+  cors: conf.get('server.weaver.cors')
+})
 
-new Server({
-  port:    conf.get('server.admin.port')
+admin = new Server({
   routes: 'admin'
-  host:   'localhost'
-}).run()
+  host:   '127.0.0.1'
+  views:[
+    {path: '/', file: 'admin/index.html', vars: {server : pjson.version}}
+  ]
+  static:
+    '/portal': 'admin'
+    
+  port: conf.get('server.admin.port')
+})
 
-# Print splash
-require('colors')
-console.log(require('splash/splash').cyan)
+
+# Run
+Promise.all([weaver.run(), admin.run()]).then(->
+  splash.printLoaded()
+  sounds.loaded()
+)
