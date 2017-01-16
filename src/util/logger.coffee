@@ -1,6 +1,7 @@
 require('colors')
 winston = require('winston')      # Logging library
 moment  = require('moment')       # Easy date formatting library
+config  = require('config')
 
 # Return timestamp correctly formatted
 timestamp = ->
@@ -28,6 +29,6 @@ Logger = winston.Logger
 logger = new Logger({transports})
 
 # Set minimum level
-logger.level = 'error'
+logger.level = "#{config.get('logging.console')}".toLowerCase()
 
 module.exports = logger

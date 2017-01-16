@@ -6,6 +6,7 @@ WeaverError  = require('weaver-commons').WeaverError
 Promise      = require('bluebird')
 Validator    = require('jsonschema').Validator
 authSchemas  = require('authSchemas')
+logger       = require('logger')
 
 createUri = (suffix) ->
   "#{config.get('services.flock.endpoint')}/#{suffix}"
@@ -48,6 +49,12 @@ validateJSONSchema = (jsonReq, jsonSch) ->
   v = new Validator()
   v.validate(jsonReq,jsonSch).valid
   
+errorCodeParserFlock = (res) ->
+  # For signUp error cases
+  if res.statusCode is 409
+    Promise.reject(Error WeaverError.DUPLICATE_VALUE, 'Duplication error, username or email is already taken.')
+  else
+    Promise.reject(Error WeaverError.OTHER_CAUSE, 'OTHER_CAUSE')
   
 ###
  Basic auth, the usr and pass
@@ -63,10 +70,11 @@ bus.on('logIn', (req, res) ->
   else if !validateJSONSchema(req.payload,authSchemas.userCredentials)
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'DATATYPE_INVALID')
   else
-    doLogInCall(res, 'token',req.payload.user,req.payload.password).then((re)->
+    doLogInCall(res, 'token',req.payload.user,req.payload.password)
+    .then((re)->
       Promise.resolve(re)
     ).catch((err) ->
-      Promise.reject(Error WeaverError.USERNAME_NOT_FOUND,'USERNAME_NOT_FOUND')
+      Promise.reject(Error WeaverError.USERNAME_NOT_FOUND,'USERNAME_NOT_FOUND OR PASSWORD_WRONG')
     )
 )
 
@@ -88,6 +96,11 @@ bus.on('signUp', (req,res) ->
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'DATATYPE_INVALID')
   else
     doSignUpCall(res,'users',req.payload.accessToken,req.payload.newUserCredentials)
+    .then((re)->
+      Promise.resolve()
+    ).catch((err)->
+      errorCodeParserFlock(err)
+    )
 )
 
 ###
@@ -129,6 +142,11 @@ bus.filter('readOff', (req, res) ->
     doPermissionCall(res,"users/permissions/#{req.payload.user}",req.payload.accessToken).then((res)->
       if 'read_role' in res
         Promise.resolve()
+      else
+        Promise.reject(Error WeaverError.OPERATION_FORBIDDEN,'OPERATION_FORBIDDEN')
+    ).catch((err) ->
+      if err.code is WeaverError.OPERATION_FORBIDDEN
+        Promise.reject(Error WeaverError.OPERATION_FORBIDDEN,'OPERATION_FORBIDDEN')
       else
         Promise.reject(Error WeaverError.INVALID_SESSION_TOKEN,'INVALID_SESSION_TOKEN')
     )
