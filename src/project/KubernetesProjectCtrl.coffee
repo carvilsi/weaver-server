@@ -20,6 +20,7 @@ doCall = (suffix, parameterName) -> (req, res) ->
     callParameter = suffix + (if parameterName? then req.payload[parameterName] else "")
     rp({
       uri: createUri(callParameter)
+      json: true
     })
 
 bus.on('project',        doCall("list"))
