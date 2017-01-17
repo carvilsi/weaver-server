@@ -48,7 +48,7 @@ require(run) for run in [
   'AuthCtrl'
   'ErrorHandler'
   'NodeCtrl'
-  'ProjectCtrl'
+  'ProjectCtrlFactory'
 ]
 
 
