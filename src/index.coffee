@@ -24,7 +24,7 @@ require('app-module-path').addPath("src/#{path}") for path in [
   'admin'
   'application'
   'auth'
-  'auth/schemas'
+  'schemas'
   'cli'
   'core'
   'database'
@@ -49,6 +49,7 @@ require(run) for run in [
   'ErrorHandler'
   'NodeCtrl'
   'ProjectCtrl'
+  'ProjectAuthCtrl'
 ]
 
 
@@ -57,7 +58,7 @@ weaver = new Server({
   routes: 'weaver'
   views:[
     {path: '/', file: 'weaver/index.html', vars: {server : pjson.version}}
-  ]  
+  ]
   
   port: conf.get('server.weaver.port')
   cors: conf.get('server.weaver.cors')
