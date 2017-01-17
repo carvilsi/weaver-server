@@ -5,6 +5,9 @@ Error       = require('weaver-commons').Error
 WeaverError = require('weaver-commons').WeaverError
 Promise     = require('bluebird')
 
+# NOTE: The functionality in this file needs to be equivalent to that in SingleDatabaseProjectCtrl, this is 
+# leading for production systems and other installs which have a k8s cluster available.
+
 serviceProject  = config.get('services.project.endpoint')?
   
 createUri = (suffix) ->
