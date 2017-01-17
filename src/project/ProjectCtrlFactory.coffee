@@ -1,12 +1,15 @@
-config      = require('config')
+config = require('config')
+logger = require('logger')
 
 serviceDatabase = config.get('services.database.endpoint')
 serviceProject  = config.get('services.project.endpoint')?
 
-if serviceDatabase?
+if !!serviceDatabase
+  logger.info "Using single database at #{serviceDatabase}"
   require('./SingleDatabaseProjectCtrl')
-else if serviceProject?
+else if !!serviceProject
+  logger.info "Using kubernetes service at #{serviceProject}"
   require('./KubernetesProjectCtrl')
 else
-  console.error "Either a static database or a projects service needs to be configured"
-  process.exit(-1)
+  logger.error "Either a static database or a projects service needs to be configured"
+  throw "No database or project service defined"
