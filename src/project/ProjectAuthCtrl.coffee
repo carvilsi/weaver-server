@@ -28,7 +28,7 @@ validateAuthRequest = (req) ->
   if !req.payload.accessToken?
     Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
   else if !validateJSONSchema(req.payload,authSchemas.newApplication)
-      Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. Try something like: {\"applicationName\":\"fooApp\",\"projectName\":\"barProj\",\"accessToken\":\"Whatever\"}')
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. Try something like: {\"applicationName\":\"fooApp\",\"projectName\":\"barProj\",\"accessToken\":\"Whatever\"}')
   else
     Promise.resolve(req)
   
@@ -49,8 +49,11 @@ bus.on('application', (req, res) ->
   .then((req) ->
     doCreateApplicationCall(res,'applications',req.payload.accessToken,{application:"#{req.payload.projectName}_#{req.payload.applicationName}"})
   ).then((re) ->
-    Promise.resolve()
+    Promise.resolve(re)
   ).catch((err) ->
-    errorCodeParserFlock(err)
+    if err.code?
+      Promise.reject(err)
+    else
+      errorCodeParserFlock(err)
   )
 )
