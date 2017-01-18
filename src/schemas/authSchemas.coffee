@@ -25,3 +25,16 @@ module.exports =
       password:
         type: 'string'
         description: 'The secret phrase for the user'
+  newApplication:
+    type: 'object'
+    required: ['applicationName','projectName','accessToken']
+    properties:
+      applicationName:
+        type: 'string'
+        description: 'Name for the application'
+      projectName:
+        type: 'string'
+        description: 'Name for the project'
+      accessToken:
+        type: 'string'
+        description: 'jwt kind'

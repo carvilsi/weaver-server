@@ -20,6 +20,7 @@ WEAVER.GET  "project"                # Get a list of projects
 WEAVER.POST "project.create"         # Create a project
 WEAVER.POST "project.delete"         # Delete a project
 WEAVER.POST "project.ready"          # Checks if a project is setup and ready
+WEAVER.POST "application"            # Creates an application
 
 
 # Admin routes

@@ -58,11 +58,11 @@ errorCodeParserFlock = (res) ->
     if !!~ res.error.Error.message.indexOf "account"
       Promise.reject(Error WeaverError.USERNAME_NOT_FOUND, res.error.Error.message)
     else if !!~ res.error.Error.message.indexOf "credentials"
-      Promise.reject(Error WeaverError.PASSWORD_INCORRECT, 'The password is incorrect')
+      Promise.reject(Error WeaverError.PASSWORD_INCORRECT, 'The password is incorrect.')
     else
-      Promise.reject(Error WeaverError.OTHER_CAUSE, 'OTHER_CAUSE')
+      Promise.reject(Error WeaverError.OTHER_CAUSE, 'There was an unexpected error.')
   else
-    Promise.reject(Error WeaverError.OTHER_CAUSE, 'OTHER_CAUSE')
+    Promise.reject(Error WeaverError.OTHER_CAUSE, 'There was an unexpected error.')
   
 ###
  Basic auth, the usr and pass
@@ -72,14 +72,14 @@ errorCodeParserFlock = (res) ->
 
 bus.on('logIn', (req, res) ->
   if !req.payload.user?
-    Promise.reject(Error WeaverError.USERNAME_MISSING, 'USERNAME_MISSING')
+    Promise.reject(Error WeaverError.USERNAME_MISSING, 'The username is missing.')
   else if !req.payload.password?
-    Promise.reject(Error WeaverError.PASSWORD_MISSING, 'PASSWORD_MISSING')
+    Promise.reject(Error WeaverError.PASSWORD_MISSING, 'The password is missing.')
   else if !validateJSONSchema(req.payload,authSchemas.userCredentials)
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'DATATYPE_INVALID')
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid.')
   else
     doLogInCall(res, 'token',req.payload.user,req.payload.password)
-    .then((re)->
+    .then((re) ->
       Promise.resolve(re)
     ).catch((err) ->
       errorCodeParserFlock(err)
@@ -97,16 +97,16 @@ bus.on('logIn', (req, res) ->
 
 bus.on('signUp', (req,res) ->
   if !req.payload.accessToken?
-    Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
+    Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
   else if !req.payload.newUserCredentials?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'DATATYPE_INVALID')
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid.')
   else if !validateJSONSchema(req.payload.newUserCredentials,authSchemas.newUserCredentials)
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'DATATYPE_INVALID')
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid.')
   else
     doSignUpCall(res,'users',req.payload.accessToken,req.payload.newUserCredentials)
-    .then((re)->
+    .then((re) ->
       Promise.resolve()
-    ).catch((err)->
+    ).catch((err) ->
       errorCodeParserFlock(err)
     )
 )
@@ -119,9 +119,9 @@ bus.on('signUp', (req,res) ->
 
 bus.on('signOff', (req, res) ->
   if !req.payload.accessToken?
-    Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
+    Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
   else if !req.payload.user?
-    Promise.reject(Error WeaverError.USERNAME_MISSING, 'USERNAME_MISSING')
+    Promise.reject(Error WeaverError.USERNAME_MISSING, 'The username is missing.')
   else
     doSignOffCall(res,"users/#{req.payload.user}",req.payload.accessToken)
   
@@ -129,12 +129,16 @@ bus.on('signOff', (req, res) ->
 
 bus.on('permissions', (req, res) ->
   if !req.payload.accessToken?
-    Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
+    Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
   else if !req.payload.user?
-    Promise.reject(Error WeaverError.USERNAME_MISSING, 'USERNAME_MISSING')
+    Promise.reject(Error WeaverError.USERNAME_MISSING, 'The username is missing.')
   else
     doPermissionCall(res,"users/permissions/#{req.payload.user}",req.payload.accessToken)
 )
+
+###
+ Filters TODO: move to other file?
+###
 
 ###
  Adding the filters, by now just for reading
@@ -143,20 +147,34 @@ bus.on('permissions', (req, res) ->
 
 bus.filter('read', (req, res) ->
   if !req.payload.user?
-    Promise.reject(Error WeaverError.USERNAME_MISSING, 'USERNAME_MISSING')
+    Promise.reject(Error WeaverError.USERNAME_MISSING, 'The username is missing.')
   else if !req.payload.accessToken?
-    Promise.reject(Error WeaverError.SESSION_MISSING, 'SESSION_MISSING')
+    Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
   else
     doPermissionCall(res,"users/permissions/#{req.payload.user}",req.payload.accessToken).then((res)->
       if 'read_role' in res
         Promise.resolve()
       else
-        Promise.reject(Error WeaverError.OPERATION_FORBIDDEN,'OPERATION_FORBIDDEN')
+        Promise.reject(Error WeaverError.OPERATION_FORBIDDEN,'You do not have rights to perform this operation.')
     ).catch((err) ->
       if err.code is WeaverError.OPERATION_FORBIDDEN
-        Promise.reject(Error WeaverError.OPERATION_FORBIDDEN,'OPERATION_FORBIDDEN')
+        Promise.reject(Error WeaverError.OPERATION_FORBIDDEN,'You do not have rights to perform this operation.')
       else
-        Promise.reject(Error WeaverError.INVALID_SESSION_TOKEN,'INVALID_SESSION_TOKEN')
+        Promise.reject(Error WeaverError.INVALID_SESSION_TOKEN,'A valid session token is missing.')
     )
 )
+
+###
+ TODO: add this to refactorize:
+ 
+ validateAuthRequest = (req) ->
+   if !req.payload.user?
+     Promise.reject(Error WeaverError.USERNAME_MISSING, 'The username is missing.')
+   else if !req.payload.accessToken?
+     Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
+   else
+     Promise.resolve(req)
+ 
+###
+
 
