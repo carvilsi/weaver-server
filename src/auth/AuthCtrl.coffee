@@ -53,6 +53,14 @@ errorCodeParserFlock = (res) ->
   # For signUp error cases
   if res.statusCode is 409
     Promise.reject(Error WeaverError.DUPLICATE_VALUE, 'Duplication error, username or email is already taken.')
+  # For logIn error cases
+  else if res.statusCode is 401
+    if !!~ res.error.Error.message.indexOf "account"
+      Promise.reject(Error WeaverError.USERNAME_NOT_FOUND, res.error.Error.message)
+    else if !!~ res.error.Error.message.indexOf "credentials"
+      Promise.reject(Error WeaverError.PASSWORD_INCORRECT, 'The password is incorrect')
+    else
+      Promise.reject(Error WeaverError.OTHER_CAUSE, 'OTHER_CAUSE')
   else
     Promise.reject(Error WeaverError.OTHER_CAUSE, 'OTHER_CAUSE')
   
@@ -74,7 +82,7 @@ bus.on('logIn', (req, res) ->
     .then((re)->
       Promise.resolve(re)
     ).catch((err) ->
-      Promise.reject(Error WeaverError.USERNAME_NOT_FOUND,'USERNAME_NOT_FOUND OR PASSWORD_WRONG')
+      errorCodeParserFlock(err)
     )
 )
 
@@ -133,7 +141,7 @@ bus.on('permissions', (req, res) ->
  http://localhost:9487/read?payload={"user":"phoenix","accessToken":"eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1zIjpbImRlbGV0ZV9hcHBsaWNhdGlvbiIsInJlYWRfYXBwbGljYXRpb24iLCJjcmVhdGVfcm9sZSIsImRlbGV0ZV9yb2xlIiwiY3JlYXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfYXBwbGljYXRpb24iLCJkZWxldGVfZGlyZWN0b3J5IiwiZGVsZXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfZGlyZWN0b3J5IiwicmVhZF91c2VyIiwiY3JlYXRlX3VzZXIiLCJyZWFkX3Blcm1pc3Npb24iLCJkZWxldGVfdXNlciIsInJlYWRfcm9sZSIsInJlYWRfZGlyZWN0b3J5Il0sInN1YiI6Im9yZy5wYWM0ai5tb25nby5wcm9maWxlLk1vbmdvUHJvZmlsZSNwaG9lbml4IiwiJGludF9yb2xlcyI6WyJwaG9lbml4Il0sIl9pZCI6IjU4NmY1OGNiYTFkMTQ3MTk0OTM2YTI2YSIsImV4cCI6MTQ4NDA0MDQwMSwiaWF0IjoxNDgzOTU0MDAxfQ.H7CEIbc_9157SHrU7VO0aBV9a40AAavPY4HEPm6Qw1AS0mrXWW5Ae4Sv-4lm0PwxvG1LhTsp9ZFW-faeNWhmJN0Aj37ZLLV5MEpFyVIpl91FnA_g0jKHWedRdzX8NvPcNMGqempWc49hgzLyFsm71Zcqp1ah2IaZ_oIHOGahz-DyUzkFI3hEF67iZeYrAfQp42a-Gi40QYUKOUPxbNBfAMQe5QcbyB1Qs75RwXg5AwJknGfyrfz4gNkkIEkAV5kvvoSoLFBsvi-v_NzkgQjh1DQbjim4X8dXIDEq7GX5b8OxEg6zrwKcdEQazdyYm1g8HgerivcdYOBB8Z9HKy3vAQ"}
 ###
 
-bus.filter('readOff', (req, res) ->
+bus.filter('read', (req, res) ->
   if !req.payload.user?
     Promise.reject(Error WeaverError.USERNAME_MISSING, 'USERNAME_MISSING')
   else if !req.payload.accessToken?
