@@ -4,6 +4,8 @@ logo  = require('./logo')
 pack   = require('../../package.json')
 cursor = require('cursor')
 delay  = require('delay')
+getProjectsCtrlType = require('ProjectCtrlFactory')
+
 splash = [] 
 
 BOOL = (val) -> 
@@ -27,6 +29,7 @@ _ "HTTP:       #{BOOL conf.get('comm.http.enable')}"
 _ "Socket.io:  #{BOOL conf.get('comm.socket.enable')}"
 _ ""
 _ "# Services"
+_ "Projects:   #{getProjectsCtrlType()}"
 _ "Database:   #{conf.get('services.database.endpoint')}"
 _ "Flock:      #{conf.get('services.flock.endpoint')}"
 _ "Project:    #{conf.get('services.project.endpoint')}"
