@@ -203,6 +203,9 @@ messages = [
   "But will it blend?"
   "Look! No hands!"
   "Sorry 12345 is already taken"
+  "What moron created this atrocity?"
+  "Error: Cannot find module 'ifitaintbrokedontfixit'"
+  "For more funnies, please donate by clicking on our Amazon banner."
 ]
 
 module.exports = ->

@@ -50,6 +50,7 @@ require(run) for run in [
   'NodeCtrl'
   'ProjectCtrl'
   'ProjectAuthCtrl'
+  'ProjectCtrlFactory'
 ]
 
 
