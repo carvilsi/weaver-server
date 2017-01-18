@@ -206,6 +206,7 @@ messages = [
   "What moron created this atrocity?"
   "Error: Cannot find module 'ifitaintbrokedontfixit'"
   "For more funnies, please donate by clicking on our Amazon banner."
+  "I'll do later. I'm upgrading the coffee machine firmware."
 ]
 
 module.exports = ->

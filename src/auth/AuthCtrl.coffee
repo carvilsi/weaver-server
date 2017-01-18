@@ -20,7 +20,7 @@ doLogInCall = (res, suffix, usr, pass) ->
     json: true
   })
 
-doPermissionCall = (res, suffix, token) ->
+doGETCall = (res, suffix, token) ->
   rp({
     method: 'GET',
     uri: createUri(suffix),
@@ -133,7 +133,28 @@ bus.on('permissions', (req, res) ->
   else if !req.payload.user?
     Promise.reject(Error WeaverError.USERNAME_MISSING, 'The username is missing.')
   else
-    doPermissionCall(res,"users/permissions/#{req.payload.user}",req.payload.accessToken)
+    doGETCall(res,"users/permissions/#{req.payload.user}",req.payload.accessToken)
+)
+
+bus.on('usersList', (req, res) ->
+  if !req.payload.accessToken?
+    Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
+  else if !validateJSONSchema(req.payload,authSchemas.listUsers)
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid.')
+  else
+    doGETCall(res,"users?directory=#{req.payload.directory}",req.payload.accessToken)
+    .then((res) ->
+      users = []
+      for user in res
+        delete user._id
+        delete user.directoryId
+        delete user.userPassword
+        delete user.roles
+        users.push(user)
+      Promise.resolve(users)
+    ).catch((err) ->
+      errorCodeParserFlock(err)
+    )
 )
 
 ###
@@ -151,7 +172,7 @@ bus.filter('read', (req, res) ->
   else if !req.payload.accessToken?
     Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
   else
-    doPermissionCall(res,"users/permissions/#{req.payload.user}",req.payload.accessToken).then((res)->
+    doGETCall(res,"users/permissions/#{req.payload.user}",req.payload.accessToken).then((res)->
       if 'read_role' in res
         Promise.resolve()
       else
@@ -163,18 +184,3 @@ bus.filter('read', (req, res) ->
         Promise.reject(Error WeaverError.INVALID_SESSION_TOKEN,'A valid session token is missing.')
     )
 )
-
-###
- TODO: add this to refactorize:
- 
- validateAuthRequest = (req) ->
-   if !req.payload.user?
-     Promise.reject(Error WeaverError.USERNAME_MISSING, 'The username is missing.')
-   else if !req.payload.accessToken?
-     Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
-   else
-     Promise.resolve(req)
- 
-###
-
-
