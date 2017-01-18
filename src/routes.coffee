@@ -20,7 +20,11 @@ WEAVER.GET  "project"                # Get a list of projects
 WEAVER.POST "project.create"         # Create a project
 WEAVER.POST "project.delete"         # Delete a project
 WEAVER.POST "project.ready"          # Checks if a project is setup and ready
-WEAVER.POST "application"            # Creates an application
+WEAVER.POST "createApplication"      # Creates an application
+WEAVER.GET  "listApplication"        # Returns a list of applications
+WEAVER.GET  "getApplication"         # Returns an application
+WEAVER.GET  "permissionApplication"  # Returns permissions from an application
+WEAVER.POST "permissionApplication"  # Sets the permissions from an application
 
 
 # Admin routes

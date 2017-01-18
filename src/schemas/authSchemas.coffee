@@ -38,3 +38,13 @@ module.exports =
       accessToken:
         type: 'string'
         description: 'jwt kind'
+  getApplication:
+    type: 'object'
+    required: ['applicationName','accessToken']
+    properties:
+      applicationName:
+        type: 'string'
+        description: 'Name of the application'
+      accessToken:
+        type: 'string'
+        description: 'jwt kind'

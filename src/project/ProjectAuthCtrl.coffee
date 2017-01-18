@@ -19,15 +19,23 @@ doCreateApplicationCall = (res, suffix, token, newApplication) ->
     body: newApplication,
     json: true
   })
+  
+doGetCall = (res, suffix, token, application) ->
+  rp({
+    method: 'GET',
+    uri: createUri(suffix),
+    headers: {'Authorization':token},
+    json: true
+  })
 
 validateJSONSchema = (jsonReq, jsonSch) ->
   v = new Validator()
   v.validate(jsonReq,jsonSch).valid
   
-validateAuthRequest = (req) ->
+validateAuthRequest = (req, schema) ->
   if !req.payload.accessToken?
     Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
-  else if !validateJSONSchema(req.payload,authSchemas.newApplication)
+  else if !validateJSONSchema(req.payload,schema)
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. Try something like: {\"applicationName\":\"fooApp\",\"projectName\":\"barProj\",\"accessToken\":\"Whatever\"}')
   else
     Promise.resolve(req)
@@ -44,10 +52,10 @@ errorCodeParserFlock = (res) ->
  Creates an application by now known as project
 ###
 
-bus.on('application', (req, res) ->
-  validateAuthRequest(req)
+bus.on('createApplication', (req, res) ->
+  validateAuthRequest(req, authSchemas.newApplication)
   .then((req) ->
-    doCreateApplicationCall(res,'applications',req.payload.accessToken,{application:"#{req.payload.projectName}_#{req.payload.applicationName}"})
+    doCreateApplicationCall(res,'applications',req.payload.accessToken,{applicationName:"#{req.payload.projectName}_#{req.payload.applicationName}"})
   ).then((re) ->
     Promise.resolve(re)
   ).catch((err) ->
@@ -57,3 +65,52 @@ bus.on('application', (req, res) ->
       errorCodeParserFlock(err)
   )
 )
+
+###
+ Return an application
+###
+
+bus.on('getApplication', (req, res) ->
+  validateAuthRequest(req, authSchemas.getApplication)
+  .then((req) ->
+    doGetCall(res,"applications/#{req.payload.applicationName}",req.payload.accessToken)
+  ).then((re) ->
+    Promise.resolve(re)
+  ).catch((err) ->
+    if err.code?
+      Promise.reject(err)
+    else
+      errorCodeParserFlock(err)
+  )
+)
+
+###
+ Retrieving all the applications
+###
+bus.on('listApplication', (req, res) ->
+  if !req.payload.accessToken?
+    Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
+  else
+    doGetCall(res,'applications',req.payload.accessToken)
+    .then((re) ->
+      Promise.resolve(re)
+    ).catch((err) ->
+      errorCodeParserFlock(err)
+    )
+)
+
+###
+ Return permissions from an application
+###
+bus.on('permissionApplication', (req, res) ->
+  if !req.payload.accessToken?
+    Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
+  else
+    doGetCall(res,'applications',req.payload.accessToken)
+    .then((re) ->
+      Promise.resolve(re)
+    ).catch((err) ->
+      errorCodeParserFlock(err)
+    )
+)
+
