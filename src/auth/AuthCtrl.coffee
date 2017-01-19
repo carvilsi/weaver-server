@@ -7,6 +7,9 @@ Promise      = require('bluebird')
 Validator    = require('jsonschema').Validator
 authSchemas  = require('authSchemas')
 logger       = require('logger')
+_            = require('lodash')
+_            = require('lodash/core')
+pick         = require('lodash/pick')
 
 createUri = (suffix) ->
   "#{config.get('services.flock.endpoint')}/#{suffix}"
@@ -146,11 +149,7 @@ bus.on('usersList', (req, res) ->
     .then((res) ->
       users = []
       for user in res
-        delete user._id
-        delete user.directoryId
-        delete user.userPassword
-        delete user.roles
-        users.push(user)
+        users.push(_.pick(user,['userName','userEmail']))
       Promise.resolve(users)
     ).catch((err) ->
       errorCodeParserFlock(err)
