@@ -1,5 +1,4 @@
 config = require('config')
-logger = require('logger')
 
 serviceDatabase = config.get('services.database.endpoint')
 serviceProject  = config.get('services.project.endpoint')?
