@@ -38,3 +38,13 @@ module.exports =
       accessToken:
         type: 'string'
         description: 'jwt kind'
+  listUsers:
+    type: 'object'
+    required: ['directory','accessToken']
+    properties:
+      directory:
+        type: 'string'
+        description: 'The directory that the users belong'
+      accessToken:
+        type: 'string'
+        description: 'jwt kind'

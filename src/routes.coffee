@@ -14,6 +14,7 @@ WEAVER.GET  "logIn"                  # Execute a log in for an existing user
 WEAVER.GET  "permissions"            # Get the permissions for an existing user
 WEAVER.POST "signUp"                 # Creates new user
 WEAVER.POST "signOff"                # Deletes an user
+WEAVER.GET  "usersList"               # Retrieves all users at weaver-flock
 
 # Project management
 WEAVER.GET  "project"                # Get a list of projects
