@@ -207,6 +207,11 @@ messages = [
   "Error: Cannot find module 'ifitaintbrokedontfixit'"
   "For more funnies, please donate by clicking on our Amazon banner."
   "I'll do later. I'm upgrading the coffee machine firmware."
+  "Are you ready? I was compiled ready!"
+  "Wings in working position, north sensors charged, eggs stable."
+  "More coffee! More coffee!"
+  "404, purpose of life not found."
+  "Permission to wipe database and retire."
 ]
 
 module.exports = ->
