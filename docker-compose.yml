@@ -1,6 +1,6 @@
 version: '2'
 services:
-  tenforce-virtuoso:
+  system-virtuoso:
     image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
     expose:
      - "1111"
@@ -13,35 +13,47 @@ services:
      - SPARQL_UPDATE=true
      - DEFAULT_GRAPH=http://www.example.com/my-graph
 
-  weaver-database-virtuoso:
+  system-weaver-database-virtuoso:
     image: sysunite/weaver-database-virtuoso:0.0.4
     expose:
      - "9474"
     ports:
      - "9474:9474"
     depends_on:
-     - tenforce-virtuoso
+     - system-virtuoso
     links:
-     - tenforce-virtuoso
+     - system-virtuoso
     environment:
       - WEAVER_VIRTUOSO_SERVICE_PORT=9474
       - VIRTUOSO_DB_USER=dba
       - VIRTUOSO_DB_PASSWORD=myDbaPassword
-      - VIRTUOSO_DB_PATH=jdbc:virtuoso://tenforce-virtuoso:1111
-      
-  mongodb:
-    image: mongo:latest
-    volumes:
-     - './data:/data/db'
+      - VIRTUOSO_DB_PATH=jdbc:virtuoso://system-virtuoso:1111
+
+  project-virtuoso:
+    image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
     expose:
-     - "27017"
-    command: ["mongod", "--smallfiles"]
-    
-  weaverflock:
-    image: sysunite/weaver-flock:0.0.7 
-    environment:
-     MONGODB_URI: "mongodb://mongodb:27017/weavernest"
+     - "1112"
+     - "8891"
     ports:
-     - "4567:4567"
+     - "1112:1111"
+     - "8891:8890"
+    environment:
+     - DBA_PASSWORD=myDbaPassword
+     - SPARQL_UPDATE=true
+     - DEFAULT_GRAPH=http://www.example.com/my-graph
+
+  project-weaver-database-virtuoso:
+    image: sysunite/weaver-database-virtuoso:0.0.4
+    expose:
+     - "9475"
+    ports:
+     - "9475:9475"
+    depends_on:
+     - project-virtuoso
     links:
-     - mongodb
+     - project-virtuoso
+    environment:
+      - WEAVER_VIRTUOSO_SERVICE_PORT=9475
+      - VIRTUOSO_DB_USER=dba
+      - VIRTUOSO_DB_PASSWORD=myDbaPassword
+      - VIRTUOSO_DB_PATH=jdbc:virtuoso://project-virtuoso:1111

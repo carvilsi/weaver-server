@@ -5,9 +5,13 @@ ADMIN  = require('RouteHandler').get("admin")
 WEAVER.GET  ""                       # Index Page
 WEAVER.GET  "application.version"    # Application version
 
-# Node operations
+# Database operations
 WEAVER.GET  "read"                   # Reads a single entity
 WEAVER.POST "write"                  # Execute Create, Update and Delete operations in bulk
+WEAVER.POST "wipe"                   # Wipe entire database
+
+# Querying
+WEAVER.POST "query"                  # Execute a WeaverQuery
 
 # User management
 WEAVER.GET  "logIn"                  # Execute a log in for an existing user

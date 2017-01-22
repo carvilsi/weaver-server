@@ -28,7 +28,7 @@ doGETCall = (res, suffix, token) ->
     headers: {'Authorization':token},
     json: true
   })
-  
+
 doSignUpCall = (res, suffix, token, newUserCredentials) ->
   rp({
     method: 'POST',
@@ -37,7 +37,7 @@ doSignUpCall = (res, suffix, token, newUserCredentials) ->
     body: newUserCredentials,
     json: true
   })
-  
+
 doSignOffCall = (res, suffix, token, user) ->
   rp({
     method: 'DELETE',
@@ -49,7 +49,7 @@ doSignOffCall = (res, suffix, token, user) ->
 validateJSONSchema = (jsonReq, jsonSch) ->
   v = new Validator()
   v.validate(jsonReq,jsonSch).valid
-  
+
 errorCodeParserFlock = (res) ->
   # For signUp error cases
   if res.statusCode is 409
@@ -64,7 +64,7 @@ errorCodeParserFlock = (res) ->
       Promise.reject(Error WeaverError.OTHER_CAUSE, 'There was an unexpected error.')
   else
     Promise.reject(Error WeaverError.OTHER_CAUSE, 'There was an unexpected error.')
-  
+
 ###
  Basic auth, the usr and pass
  http://localhost:9487/logIn?payload={"user":"phoenix","password":"Schaap"}
@@ -125,7 +125,7 @@ bus.on('signOff', (req, res) ->
     Promise.reject(Error WeaverError.USERNAME_MISSING, 'The username is missing.')
   else
     doSignOffCall(res,"users/#{req.payload.user}",req.payload.accessToken)
-  
+
 )
 
 bus.on('permissions', (req, res) ->
@@ -163,7 +163,7 @@ bus.on('usersList', (req, res) ->
  http://localhost:9487/read?payload={"user":"phoenix","accessToken":"eyJhbGciOiJSUzI1NiJ9.eyIkaW50X3Blcm1zIjpbImRlbGV0ZV9hcHBsaWNhdGlvbiIsInJlYWRfYXBwbGljYXRpb24iLCJjcmVhdGVfcm9sZSIsImRlbGV0ZV9yb2xlIiwiY3JlYXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfYXBwbGljYXRpb24iLCJkZWxldGVfZGlyZWN0b3J5IiwiZGVsZXRlX3Blcm1pc3Npb24iLCJjcmVhdGVfZGlyZWN0b3J5IiwicmVhZF91c2VyIiwiY3JlYXRlX3VzZXIiLCJyZWFkX3Blcm1pc3Npb24iLCJkZWxldGVfdXNlciIsInJlYWRfcm9sZSIsInJlYWRfZGlyZWN0b3J5Il0sInN1YiI6Im9yZy5wYWM0ai5tb25nby5wcm9maWxlLk1vbmdvUHJvZmlsZSNwaG9lbml4IiwiJGludF9yb2xlcyI6WyJwaG9lbml4Il0sIl9pZCI6IjU4NmY1OGNiYTFkMTQ3MTk0OTM2YTI2YSIsImV4cCI6MTQ4NDA0MDQwMSwiaWF0IjoxNDgzOTU0MDAxfQ.H7CEIbc_9157SHrU7VO0aBV9a40AAavPY4HEPm6Qw1AS0mrXWW5Ae4Sv-4lm0PwxvG1LhTsp9ZFW-faeNWhmJN0Aj37ZLLV5MEpFyVIpl91FnA_g0jKHWedRdzX8NvPcNMGqempWc49hgzLyFsm71Zcqp1ah2IaZ_oIHOGahz-DyUzkFI3hEF67iZeYrAfQp42a-Gi40QYUKOUPxbNBfAMQe5QcbyB1Qs75RwXg5AwJknGfyrfz4gNkkIEkAV5kvvoSoLFBsvi-v_NzkgQjh1DQbjim4X8dXIDEq7GX5b8OxEg6zrwKcdEQazdyYm1g8HgerivcdYOBB8Z9HKy3vAQ"}
 ###
 
-bus.filter('read', (req, res) ->
+bus.filter('readOff', (req, res) ->
   if !req.payload.user?
     Promise.reject(Error WeaverError.USERNAME_MISSING, 'The username is missing.')
   else if !req.payload.accessToken?
