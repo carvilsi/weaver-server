@@ -23,9 +23,9 @@ module.exports =
 
   services:
     systemDatabase:
-      endpoint: 'http://localhost:9777'
+      endpoint: 'http://localhost:9474'
     projectDatabase:
-      endpoint: 'http://localhost:9777'
+      endpoint: 'http://localhost:9474'
     projectController:
       endpoint: 'http://localhost:9888'
     flock:
