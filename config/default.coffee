@@ -27,6 +27,8 @@ module.exports =
       endpoint: 'http://localhost:4567/api/v1'
     project:
       endpoint: 'http://localhost:9888'
+    fileSystem:
+      endpoint: 'http://localhost:9000'
 
   logging:
     console: 'ERROR'
