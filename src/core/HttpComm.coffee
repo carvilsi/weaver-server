@@ -1,11 +1,12 @@
 Promise     = require('bluebird')
-Error       = require('weaver-commons').Error
-WeaverError = require('weaver-commons').WeaverError
+Weaver       = require('weaver-sdk')
+Error        = Weaver.LegacyError
+WeaverError  = Weaver.Error
 
 module.exports =
-class HTTP 
+class HTTP
   constructor: (@routeHandler) ->
-    
+
   # Transforms application.version to /application/version
   transform: (route) ->
     '/' + route.replace('.', '/')
@@ -29,7 +30,7 @@ class HTTP
          @routeHandler.handleRequest(route, req, res)
        )
      )
-     
+
      @routeHandler.postRoutes.forEach((route) =>
        app.post(@transform(route), (req, res) =>
          req.payload = req.body

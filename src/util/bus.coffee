@@ -1,5 +1,6 @@
-Error       = require('weaver-commons').Error
-WeaverError = require('weaver-commons').WeaverError
+Weaver       = require('weaver-sdk')
+Error        = Weaver.LegacyError
+WeaverError  = Weaver.Error
 
 module.exports =
 
@@ -7,7 +8,7 @@ module.exports =
   #
   # bus      = require('EventBus').get('weaver')
   # expect   = require('util/bus').getExpect(bus)
-  # 
+  #
   # Then use it as follows
   # expect('id').for('node.create').do((req, res, id) ->)
   #

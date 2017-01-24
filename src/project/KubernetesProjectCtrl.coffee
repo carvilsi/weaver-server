@@ -1,15 +1,16 @@
 bus         = require('EventBus').get('weaver')
 config      = require('config')
 rp          = require('request-promise')
-Error       = require('weaver-commons').Error
-WeaverError = require('weaver-commons').WeaverError
+Weaver      = require('weaver-sdk')
+Error       = Weaver.LegacyError
+WeaverError = Weaver.Error
 Promise     = require('bluebird')
 
-# NOTE: The functionality in this file needs to be equivalent to that in SingleDatabaseProjectCtrl, this is 
+# NOTE: The functionality in this file needs to be equivalent to that in SingleDatabaseProjectCtrl, this is
 # leading for production systems and other installs which have a k8s cluster available.
 
 serviceProject  = config.get('services.project.endpoint')?
-  
+
 createUri = (suffix) ->
   "#{serviceProject}/#{suffix}"
 
