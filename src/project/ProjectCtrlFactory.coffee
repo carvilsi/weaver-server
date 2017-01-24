@@ -1,8 +1,8 @@
 config = require('config')
 logger = require('logger')
 
-serviceDatabase = config.get('services.database.endpoint')
-serviceProject  = config.get('services.project.endpoint')?
+serviceDatabase = config.get('services.projectDatabase.endpoint')
+serviceProject  = config.get('services.projectController.endpoint')?
 
 if !!serviceDatabase
   logger.info "Using single database at #{serviceDatabase}"

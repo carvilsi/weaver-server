@@ -17,21 +17,8 @@ getDb = (target) ->
     )
 
 
-expect('target').bus('read').do((req, res, target) ->
+expect('target').bus('query').do((req, res, target) ->
   getDb(target).then((db) ->
-    db.read(req.payload.nodeId)
+    db.query(req.payload.query)
   )
 )
-
-expect('target').bus('write').do((req, res, target) ->
-  getDb(target).then((db) ->
-    db.write(req.payload.operations)
-  )
-)
-
-expect('target').bus('wipe').do((req, res, target) ->
-  getDb(target).then((db) ->
-    db.wipe()
-  )
-)
-
