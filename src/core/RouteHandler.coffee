@@ -7,13 +7,13 @@ class RouteHandler
 
   GET: (route) ->
     @getRoutes.push(route)
-    
+
   POST: (route) ->
     @postRoutes.push(route)
-    
+
   allRoutes: ->
     @getRoutes.concat(@postRoutes)
-    
+
   handleGet: (route, req, res) ->
     # Test payload
     try
@@ -22,9 +22,8 @@ class RouteHandler
       console.log(error)
       return
 
-  handleRequest: (route, req, res) -> 
-    @bus.emit(route, req, res)
-    .then((response)->
+  handleRequest: (route, req, res) ->
+    @bus.emit(route, req, res).then((response)->
       response = "OK" if not response?
       res.send(response)
     )

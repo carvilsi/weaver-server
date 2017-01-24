@@ -28,7 +28,7 @@ doGETCall = (res, suffix, token) ->
     headers: {'Authorization':token},
     json: true
   })
-  
+
 doSignUpCall = (res, suffix, token, newUserCredentials) ->
   rp({
     method: 'POST',
@@ -37,7 +37,7 @@ doSignUpCall = (res, suffix, token, newUserCredentials) ->
     body: newUserCredentials,
     json: true
   })
-  
+
 doSignOffCall = (res, suffix, token, user) ->
   rp({
     method: 'DELETE',
@@ -49,7 +49,7 @@ doSignOffCall = (res, suffix, token, user) ->
 validateJSONSchema = (jsonReq, jsonSch) ->
   v = new Validator()
   v.validate(jsonReq,jsonSch).valid
-  
+
 errorCodeParserFlock = (res) ->
   # For signUp error cases
   if res.statusCode is 409
@@ -64,7 +64,7 @@ errorCodeParserFlock = (res) ->
       Promise.reject(Error WeaverError.OTHER_CAUSE, 'There was an unexpected error.')
   else
     Promise.reject(Error WeaverError.OTHER_CAUSE, 'There was an unexpected error.')
-  
+
 ###
  Basic auth, the usr and pass
  http://localhost:9487/logIn?payload={"user":"phoenix","password":"Schaap"}
@@ -125,7 +125,7 @@ bus.on('signOff', (req, res) ->
     Promise.reject(Error WeaverError.USERNAME_MISSING, 'The username is missing.')
   else
     doSignOffCall(res,"users/#{req.payload.user}",req.payload.accessToken)
-  
+
 )
 
 bus.on('permissions', (req, res) ->
