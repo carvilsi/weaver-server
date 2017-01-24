@@ -1,8 +1,9 @@
 bus          = require('EventBus').get('weaver')
 rp           = require('request-promise')
 config       = require('config')
-Error        = require('weaver-commons').Error
-WeaverError  = require('weaver-commons').WeaverError
+Weaver       = require('weaver-sdk')
+Error        = Weaver.LegacyError
+WeaverError  = Weaver.Error
 Promise      = require('bluebird')
 Validator    = require('jsonschema').Validator
 authSchemas  = require('authSchemas')

@@ -1,8 +1,9 @@
 bus          = require('EventBus').get('weaver')
 rp           = require('request-promise')
 config       = require('config')
-Error        = require('weaver-commons').Error
-WeaverError  = require('weaver-commons').WeaverError
+Weaver       = require('weaver-sdk')
+Error        = Weaver.LegacyError
+WeaverError  = Weaver.Error
 Promise      = require('bluebird')
 Validator    = require('jsonschema').Validator
 authSchemas  = require('authSchemas')
@@ -10,7 +11,7 @@ logger       = require('logger')
 
 createUri = (suffix) ->
   "#{config.get('services.flock.endpoint')}/#{suffix}"
-  
+
 doCreateApplicationCall = (res, suffix, token, newApplication) ->
   rp({
     method: 'POST',
@@ -23,7 +24,7 @@ doCreateApplicationCall = (res, suffix, token, newApplication) ->
 validateJSONSchema = (jsonReq, jsonSch) ->
   v = new Validator()
   v.validate(jsonReq,jsonSch).valid
-  
+
 validateAuthRequest = (req) ->
   if !req.payload.accessToken?
     Promise.reject(Error WeaverError.SESSION_MISSING, 'A valid session token is missing.')
@@ -31,7 +32,7 @@ validateAuthRequest = (req) ->
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. Try something like: {\"applicationName\":\"fooApp\",\"projectName\":\"barProj\",\"accessToken\":\"Whatever\"}')
   else
     Promise.resolve(req)
-  
+
 errorCodeParserFlock = (res) ->
   if res.statusCode is 400
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid.')
