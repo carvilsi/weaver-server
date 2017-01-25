@@ -11,7 +11,6 @@ module.exports =
     
     class MinioClass
       constructor: (@minioClient) ->
-        console.log '=^^=|_'
         @minioClient = new minio.Client({
           endPoint: "#{config.get('services.fileSystem.endpoint')}".split(":")[1].replace('\/\/','')
           port: parseInt("#{config.get('services.fileSystem.endpoint')}".split(":")[2])

@@ -14,6 +14,7 @@ Promise      = require('bluebird')
 logger       = require('logger')
 minio        = require('minio')
 MinioClass   = require('MinioSingleton')
+fs           = require('fs')
 
 checkBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
@@ -50,29 +51,62 @@ uploadFile = (file, fileName, project) ->
   )
   
 sendFileToServer = (file, fileName, project, minioClient) ->
-  fileTemp = '/Users/char/temp/fortnightlyCheck.pdf'
-  minioClient.fPutObject("#{project}","#{fileName}",fileTemp,'application/octet-stream', (err,etag) ->
-    if err
-      Promise.reject(err)
-    else
-      Promise.resolve()
-  )
-
-downloadFile = (file) ->
-  fileTemp = '/Users/char/temp/downloadedFile.pdf'
-  getMinioClient().fGetObject('whatever5','pdf.pdf','/Users/char/temp/downloadedFile.pdf', (err) ->
+  buf = new Buffer(file.data)
+  minioClient.putObject("#{project}","#{fileName}",buf, 'application/octet-stream', (err) ->
     if err
       logger.error(err)
+      Promise.reject(err)
     else
-      logger.debug('success :)')
+      logger.debug('file uploaded ok')
+      Promise.resolve('file uploaded ok')
+  )
+
+downloadFile = (fileName, project, minioClient) ->
+  new Promise((resolve, reject) =>
+    
+    minioClient = MinioClass.getInstance().minioClient
+    size = 0
+    bufArray = []
+    minioClient.getObject("#{project}","#{fileName}", (err, stream) ->
+      if err
+        logger.error(err)
+        reject(err)
+      else
+        logger.debug('success :)')
+        stream.on('data', (chunk) ->
+          size += chunk.length
+          bufArray.push(chunk)
+          logger.debug(chunk)
+        )
+        stream.on('end', ->
+          logger.debug('total size: ' + size)
+          buffer = Buffer.concat(bufArray)
+          resolve(buffer)
+        )
+        stream.on('error', (err) ->
+          logger.error(err)
+          reject(err)
+        )
+    )
   )
   
 bus.on('uploadFile', (req, res) ->
-  console.log '=^^=|_uploadFile'
-  uploadFile('','newFilesLolaopalTioOmmmmm.pdf','eltitoom')
+  if !req.payload.target?
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
+  else if !req.payload.buffer.data?
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide an attached file.')
+  else if !req.payload.fileName?
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a file name.')
+  else
+    uploadFile(req.payload.buffer,req.payload.fileName,req.payload.target)
 )
 
 bus.on('downloadFile', (req, res) ->
-  minioClient = MinioClass.getInstance().minioClient
-  console.log minioClient
+  logger.debug(req)
+  if !req.payload.target?
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
+  else if !req.payload.fileName?
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a file name.')
+  else
+    downloadFile(req.payload.fileName,req.payload.target)
 )
