@@ -30,6 +30,7 @@ require('app-module-path').addPath("src/#{path}") for path in [
   'database'
   'project'
   'util'
+  'fileSystem'
 ]
 
 
@@ -53,6 +54,7 @@ require(run) for run in [
   'ProjectAuthCtrl'
   'ProjectCtrlFactory'
   'WeaverQueryCtrl'
+  'FileSystemCtrl'
 ]
 
 

@@ -212,6 +212,8 @@ messages = [
   "More coffee! More coffee!"
   "404, purpose of life not found."
   "Permission to wipe database and retire."
+  "100 Certified It Works on My Machine"
+  "We are going to build a great firewall and Freedonia is going to pay for it"
 ]
 
 module.exports = ->
