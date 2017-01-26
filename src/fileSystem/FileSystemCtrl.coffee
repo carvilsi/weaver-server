@@ -44,26 +44,29 @@ uploadFile = (file, fileName, project) ->
   minioClient = MinioClass.getInstance().minioClient
   checkBucket(project, minioClient)
   .then( ->
-    sendFileToServer(file, fileName, project, minioClient)
+    sendFileToServer(file, fileName, project, minioClient).then((res) ->
+      Promise.resolve(res)
+    )
   )
   .catch((error) ->
-    error
+    Promise.resolve(error)
   )
   
 sendFileToServer = (file, fileName, project, minioClient) ->
   buf = new Buffer(file.data)
-  minioClient.putObject("#{project}","#{fileName}",buf, 'application/octet-stream', (err) ->
-    if err
-      logger.error(err)
-      Promise.reject(err)
-    else
-      logger.debug('file uploaded ok')
-      Promise.resolve('file uploaded ok')
+  new Promise((resolve, reject) =>
+    minioClient.putObject("#{project}","#{fileName}",buf, 'application/octet-stream', (err) ->
+      if err
+        logger.error(err)
+        reject(err)
+      else
+        logger.debug('file uploaded ok')
+        resolve('file uploaded ok')
+    )
   )
 
 downloadFile = (fileName, project, minioClient) ->
   new Promise((resolve, reject) =>
-    
     minioClient = MinioClass.getInstance().minioClient
     size = 0
     bufArray = []
