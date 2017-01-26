@@ -3,8 +3,9 @@ config      = require('config')
 bus         = require('EventBus').get('weaver')
 expect      = require('util/bus').getExpect(bus)
 DbService   = require('DatabaseService')
-Error       = require('weaver-commons').Error
-WeaverError = require('weaver-commons').WeaverError
+Weaver      = require('weaver-sdk')
+Error       = Weaver.LegacyError
+WeaverError = Weaver.Error
 
 
 # NOTE: Functionality described here needs to match that in KubernetesProjectCtrl
