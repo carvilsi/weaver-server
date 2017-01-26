@@ -8,8 +8,9 @@ $ docker run -p 9000:9000 --name minio -e "MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
 ###
 bus          = require('EventBus').get('weaver')
 config       = require('config')
-Error        = require('weaver-commons').Error
-WeaverError  = require('weaver-commons').WeaverError
+Weaver       = require('weaver-sdk')
+Error        = Weaver.LegacyError
+WeaverError  = Weaver.Error
 Promise      = require('bluebird')
 logger       = require('logger')
 minio        = require('minio')
@@ -20,7 +21,8 @@ checkBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
     minioClient.bucketExists("#{project}", (err) ->
       if err and err.code is 'NoSuchBucket'
-        createBucket("#{project}", minioClient).then(  ->
+        createBucket("#{project}", minioClient)
+        .then(  ->
           resolve()
         ).catch((err) ->
           reject(err)
@@ -57,10 +59,8 @@ sendFileToServer = (file, fileName, project, minioClient) ->
   new Promise((resolve, reject) =>
     minioClient.putObject("#{project}","#{fileName}",buf, 'application/octet-stream', (err) ->
       if err
-        logger.error(err)
         reject(err)
       else
-        logger.debug('file uploaded ok')
         resolve('file uploaded ok')
     )
   )
@@ -70,27 +70,25 @@ downloadFile = (fileName, project, minioClient) ->
     minioClient = MinioClass.getInstance().minioClient
     size = 0
     bufArray = []
-    minioClient.getObject("#{project}","#{fileName}", (err, stream) ->
-      if err
-        logger.error(err)
-        reject(err)
-      else
-        logger.debug('success :)')
-        stream.on('data', (chunk) ->
-          size += chunk.length
-          bufArray.push(chunk)
-          logger.debug(chunk)
-        )
-        stream.on('end', ->
-          logger.debug('total size: ' + size)
-          buffer = Buffer.concat(bufArray)
-          resolve(buffer)
-        )
-        stream.on('error', (err) ->
-          logger.error(err)
+    try
+      minioClient.getObject("#{project}","#{fileName}", (err, stream) ->
+        if err
           reject(err)
-        )
-    )
+        else
+          stream.on('data', (chunk) ->
+            size += chunk.length
+            bufArray.push(chunk)
+          )
+          stream.on('end', ->
+            buffer = Buffer.concat(bufArray)
+            resolve(buffer)
+          )
+          stream.on('error', (err) ->
+            reject(err)
+          )
+      )
+    catch error
+      reject(error)
   )
   
 bus.on('uploadFile', (req, res) ->
@@ -105,7 +103,6 @@ bus.on('uploadFile', (req, res) ->
 )
 
 bus.on('downloadFile', (req, res) ->
-  logger.debug(req)
   if !req.payload.target?
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
   else if !req.payload.fileName?
