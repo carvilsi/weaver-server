@@ -14,8 +14,9 @@ WeaverError  = Weaver.Error
 Promise      = require('bluebird')
 logger       = require('logger')
 minio        = require('minio')
-MinioClass   = require('MinioSingleton')
+MinioClass   = require('MinioClient')
 fs           = require('fs')
+cuid         = require('cuid')
 
 checkBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
@@ -56,16 +57,17 @@ uploadFile = (file, fileName, project) ->
   
 sendFileToServer = (file, fileName, project, minioClient) ->
   buf = new Buffer(file.data)
+  uuid = cuid()
   new Promise((resolve, reject) =>
-    minioClient.putObject("#{project}","#{fileName}",buf, 'application/octet-stream', (err) ->
+    minioClient.putObject("#{project}","#{uuid}-#{fileName}",buf, 'application/octet-stream', (err) ->
       if err
         reject(err)
       else
-        resolve('file uploaded ok')
+        resolve("#{uuid}-#{fileName}")
     )
   )
 
-downloadFile = (fileName, project, minioClient) ->
+downloadFile = (fileName, project) ->
   new Promise((resolve, reject) =>
     minioClient = MinioClass.getInstance().minioClient
     size = 0
@@ -90,6 +92,23 @@ downloadFile = (fileName, project, minioClient) ->
     catch error
       reject(error)
   )
+
+downloadFileByID = (id, project) ->
+  new Promise((resolve, reject) =>
+    minioClient = MinioClass.getInstance().minioClient
+    size = 0
+    bufArray = []
+    try
+      stream = minioClient.listObjectsV2("#{project}","#{id}", true)
+      stream.on('data', (obj) ->
+        resolve(downloadFile(obj.name,project))
+      )
+      stream.on('error', (err) ->
+        reject(err)
+      )
+    catch error
+      reject(error)
+  )
   
 bus.on('uploadFile', (req, res) ->
   if !req.payload.target?
@@ -109,4 +128,13 @@ bus.on('downloadFile', (req, res) ->
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a file name.')
   else
     downloadFile(req.payload.fileName,req.payload.target)
+)
+
+bus.on('downloadFileByID', (req, res) ->
+  if !req.payload.target?
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
+  else if !req.payload.id?
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide an ID.')
+  else
+    downloadFileByID(req.payload.id,req.payload.target)
 )
