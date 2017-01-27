@@ -37,7 +37,7 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
 # Load libs
 Promise  = require('bluebird')
 conf     = require('config')       # Configuration loads files in the root config directory
-Server   = require('server')
+Server   = require('Server')
 splash   = require('splash')
 sounds   = require('sounds')
 Weaver   = require('weaver-sdk')
