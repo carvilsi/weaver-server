@@ -99,12 +99,19 @@ downloadFileByID = (id, project) ->
     size = 0
     bufArray = []
     try
+      file = false
       stream = minioClient.listObjectsV2("#{project}","#{id}", true)
       stream.on('data', (obj) ->
+        file = true
         resolve(downloadFile(obj.name,project))
       )
       stream.on('error', (err) ->
+        file = true
         reject(err)
+      )
+      stream.on('end', (smt) ->
+        if !file
+          reject('file not found')
       )
     catch error
       reject(error)
@@ -137,4 +144,7 @@ bus.on('downloadFileByID', (req, res) ->
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide an ID.')
   else
     downloadFileByID(req.payload.id,req.payload.target)
+    .catch((err) ->
+      Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
+    )
 )
