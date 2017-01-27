@@ -212,6 +212,8 @@ messages = [
   "More coffee! More coffee!"
   "404, purpose of life not found."
   "Permission to wipe database and retire."
+  "Doesn't look like anything to me..."
+  "The src isn't meant for you"
 ]
 
 module.exports = ->
