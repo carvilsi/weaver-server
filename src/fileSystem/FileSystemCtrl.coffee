@@ -23,11 +23,6 @@ checkBucket = (project, minioClient) ->
     minioClient.bucketExists("#{project}", (err) ->
       if err and err.code is 'NoSuchBucket'
         createBucket("#{project}", minioClient)
-        .then(  ->
-          resolve()
-        ).catch((err) ->
-          reject(err)
-        )
       else
         resolve()
     )
@@ -47,12 +42,7 @@ uploadFile = (file, fileName, project) ->
   minioClient = MinioClass.getInstance().minioClient
   checkBucket(project, minioClient)
   .then( ->
-    sendFileToServer(file, fileName, project, minioClient).then((res) ->
-      Promise.resolve(res)
-    )
-  )
-  .catch((error) ->
-    Promise.resolve(error)
+    sendFileToServer(file, fileName, project, minioClient)
   )
   
 sendFileToServer = (file, fileName, project, minioClient) ->
