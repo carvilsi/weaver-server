@@ -27,6 +27,10 @@ WEAVER.POST "project.delete"         # Delete a project
 WEAVER.POST "project.ready"          # Checks if a project is setup and ready
 WEAVER.POST "application"            # Creates an application
 
+# Files management
+WEAVER.POST "uploadFile"             # Sends a file to be stored at server
+WEAVER.GET  "downloadFile"           # Retrieves a file from server by fileName
+WEAVER.GET  "downloadFileByID"           # Retrieves a file from server by ID
 
 # Admin routes
 ADMIN.POST "wipe"                    # Wipe entire database
