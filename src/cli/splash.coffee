@@ -1,9 +1,12 @@
 require('colors')
 conf   = require('config')
-logo  = require('./logo')
+logo   = require('./logo')
 pack   = require('../../package.json')
 cursor = require('cursor')
 delay  = require('delay')
+
+getProjectsCtrlType = require('ProjectCtrlFactory')
+
 splash = []
 
 BOOL = (val) ->
@@ -37,7 +40,7 @@ _ "Console:   #{conf.get('logging.console').toUpperCase()}"
 _ "File:      #{conf.get('logging.file').toUpperCase()}"
 _ ""
 _ "# Settings"
-_ "Single database:  #{BOOL conf.get('application.singleDatabase')}"
+_ "Projects:         #{getProjectsCtrlType()}"
 _ "CORS allow all:   #{BOOL conf.get('server.weaver.cors')}"
 _ "Admin password:   #{conf.get('server.admin.password')}"
 _ ""

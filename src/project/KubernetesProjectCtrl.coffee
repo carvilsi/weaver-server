@@ -1,4 +1,5 @@
 bus         = require('EventBus').get('weaver')
+expect      = require('util/bus').getExpect(bus)
 config      = require('config')
 rp          = require('request-promise')
 Weaver      = require('weaver-sdk')
@@ -9,26 +10,38 @@ Promise     = require('bluebird')
 # NOTE: The functionality in this file needs to be equivalent to that in SingleDatabaseProjectCtrl, this is
 # leading for production systems and other installs which have a k8s cluster available.
 
-serviceProject  = config.get('services.project.endpoint')?
+serviceProject  = config.get('services.projectController.endpoint')
 
 createUri = (suffix) ->
   "#{serviceProject}/#{suffix}"
 
-doCall = (suffix, parameterName) -> (req, res) ->
-  if parameterName? and !req.payload[parameterName]?
-    Promise.reject(Error(WeaverError.OTHER_CAUSE, "Missing parameter #{parameterName}"))
-  else
-    callParameter = suffix + (if parameterName? then req.payload[parameterName] else "")
-    rp({
-      uri: createUri(callParameter)
-      json: true
-    })
+doCall = (suffix) ->
+  uri = createUri(suffix)
+  rp({
+    uri: uri
+    json: true
+  })
 
-bus.on('project',        doCall("list"))
-bus.on('project.create', doCall("create/", "name"))
-bus.on('project.delete', doCall("delete/", "id"))
+bus.on('project', (res, req) ->
+  doCall("list")
+)
 
-bus.on('getDatabaseForProject', (project) ->
-  console.log("Getting database for project: #{project}")
-  Promise.reject()
+expect('id').bus('project.create').do((res, req, id) ->
+  doCall("create/#{id}")
+)
+ 
+expect('id').bus('project.delete').do((res, req, id) ->
+  doCall("delete/#{id}")
+)
+
+expect('id').bus('project.ready').do((res, req, id) ->
+  doCall("status/#{id}").then((status) ->
+    { ready: status.ready }
+  )
+)
+
+bus.on('getDatabaseForProject', (id) ->
+  doCall("status/#{id}").then((status) ->
+    Promise.resolve(status.service)
+  )
 )
