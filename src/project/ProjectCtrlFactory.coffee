@@ -1,13 +1,12 @@
 config = require('config')
 
-serviceDatabase = config.get('services.projectDatabase.endpoint')
 serviceProject  = config.get('services.projectController.endpoint')?
 
 getDatabaseCtrl = ->
-  switch
-    when !!serviceDatabase then 'SingleDatabaseProjectCtrl'
-    when !!serviceProject then 'KubernetesProjectCtrl'
-    else throw "No database or project service defined"
+  if config.get('application.singleDatabase')
+    'SingleDatabaseProjectCtrl'
+  else
+    'KubernetesProjectCtrl'
 
 require("./#{getDatabaseCtrl()}")
 

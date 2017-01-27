@@ -11,7 +11,7 @@ logger      = require('logger')
 # NOTE: The functionality in this file needs to be equivalent to that in SingleDatabaseProjectCtrl, this is
 # leading for production systems and other installs which have a k8s cluster available.
 
-serviceProject  = config.get('services.project.endpoint')
+serviceProject  = config.get('services.projectController.endpoint')
 
 createUri = (suffix) ->
   "#{serviceProject}/#{suffix}"
@@ -46,7 +46,7 @@ expect('id').bus('project.ready').do((res, req, id) ->
   )
 )
 
-bus.on('getDatabaseForProject', (project) ->
+bus.on('getDatabaseForProject', (id) ->
   doCall("status/#{id}").then((status) ->
     Promise.resolve(status.service)
   )
