@@ -4,11 +4,15 @@ logo  = require('./logo')
 pack   = require('../../package.json')
 cursor = require('cursor')
 delay  = require('delay')
+<<<<<<< HEAD
 getProjectsCtrlType = require('ProjectCtrlFactory')
 
 splash = [] 
+=======
+splash = []
+>>>>>>> BETA
 
-BOOL = (val) -> 
+BOOL = (val) ->
   if val then 'ON' else 'OFF'
 
 _ = (e) -> splash.push(e)
@@ -17,7 +21,6 @@ _ "Weaver Server started and ready!"
 _ ""
 _ "# Versions"
 _ "Server:     #{pack.version}"
-_ "Commons:    #{pack['dependencies']['weaver-commons']}"
 _ "SDK:        #{pack['dependencies']['weaver-sdk']}"
 _ ""
 _ "# Ports"
@@ -29,18 +32,18 @@ _ "HTTP:       #{BOOL conf.get('comm.http.enable')}"
 _ "Socket.io:  #{BOOL conf.get('comm.socket.enable')}"
 _ ""
 _ "# Services"
-_ "Projects:   #{getProjectsCtrlType()}"
-_ "Database:   #{conf.get('services.database.endpoint')}"
-_ "Flock:      #{conf.get('services.flock.endpoint')}"
-_ "Project:    #{conf.get('services.project.endpoint')}"
+_ "System Database:     #{conf.get('services.systemDatabase.endpoint')}"
+_ "Project Database:    #{conf.get('services.projectDatabase.endpoint')}"
+_ "Project Controller:  #{conf.get('services.projectController.endpoint')}"
 _ ""
 _ "# Logging"
-_ "Console:   #{conf.get('logging.console')}"
-_ "File:      #{conf.get('logging.file')}"
+_ "Console:   #{conf.get('logging.console').toUpperCase()}"
+_ "File:      #{conf.get('logging.file').toUpperCase()}"
 _ ""
 _ "# Settings"
-_ "CORS allow all:  #{BOOL conf.get('server.weaver.cors')}"
-_ "Admin password:  #{conf.get('server.admin.password')}"
+_ "Single database:  #{BOOL conf.get('application.singleDatabase')}"
+_ "CORS allow all:   #{BOOL conf.get('server.weaver.cors')}"
+_ "Admin password:   #{conf.get('server.admin.password')}"
 _ ""
 _ require('./funnies')()
 
@@ -80,7 +83,7 @@ module.exports =
       cursor.toTop()
       console.log(getText(spaceUp).cyan)
       spaceUp--
-      
+
       delay(30, print) if spaceUp > 0
-      
+
     print()

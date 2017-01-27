@@ -14,10 +14,10 @@ formatter = (options) ->
   message = if options.message? then options.message else ''
   object  = if options.meta? && Object.keys(options.meta).length != 0 then ('\n\t'+ JSON.stringify(options.meta)) else ''
   total   = "#{time} | #{level} | #{message} #{object}"
-  
+
   # Make message red if error
   total = total.red if level is 'ERROR'
-  
+
   total
 
 # Create console transports array using timestamp and formatter functions
@@ -29,6 +29,6 @@ Logger = winston.Logger
 logger = new Logger({transports})
 
 # Set minimum level
-logger.level = "#{config.get('logging.console')}".toLowerCase()
+logger.level = "#{config.get('logging.console')}"
 
 module.exports = logger

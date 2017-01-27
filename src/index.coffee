@@ -24,7 +24,7 @@ require('app-module-path').addPath("src/#{path}") for path in [
   'admin'
   'application'
   'auth'
-  'auth/schemas'
+  'schemas'
   'cli'
   'core'
   'database'
@@ -34,12 +34,14 @@ require('app-module-path').addPath("src/#{path}") for path in [
 
 
 # Load libs
-Promise = require('bluebird')
-conf    = require('config')       # Configuration loads files in the root config directory
-Server  = require('server')
-splash  = require('splash')
-sounds  = require('sounds')
-pjson   = require('../package.json')
+Promise  = require('bluebird')
+conf     = require('config')       # Configuration loads files in the root config directory
+Server   = require('server')
+splash   = require('splash')
+sounds   = require('sounds')
+Weaver   = require('weaver-sdk')
+EventBus = require('EventBus')
+pjson    = require('../package.json')
 
 # Init routes and controllers by running once
 require(run) for run in [
@@ -48,7 +50,9 @@ require(run) for run in [
   'AuthCtrl'
   'ErrorHandler'
   'NodeCtrl'
+  'ProjectAuthCtrl'
   'ProjectCtrlFactory'
+  'WeaverQueryCtrl'
 ]
 
 
@@ -57,8 +61,8 @@ weaver = new Server({
   routes: 'weaver'
   views:[
     {path: '/', file: 'weaver/index.html', vars: {server : pjson.version}}
-  ]  
-  
+  ]
+
   port: conf.get('server.weaver.port')
   cors: conf.get('server.weaver.cors')
 })
@@ -71,13 +75,17 @@ admin = new Server({
   ]
   static:
     '/portal': 'admin'
-    
+
   port: conf.get('server.admin.port')
 })
 
 
-# Run
-Promise.all([weaver.run(), admin.run()]).then(->
+# Run servers
+Promise.all([weaver.run(), admin.run()])
+.then(->
+  # Initialize local Weaver
+  Weaver.local(EventBus.get('weaver'))
+).then(->
   splash.printLoaded()
   sounds.loaded()
 )

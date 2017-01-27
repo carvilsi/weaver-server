@@ -1,7 +1,7 @@
 config = require('config')
 
-serviceDatabase = config.get('services.database.endpoint')
-serviceProject  = config.get('services.project.endpoint')?
+serviceDatabase = config.get('services.projectDatabase.endpoint')
+serviceProject  = config.get('services.projectController.endpoint')?
 
 getDatabaseCtrl = ->
   switch
