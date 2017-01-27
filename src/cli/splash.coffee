@@ -4,13 +4,8 @@ logo  = require('./logo')
 pack   = require('../../package.json')
 cursor = require('cursor')
 delay  = require('delay')
-<<<<<<< HEAD
-getProjectsCtrlType = require('ProjectCtrlFactory')
 
-splash = [] 
-=======
 splash = []
->>>>>>> BETA
 
 BOOL = (val) ->
   if val then 'ON' else 'OFF'
