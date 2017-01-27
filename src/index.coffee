@@ -19,7 +19,7 @@ console.log(`'\033[36mLoading...'`)  # Loading in cyan
 # Path resolving local directories, making it non-relative accessible from any location.
 # In other words, require('../../../../util/logger') becomes require('logger')
 # Note: This must be the first running code in the application before any require() works
-require('app-module-path').addPath("src/#{path}") for path in [
+require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   '.'
   'admin'
   'application'
