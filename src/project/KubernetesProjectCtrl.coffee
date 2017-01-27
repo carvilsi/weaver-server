@@ -23,7 +23,7 @@ doCall = (suffix) ->
   })
 
 bus.on('project', (res, req) ->
-  Promise.resolve(doCall("list"))
+  doCall("list")
 )
 
 expect('id').bus('project.create').do((res, req, id) ->
