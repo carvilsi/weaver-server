@@ -57,3 +57,14 @@ services:
       - VIRTUOSO_DB_USER=dba
       - VIRTUOSO_DB_PASSWORD=myDbaPassword
       - VIRTUOSO_DB_PATH=jdbc:virtuoso://project-virtuoso:1111
+
+  file-system:
+    image: minio/minio
+    expose:
+      - "9000"
+    ports:
+      - "9000:9000"
+    environment:
+      - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
+      - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
+    command: server /data
