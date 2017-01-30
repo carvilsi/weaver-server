@@ -28,9 +28,11 @@ WEAVER.POST "project.ready"          # Checks if a project is setup and ready
 WEAVER.POST "application"            # Creates an application
 
 # Files management
-WEAVER.POST "uploadFile"             # Sends a file to be stored at server
-WEAVER.GET  "downloadFile"           # Retrieves a file from server by fileName
-WEAVER.GET  "downloadFileByID"           # Retrieves a file from server by ID
+WEAVER.POST "uploadFile"             # Sends a file to be stored at the object storage server
+WEAVER.GET  "downloadFile"           # Retrieves a file from the object storage server by fileName
+WEAVER.GET  "downloadFileByID"       # Retrieves a file from the object storage server by ID
+WEAVER.POST "deleteFile"             # Deletes a file from the object storage server by name
+WEAVER.POST "deleteFileByID"         # Deletes a file from the object storage server by ID
 
 # Admin routes
 ADMIN.POST "wipe"                    # Wipe entire database

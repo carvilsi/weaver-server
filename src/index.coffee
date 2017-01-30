@@ -45,17 +45,18 @@ EventBus = require('EventBus')
 pjson    = require('../package.json')
 
 # Init routes and controllers by running once
-require(run) for run in [
-  'routes'
-  'ApplicationCtrl'
-  'AuthCtrl'
-  'ErrorHandler'
-  'NodeCtrl'
-  'ProjectAuthCtrl'
-  'ProjectCtrlFactory'
-  'WeaverQueryCtrl'
-  'FileSystemCtrl'
-]
+initModules = ->
+  require(run) for run in [
+    'routes'
+    'ApplicationCtrl'
+    'AuthCtrl'
+    'ErrorHandler'
+    'NodeCtrl'
+    'ProjectAuthCtrl'
+    'ProjectCtrlFactory'
+    'WeaverQueryCtrl'
+    'FileSystemCtrl'
+  ]
 
 
 # Init servers
@@ -88,6 +89,7 @@ Promise.all([weaver.run(), admin.run()])
   # Initialize local Weaver
   Weaver.local(EventBus.get('weaver'))
 ).then(->
+  initModules()
   splash.printLoaded()
   sounds.loaded()
 )
