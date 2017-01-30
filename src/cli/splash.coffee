@@ -75,7 +75,10 @@ getText = (spaceUp) ->
 module.exports =
 
   printLoaded: ->
-    spaceUp = splash.length
+    if conf.get('application.scroll') is "true"
+      spaceUp = splash.length
+    else
+      spaceUp = 1
 
     print = ->
       cursor.clear()

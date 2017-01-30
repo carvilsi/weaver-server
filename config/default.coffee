@@ -1,5 +1,6 @@
 module.exports =
   application:
+    scroll: true
     singleDatabase: true
     sounds:
       muteAll: false
