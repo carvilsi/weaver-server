@@ -2,7 +2,7 @@ config = require('config')
 logger = require('logger')
 
 serviceProject = config.get('services.projectController.endpoint')?
-singleDatabase = config.get('application.singleDatabase') is "true"
+singleDatabase = config.get('application.singleDatabase')
 
 getDatabaseCtrl = ->
   logger.debug("Getting project controller name, single database #{singleDatabase}")

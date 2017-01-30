@@ -1,9 +1,16 @@
 module.exports =
   application:
-    scroll:         "APPLICATION_SCROLL"
-    singleDatabase: "APPLICATION_SINGLE_DATABASE"
+    scroll:
+      # https://github.com/lorenwest/node-config/issues/272#issuecomment-223146123
+      __name: "APPLICATION_SCROLL"
+      __format: "json"
+    singleDatabase:
+      __name: "APPLICATION_SINGLE_DATABASE"
+      __format: "json"
     sounds:
-      muteAll:      "APPLICATION_SOUNDS_MUTEALL"
+      muteAll:
+        __name: "APPLICATION_SOUNDS_MUTEALL"
+        __format: "json"
 
   server:
     weaver:

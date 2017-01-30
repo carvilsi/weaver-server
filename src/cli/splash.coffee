@@ -75,7 +75,7 @@ getText = (spaceUp) ->
 module.exports =
 
   printLoaded: ->
-    if conf.get('application.scroll') is "true"
+    if conf.get('application.scroll')
       spaceUp = splash.length
     else
       spaceUp = 1
