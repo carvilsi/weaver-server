@@ -1,9 +1,12 @@
 config = require('config')
+logger = require('logger')
 
-serviceProject  = config.get('services.projectController.endpoint')?
+serviceProject = config.get('services.projectController.endpoint')?
+singleDatabase = config.get('application.singleDatabase') is "true"
 
 getDatabaseCtrl = ->
-  if config.get('application.singleDatabase')
+  logger.debug("Getting project controller name, single database #{singleDatabase}")
+  if singleDatabase
     'SingleDatabaseProjectCtrl'
   else
     'KubernetesProjectCtrl'

@@ -6,6 +6,7 @@ DbService   = require('DatabaseService')
 Weaver      = require('weaver-sdk')
 Error       = Weaver.LegacyError
 WeaverError = Weaver.Error
+logger      = require('logger')
 
 
 # NOTE: Functionality described here needs to match that in KubernetesProjectCtrl
@@ -48,3 +49,5 @@ expect('id').bus('project.ready').do((req, res, id) ->
 bus.on('getDatabaseForProject', (project) ->
   Promise.resolve(serviceDatabase.uri)
 )
+
+logger.info("Single database project controller loaded")

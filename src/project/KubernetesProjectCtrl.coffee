@@ -6,6 +6,7 @@ Weaver      = require('weaver-sdk')
 Error       = Weaver.LegacyError
 WeaverError = Weaver.Error
 Promise     = require('bluebird')
+logger      = require('logger')
 
 # NOTE: The functionality in this file needs to be equivalent to that in SingleDatabaseProjectCtrl, this is
 # leading for production systems and other installs which have a k8s cluster available.
@@ -45,3 +46,5 @@ bus.on('getDatabaseForProject', (id) ->
     Promise.resolve(status.service)
   )
 )
+
+logger.info("K8s project controller loaded")
