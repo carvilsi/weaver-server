@@ -33,7 +33,9 @@ module.exports =
       accessKey: "SERVICES_FILESYSTEM_ACCESSKEY"
       secretKey: "SERVICES_FILESYSTEM_SECRETKEY"
       region:    "SERVICES_FILESYSTEM_REGION"
-      secure:    "SERVICES_FILESYSTEM_SECURE"
+      secure:
+        __name: "SERVICES_FILESYSTEM_SECURE"
+        __format: "json"
 
   logging:
     console: "LOGGING_CONSOLE"
