@@ -82,6 +82,20 @@ downloadFile = (fileName, project) ->
     catch error
       reject(error)
   )
+  
+deleteFile = (fileName, project) ->
+  new Promise((resolve, reject) =>
+    minioClient = MinioClass.getInstance().minioClient
+    try
+      minioClient.removeObject("#{project}","#{fileName}", (err) ->
+        if err and err.code is 'NoSuchBucket'
+          reject(Error(WeaverError.FILE_NOT_EXISTS_ERROR, 'Project not found'))
+        else
+          resolve()
+      )
+    catch error
+      reject(error)
+  )
 
 downloadFileByID = (id, project) ->
   new Promise((resolve, reject) =>
@@ -94,6 +108,30 @@ downloadFileByID = (id, project) ->
       stream.on('data', (obj) ->
         file = true
         resolve(downloadFile(obj.name,project))
+      )
+      stream.on('error', (err) ->
+        file = true
+        reject(err)
+      )
+      stream.on('end', (smt) ->
+        if !file
+          reject('file not found')
+      )
+    catch error
+      reject(error)
+  )
+
+deleteFileByID = (id, project) ->
+  new Promise((resolve, reject) =>
+    minioClient = MinioClass.getInstance().minioClient
+    size = 0
+    bufArray = []
+    try
+      file = false
+      stream = minioClient.listObjectsV2("#{project}","#{id}", true)
+      stream.on('data', (obj) ->
+        file = true
+        resolve(deleteFile(obj.name,project))
       )
       stream.on('error', (err) ->
         file = true
@@ -136,5 +174,26 @@ bus.on('downloadFileByID', (req, res) ->
     downloadFileByID(req.payload.id,req.payload.target)
     .catch((err) ->
       Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
+    )
+)
+
+bus.on('deleteFile', (req, res) ->
+  if !req.payload.target?
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
+  else if !req.payload.fileName?
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a file name.')
+  else
+    deleteFile(req.payload.fileName,req.payload.target)
+)
+
+bus.on('deleteFileByID', (req, res) ->
+  if !req.payload.target?
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
+  else if !req.payload.id?
+    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide an ID.')
+  else
+    deleteFileByID(req.payload.id,req.payload.target)
+    .catch((err) ->
+      Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'Project does not exists')
     )
 )
