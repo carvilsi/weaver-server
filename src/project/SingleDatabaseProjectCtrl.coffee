@@ -6,6 +6,7 @@ DbService   = require('DatabaseService')
 Weaver      = require('weaver-sdk')
 Error       = Weaver.LegacyError
 WeaverError = Weaver.Error
+MinioClient = require('MinioClient')
 logger      = require('logger')
 
 
@@ -48,6 +49,10 @@ expect('id').bus('project.ready').do((req, res, id) ->
 
 bus.on('getDatabaseForProject', (project) ->
   Promise.resolve(serviceDatabase.uri)
+)
+
+bus.on('getMinioForProject', (project) ->
+  Promise.resolve(new MinioClient(config.get('services.fileSystem')))
 )
 
 logger.info("Single database project controller loaded")
