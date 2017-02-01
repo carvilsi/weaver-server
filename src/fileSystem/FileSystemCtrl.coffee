@@ -14,9 +14,11 @@ WeaverError  = Weaver.Error
 Promise      = require('bluebird')
 logger       = require('logger')
 minio        = require('minio')
-MinioClass   = require('MinioClient')
 fs           = require('fs')
 cuid         = require('cuid')
+
+getMinioClient = (project) ->
+  bus.emit('getMinioForProject', project)
 
 checkBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
@@ -39,10 +41,11 @@ createBucket = (project, minioClient) ->
   )
 
 uploadFile = (file, fileName, project) ->
-  minioClient = MinioClass.getInstance().minioClient
-  checkBucket(project, minioClient)
-  .then( ->
-    sendFileToServer(file, fileName, project, minioClient)
+  getMinioClient(project).then((minioClient) ->
+    checkBucket(project, minioClient)
+    .then( ->
+      sendFileToServer(file, fileName, project, minioClient)
+    )
   )
   
 sendFileToServer = (file, fileName, project, minioClient) ->
@@ -59,90 +62,103 @@ sendFileToServer = (file, fileName, project, minioClient) ->
 
 downloadFile = (fileName, project) ->
   new Promise((resolve, reject) =>
-    minioClient = MinioClass.getInstance().minioClient
-    size = 0
-    bufArray = []
-    try
-      minioClient.getObject("#{project}","#{fileName}", (err, stream) ->
-        if err
-          reject(err)
-        else
-          stream.on('data', (chunk) ->
-            size += chunk.length
-            bufArray.push(chunk)
-          )
-          stream.on('end', ->
-            buffer = Buffer.concat(bufArray)
-            resolve(buffer)
-          )
-          stream.on('error', (err) ->
+    getMinioClient(project).then((minioClient) ->
+      size = 0
+      bufArray = []
+      try
+        minioClient.getObject("#{project}","#{fileName}", (err, stream) ->
+          if err
             reject(err)
-          )
-      )
-    catch error
-      reject(error)
+          else
+            stream.on('data', (chunk) ->
+              size += chunk.length
+              bufArray.push(chunk)
+            )
+            stream.on('end', ->
+              buffer = Buffer.concat(bufArray)
+              resolve(buffer)
+            )
+            stream.on('error', (err) ->
+              reject(err)
+            )
+        )
+      catch error
+        reject(error)
+    ).catch((err) ->
+      reject(err)
+    )
   )
   
 deleteFile = (fileName, project) ->
   new Promise((resolve, reject) =>
-    minioClient = MinioClass.getInstance().minioClient
-    try
-      minioClient.removeObject("#{project}","#{fileName}", (err) ->
-        if err and err.code is 'NoSuchBucket'
-          reject(Error(WeaverError.FILE_NOT_EXISTS_ERROR, 'Project not found'))
-        else
-          resolve()
-      )
-    catch error
-      reject(error)
+    getMinioClient(project).then((minioClient) ->
+      minioClient = MinioClass.getInstance().minioClient
+      try
+        minioClient.removeObject("#{project}","#{fileName}", (err) ->
+          if err and err.code is 'NoSuchBucket'
+            reject(Error(WeaverError.FILE_NOT_EXISTS_ERROR, 'Project not found'))
+          else
+            resolve()
+        )
+      catch error
+        reject(error)
+    ).catch((err) ->
+      reject(err)
+    )
   )
 
 downloadFileByID = (id, project) ->
   new Promise((resolve, reject) =>
-    minioClient = MinioClass.getInstance().minioClient
-    size = 0
-    bufArray = []
-    try
-      file = false
-      stream = minioClient.listObjectsV2("#{project}","#{id}", true)
-      stream.on('data', (obj) ->
-        file = true
-        resolve(downloadFile(obj.name,project))
-      )
-      stream.on('error', (err) ->
-        file = true
-        reject(err)
-      )
-      stream.on('end', (smt) ->
-        if !file
-          reject('file not found')
-      )
-    catch error
-      reject(error)
+    getMinioClient(project).then((minioClient) ->
+      size = 0
+      bufArray = []
+      try
+        file = false
+        stream = minioClient.listObjectsV2("#{project}","#{id}", true)
+        stream.on('data', (obj) ->
+          file = true
+          resolve(downloadFile(obj.name,project))
+        )
+        stream.on('error', (err) ->
+          file = true
+          reject(err)
+        )
+        stream.on('end', (smt) ->
+          if !file
+            reject('file not found')
+        )
+      catch error
+        reject(error)
+    ).catch((err) ->
+      reject(err)
+    )
   )
 
 deleteFileByID = (id, project) ->
   new Promise((resolve, reject) =>
-    minioClient = MinioClass.getInstance().minioClient
-    size = 0
-    bufArray = []
-    try
-      file = false
-      stream = minioClient.listObjectsV2("#{project}","#{id}", true)
-      stream.on('data', (obj) ->
-        file = true
-        resolve(deleteFile(obj.name,project))
-      )
-      stream.on('error', (err) ->
-        file = true
-        reject(err)
-      )
-      stream.on('end', (smt) ->
-        if !file
-          reject('file not found')
-      )
-    catch error
-      reject(error)
+    getMinioClient(project).then((minioClient) ->
+      size = 0
+      bufArray = []
+      try
+        file = false
+        stream = minioClient.listObjectsV2("#{project}","#{id}", true)
+        stream.on('data', (obj) ->
+          file = true
+          resolve(deleteFile(obj.name,project))
+        )
+        stream.on('error', (err) ->
+          file = true
+          reject(err)
+        )
+        stream.on('end', (smt) ->
+          if !file
+            reject('file not found')
+        )
+      catch error
+        reject(error)
+    ).catch((err) ->
+      reject(err)
+    )
   )
   
 bus.on('uploadFile', (req, res) ->
