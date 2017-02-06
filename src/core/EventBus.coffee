@@ -1,31 +1,33 @@
-module.exports=
+Promise       = require('bluebird')
+EventListener = require("EventListener")
+
 class EventBus
   constructor: (@name) ->
-    @filters   = {}
-    @listeners = {}
+    @listeners = {"*": []} # The wildcard array is initialized
 
-  on: (event, func) ->
-    @listeners[event] = [] if !@listeners[event]?
-    @listeners[event].push(func)
-    
-  fire: (event, arg1, arg2, arg3) ->
-    promises = ((f(arg1, arg2, arg3)) for f in @listeners[event])
-    Promise.all(promises).then((result) ->
-      
+  addListener: (event) ->
+    l = new EventListener(event)
+    @listeners[event] = @listeners[event] or []
+    @listeners[event].push(l)
+    l
+
+  emit: (event, args...) ->
+    # Always add the wildcard listeners to each event
+    notify = @listeners["*"].concat(@listeners[event] or [])
+
+    # Sort based on priority
+    sorted = notify.sort((a,b) -> a.after(b))
+
+    # Promise.mapSeries runs promises sequentially (as opposed to Promise.map)
+    Promise.mapSeries(sorted, (listener) ->
+      listener.call(args...)
+    ).then((result) ->
+
+      # Remove null and undefined
+      result = result.filter((r) -> r?)
+
       # Return single result if only 1 listener responded, else the array of results
       if result.length is 1 then result[0] else result
     )
-    
-  emit: (event, arg1, arg2, arg3) ->
-    if !@filters[event]?
-      @fire(event, arg1, arg2, arg3)
-    else
-      @filters[event](arg1, arg2, arg3).then(=>
-        @fire(event, arg1, arg2, arg3)
-      )
 
-  filter: (event, func) ->
-    @filters[event] = func
-
-Registry = require('registry')
-module.exports = new Registry(EventBus)
+module.exports = EventBus

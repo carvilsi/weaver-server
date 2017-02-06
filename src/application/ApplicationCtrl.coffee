@@ -1,7 +1,7 @@
 pjson = require('../../package.json')
-bus   = require('EventBus').get('weaver')
+bus   = require('WeaverBus')
 
 # Version
-bus.on('application.version', (req, res) ->
-  res.send(pjson.version)
+bus.private('application.version').on(->
+  pjson.version
 )

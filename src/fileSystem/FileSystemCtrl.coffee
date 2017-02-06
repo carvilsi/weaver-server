@@ -6,7 +6,7 @@ $ docker pull minio/minio
 $ docker run -p 9000:9000 --name minio -e "MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE" -e "MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD" -v /Path/to/store/data/minio:/data -v /Path/where/the/config/minio/exsits:/root/.minio  minio/minio server /data
 
 ###
-bus          = require('EventBus').get('weaver')
+bus          = require('WeaverBus')
 config       = require('config')
 Weaver       = require('weaver-sdk')
 Error        = Weaver.LegacyError
@@ -18,6 +18,8 @@ MinioClass   = require('MinioClient')
 fs           = require('fs')
 cuid         = require('cuid')
 
+return
+
 checkBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
     minioClient.bucketExists("#{project}", (err) ->
@@ -27,7 +29,7 @@ checkBucket = (project, minioClient) ->
         resolve()
     )
   )
-  
+
 createBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
     minioClient.makeBucket("#{project}", "#{config.get('services.fileSystem.region')}", (err) ->
@@ -44,7 +46,7 @@ uploadFile = (file, fileName, project) ->
   .then( ->
     sendFileToServer(file, fileName, project, minioClient)
   )
-  
+
 sendFileToServer = (file, fileName, project, minioClient) ->
   buf = new Buffer(file.data)
   uuid = cuid()
@@ -82,7 +84,7 @@ downloadFile = (fileName, project) ->
     catch error
       reject(error)
   )
-  
+
 deleteFile = (fileName, project) ->
   new Promise((resolve, reject) =>
     minioClient = MinioClass.getInstance().minioClient
@@ -144,7 +146,7 @@ deleteFileByID = (id, project) ->
     catch error
       reject(error)
   )
-  
+
 bus.on('uploadFile', (req, res) ->
   if !req.payload.target?
     Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
