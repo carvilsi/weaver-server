@@ -96,7 +96,6 @@ downloadFile = (fileName, project) ->
 deleteFile = (fileName, project) ->
   new Promise((resolve, reject) =>
     getMinioClient(project).then((minioClient) ->
-      minioClient = MinioClass.getInstance().minioClient
       try
         minioClient.removeObject("#{project}","#{fileName}", (err) ->
           if err and err.code is 'NoSuchBucket'
