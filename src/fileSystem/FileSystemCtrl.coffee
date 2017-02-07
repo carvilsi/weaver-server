@@ -18,7 +18,6 @@ MinioClass   = require('MinioClient')
 fs           = require('fs')
 cuid         = require('cuid')
 
-return
 
 checkBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
@@ -147,55 +146,28 @@ deleteFileByID = (id, project) ->
       reject(error)
   )
 
-bus.on('uploadFile', (req, res) ->
-  if !req.payload.target?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
-  else if !req.payload.buffer.data?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide an attached file.')
-  else if !req.payload.fileName?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a file name.')
-  else
-    uploadFile(req.payload.buffer,req.payload.fileName,req.payload.target)
+bus.private('uploadFile').require('target', 'buffer', 'fileName').on((req, target, buffer, fileName) ->
+  uploadFile(buffer, fileName, target)
 )
 
-bus.on('downloadFile', (req, res) ->
-  if !req.payload.target?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
-  else if !req.payload.fileName?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a file name.')
-  else
-    downloadFile(req.payload.fileName,req.payload.target)
+bus.private('downloadFile').require('target', 'fileName').on((req, target, fileName) ->
+  downloadFile(fileName, target)
 )
 
-bus.on('downloadFileByID', (req, res) ->
-  if !req.payload.target?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
-  else if !req.payload.id?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide an ID.')
-  else
-    downloadFileByID(req.payload.id,req.payload.target)
-    .catch((err) ->
-      Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
-    )
+bus.private('downloadFileByID').require('target', 'id').on((req, target, id) ->
+  downloadFileByID(id, target)
+  .catch((err) ->
+    Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
+  )
 )
 
-bus.on('deleteFile', (req, res) ->
-  if !req.payload.target?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
-  else if !req.payload.fileName?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a file name.')
-  else
-    deleteFile(req.payload.fileName,req.payload.target)
+bus.private('deleteFile').require('target', 'fileName').on((req, target, fileName) ->
+  deleteFile(fileName, target)
 )
 
-bus.on('deleteFileByID', (req, res) ->
-  if !req.payload.target?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide a target.')
-  else if !req.payload.id?
-    Promise.reject(Error WeaverError.DATATYPE_INVALID, 'The provided data is not valid. You must provide an ID.')
-  else
-    deleteFileByID(req.payload.id,req.payload.target)
-    .catch((err) ->
-      Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'Project does not exists')
-    )
+bus.private('deleteFileByID').require('target', 'id').on((req, target, id) ->
+  deleteFileByID(id, target)
+  .catch((err) ->
+    Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'Project does not exists')
+  )
 )
