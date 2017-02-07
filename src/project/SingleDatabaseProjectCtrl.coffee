@@ -53,7 +53,7 @@ bus.on('getDatabaseForProject', (project) ->
 )
 
 bus.on('getMinioForProject', (project) ->
-  Promise.resolve(new MinioClient(config.get('services.fileSystem')))
+  Promise.resolve(MinioClient.create(config.get('services.fileSystem')))
 )
 
 logger.info("Single database project controller loaded")
