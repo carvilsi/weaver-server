@@ -4,7 +4,7 @@ logger   = require('logger')
 
 module.exports =
 class Socket
-  constructor: (@routeHandler) ->
+  constructor: (@routes) ->
 
   wire: (http) ->
 
@@ -21,31 +21,26 @@ class Socket
       )
 
       # Wire GET requests
-      @routeHandler.allRoutes().forEach((route) =>
-        socket.on(route, (payload, ack) =>
-          # Must always give a ack function from client
-          return if not ack?
-            
-          # Payload object must never be undefined
-          payload = "{}" if not payload?
+      @routes.forEach((routeHandler) =>
+        routeHandler.allRoutes().forEach((route) =>
+          socket.on(route, (payload, ack) =>
+            # Must always give a ack function from client
+            return if not ack?
 
-          try
-            req = { payload: JSON.parse(payload) }
-          catch error
-            ack("Invalid json payload")
-            return
-          
-          res =
-            send: ack
-            ok: ->
-              ack(200)
-            error: (error) ->
-              ack(error)
-            status: ->
-              send: ack
-            render: -> ack('unavailable')
-          
-          @routeHandler.handleRequest(route, req, res)
+            try
+              req = { payload: JSON.parse(payload or "{}") }
+            catch error
+              ack("Invalid json payload")
+              return
+
+            res =
+              success: (data) ->
+                ack(data)
+              fail: (error) ->
+                ack(error)
+
+            routeHandler.handleRequest(route, req, res)
+          )
         )
       )
     )

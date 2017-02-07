@@ -1,7 +1,6 @@
 Promise     = require('bluebird')
 config      = require('config')
-bus         = require('EventBus').get('weaver')
-expect      = require('util/bus').getExpect(bus)
+bus         = require('WeaverBus')
 DbService   = require('DatabaseService')
 Weaver      = require('weaver-sdk')
 Error       = Weaver.LegacyError
@@ -16,19 +15,19 @@ serviceDatabase = new DbService(config.get('services.projectDatabase.endpoint'))
 databases = {}
 
 
-expect('id').bus('project.create').do((req, res, id) ->
+bus.private('project.create').require('id').on((req, id) ->
   if databases[id]?
     Promise.reject(Error(WeaverError.OTHER_CAUSE, "Project with #{id} already exists."))
   else
     databases[id] = {ready: 0}  # Keep track of ready calls to simulate delay
 )
 
-expect('id').bus('project.delete').do((req, res, id) ->
+bus.private('project.delete').require('id').on((req, id) ->
   delete databases[id]
 )
 
 # Tests whether given project is created and ready
-expect('id').bus('project.ready').do((req, res, id) ->
+bus.private('project.ready').require('id').on((req, id) ->
   new Promise((resolve, reject) ->
 
     if not databases[id]?
@@ -46,7 +45,7 @@ expect('id').bus('project.ready').do((req, res, id) ->
   )
 )
 
-bus.on('getDatabaseForProject', (project) ->
+bus.internal('getDatabaseForProject').on((project) ->
   Promise.resolve(serviceDatabase.uri)
 )
 

@@ -1,4 +1,4 @@
-bus         = require('EventBus').get('weaver')
+bus         = require('WeaverBus')
 expect      = require('util/bus').getExpect(bus)
 config      = require('config')
 rp          = require('request-promise')
@@ -30,7 +30,7 @@ bus.on('project', (res, req) ->
 expect('id').bus('project.create').do((res, req, id) ->
   doCall("create/#{id}")
 )
- 
+
 expect('id').bus('project.delete').do((res, req, id) ->
   doCall("delete/#{id}")
 )

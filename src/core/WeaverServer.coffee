@@ -5,12 +5,23 @@ mustacheExpress = require('mustache-express')   # Templating
 bodyParser      = require('body-parser')        # POST requests
 HttpComm        = require('HttpComm')
 SocketComm      = require('SocketComm')
+config = require('config')
+pjson       = require('../../package.json')
 
-module.exports = 
+module.exports =
 class Server
-  
-  constructor: (@options) ->
-    
+
+  constructor: () ->
+
+    @options =
+      views:[
+        {path: '/', file: 'weaver/index.html', vars: {server : pjson.version}}
+      ]
+
+      port: config.get('server.port')
+      cors: config.get('server.cors')
+
+
     # Set default options
     require('util/options').defaults(@options,
       host: '0.0.0.0'
@@ -18,7 +29,7 @@ class Server
       views:  []
       static: {}
     )
-    
+
     # Init express
     @app  = express()
     @http = http.Server(@app)
@@ -53,19 +64,19 @@ class Server
       @app.get(view.path, (req, res) ->
         res.render(view.file, view.vars)
       )
-      
+
     # Connection test
     @app.get('/connection', (req, res) ->
       res.status(204).send()
     )
-    
+
     # Retrieve routes
-    @routes = require('RouteHandler').get(@options.routes)
-    
+    @routes = require('routes')
+
     # Wire HTTP
     @httpComm  = new HttpComm(@routes)
     @httpComm.wire(@app)
-    
+
     # Wire Socket
     @socketComm  = new SocketComm(@routes)
     @socketComm.wire(@http)
@@ -77,4 +88,3 @@ class Server
         if error then reject(error) else resolve()
       )
     )
-      
