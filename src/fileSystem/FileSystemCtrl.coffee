@@ -13,7 +13,6 @@ Error        = Weaver.LegacyError
 WeaverError  = Weaver.Error
 Promise      = require('bluebird')
 logger       = require('logger')
-minio        = require('minio')
 fs           = require('fs')
 cuid         = require('cuid')
 
