@@ -2,7 +2,6 @@ Promise         = require('bluebird')
 config          = require('config')
 DatabaseService = require('DatabaseService')
 bus             = require('WeaverBus')
-expect          = require('util/bus').getExpect(bus)
 
 systemDatabase  = new DatabaseService(config.get('services.systemDatabase.endpoint'))
 
