@@ -9,6 +9,58 @@ Validator    = require('jsonschema').Validator
 authSchemas  = require('authSchemas')
 logger       = require('logger')
 pick         = require('lodash/pick')
+UserService  = require('UserService')
+
+
+# Sign up a new user
+bus.public("auth.signUp").require('userId', 'username', 'password', 'email').on((req, userId, username, password, email)->
+  if UserService.userExists(username)
+    throw {code:-1, message: "User with username #{username} already exists"}
+
+  UserService.addUser(userId, username, email, password)
+
+  sessionId = UserService.signIn(username, password)
+  sessionId
+)
+
+# Sign in existing user
+bus.public("auth.signIn").require('username', 'password').on((req, username, password) ->
+  sessionId = UserService.signIn(username, password)
+  sessionId
+)
+
+# All private routes require a signed in user that is loaded in this handler based on sessionId
+bus.private("*").priority(1000).require('sessionId').on((req, sessionId) ->
+  user = UserService.getUserBySessionId(sessionId)
+
+  req.state.sessionId = sessionId
+  req.state.user = user
+  return
+)
+
+bus.private("auth.signOut.session").on((req) ->
+  UserService.signOut(req.state.sessionId)
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 return
 
 createUri = (suffix) ->

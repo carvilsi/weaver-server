@@ -41,6 +41,7 @@ WeaverServer  = require('WeaverServer')
 splash        = require('splash')
 sounds        = require('sounds')
 Weaver        = require('weaver-sdk')
+UserService   = require('UserService')
 WeaverBus     = require('WeaverBus')
 routes        = require('routes')
 pjson         = require('../package.json')
@@ -66,6 +67,7 @@ server = new WeaverServer()
 # Run servers
 Promise.all([
   server.run()
+  UserService.load()
 ])
 .then(->
   # Initialize local Weaver
@@ -76,3 +78,13 @@ Promise.all([
   splash.printLoaded()
   sounds.loaded()
 )
+
+
+
+#  safeEval = require('safe-eval')
+#  code = 'Promise.resolve("hello")'
+#  evaluated = safeEval(code, {Promise}) # "apple"
+#  evaluated.then((Res) -> console.log(Res))
+#  console.log(evaluated)
+
+
