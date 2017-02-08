@@ -19,27 +19,27 @@ bus.public("auth.signUp").require('userId', 'username', 'password', 'email').on(
 
   UserService.addUser(userId, username, email, password)
 
-  sessionId = UserService.signIn(username, password)
-  sessionId
+  authToken = UserService.signIn(username, password)
+  authToken
 )
 
 # Sign in existing user
 bus.public("auth.signIn").require('username', 'password').on((req, username, password) ->
-  sessionId = UserService.signIn(username, password)
-  sessionId
+  authToken = UserService.signIn(username, password)
+  authToken
 )
 
-# All private routes require a signed in user that is loaded in this handler based on sessionId
-bus.private("*").priority(1000).require('sessionId').on((req, sessionId) ->
-  user = UserService.getUserBySessionId(sessionId)
+# All private routes require a signed in user that is loaded in this handler based on authToken
+bus.private("*").priority(1000).require('authToken').on((req, authToken) ->
+  user = UserService.getUserByAuthToken(authToken)
 
-  req.state.sessionId = sessionId
+  req.state.authToken = authToken
   req.state.user = user
   return
 )
 
 bus.private("auth.signOut.session").on((req) ->
-  UserService.signOut(req.state.sessionId)
+  UserService.signOut(req.state.authToken)
 )
 
 

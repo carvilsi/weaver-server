@@ -6,7 +6,7 @@ class UserService extends LokiService
   constructor: ->
     super('users',
       users:    ['username', 'email']
-      sessions: []
+      sessions: ['authToken']
       roles:    []
       acl:      []
       nodes:    []
@@ -15,10 +15,10 @@ class UserService extends LokiService
   userExists: (username) ->
     @users.find({username}).length isnt 0
 
-  getUserBySessionId: (sessionId) ->
-    session = @sessions.find({sessionId})[0]
+  getUserByAuthToken: (authToken) ->
+    session = @sessions.find({authToken})[0]
     if not session?
-      throw {code: -1, message: "Invalid session id #{sessionId}"}
+      throw {code: -1, message: "No session found for authToken #{authToken}"}
 
     user = @users.find({username: session.username})[0]
     user
@@ -34,9 +34,10 @@ class UserService extends LokiService
     if user.password isnt password
       throw {code: -1, message: "Password incorrect"}
 
+    authToken = cuid()
     sessionId = cuid()
-    @sessions.insert({sessionId, username})
-    sessionId
+    @sessions.insert({sessionId, authToken, username})
+    authToken
 
   signOff: (session) ->
 
