@@ -20,3 +20,9 @@ bus.private('query').require('target').on((req, target) ->
     db.query(req.payload.query)
   )
 )
+
+bus.private('query.native').require('target').on((req, target) ->
+  getDb(target).then((db) ->
+    db.nativeQuery(req.payload.query)
+  )
+)
