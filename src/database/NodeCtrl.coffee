@@ -27,6 +27,18 @@ bus.private('write').require('target').on((req, target) ->
   )
 )
 
+bus.private('nodes').on((req, target) ->
+  getDb(target).then((db) ->
+    db.listAllNodes(req)
+  )
+)
+
+bus.private('relations').on((req, target) ->
+  getDb(target).then((db) ->
+    db.listAllRelations()
+  )
+)
+
 bus.private('wipe').require('target').on((req, target) ->
   getDb(target).then((db) ->
     db.wipe()

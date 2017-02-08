@@ -13,6 +13,8 @@ route.public.GET  "application.version"      # Application version
 route.private.GET  "read"                    # Reads a single entity
 route.private.POST "write"                   # Execute Create, Update and Delete operations in bulk
 route.private.POST "wipe"                    # Wipe entire database
+route.private.POST "nodes"
+route.private.GET "relations"
 
 # Querying
 route.private.POST "query"                   # Execute a WeaverQuery

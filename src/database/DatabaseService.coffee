@@ -34,5 +34,11 @@ module.exports =
     query: (query) ->
       @_POST("#{@uri}/query", query)
 
+    listAllNodes: (args) ->
+      @_GET("#{@uri}/nodes", args)
+
+    listAllRelations: ->
+      @_GET("#{@uri}/relationKeys")
+
     wipe: ->
       @_GET("#{@uri}/wipe")
