@@ -47,4 +47,16 @@ bus.on('getDatabaseForProject', (id) ->
   )
 )
 
+bus.on('getMinioForProject', (id) ->
+  doCall("status/#{id}").then((status) ->
+    MinioClient.create({
+      endpoint: status.services.minio
+      region: 'us-east-1' 
+      accessKey: status.minio.MINIO_ACCESS_KEY
+      secretKey: status.minio.MINIO_SECRET_KEY
+      secure: false
+    })
+  )
+)
+
 logger.info("K8s project controller loaded")
