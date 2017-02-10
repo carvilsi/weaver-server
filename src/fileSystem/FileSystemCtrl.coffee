@@ -17,7 +17,7 @@ fs           = require('fs')
 cuid         = require('cuid')
 
 getMinioClient = (project) ->
-  bus.private.emit('getMinioForProject', project)
+  bus.get("internal").emit('getMinioForProject', project)
 
 checkBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
