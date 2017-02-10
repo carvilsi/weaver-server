@@ -1,38 +1,49 @@
-WEAVER = require('RouteHandler').get("weaver")
-ADMIN  = require('RouteHandler').get("admin")
+RouteHandler = require('RouteHandler')
+bus          = require('WeaverBus')
 
-# Weaver routes
-WEAVER.GET  ""                       # Index Page
-WEAVER.GET  "application.version"    # Application version
+route =
+  public  : new RouteHandler(bus.get("public"))
+  private : new RouteHandler(bus.get("private"))
+  admin   : new RouteHandler(bus.get("admin"))
+
+# General
+route.public.GET  "application.version"      # Application version
 
 # Database operations
-WEAVER.GET  "read"                   # Reads a single entity
-WEAVER.POST "write"                  # Execute Create, Update and Delete operations in bulk
-WEAVER.POST "wipe"                   # Wipe entire database
+route.private.GET  "read"                    # Reads a single entity
+route.private.POST "write"                   # Execute Create, Update and Delete operations in bulk
+route.private.POST "wipe"                    # Wipe entire database
+route.private.POST "nodes"                   # Lists all nodes on the database
+route.private.GET  "relations"               # Lists all relations on the database
 
 # Querying
-WEAVER.POST "query"                  # Execute a WeaverQuery
+route.private.POST "query"                   # Execute a WeaverQuery
+route.private.POST "query.native"            # Execute a native query
+
+# Authentication
+route.public.POST  "auth.signUp"             # Sign up a new user
+route.public.POST  "auth.signIn"             # Sign in using username and password
+route.private.POST "auth.signOut.session"    # Sign out
+route.private.POST "auth.signOut.all"        # Sign out
 
 # User management
-WEAVER.GET  "logIn"                  # Execute a log in for an existing user
-WEAVER.GET  "permissions"            # Get the permissions for an existing user
-WEAVER.POST "signUp"                 # Creates new user
-WEAVER.POST "signOff"                # Deletes an user
-WEAVER.GET  "usersList"               # Retrieves all users at weaver-flock
+route.private.GET  "users"                   # Get all users
+route.private.POST "users.create"            # Creates a user
+route.private.GET  "users.delete"            # Deletes a user
 
 # Project management
-WEAVER.GET  "project"                # Get a list of projects
-WEAVER.POST "project.create"         # Create a project
-WEAVER.POST "project.delete"         # Delete a project
-WEAVER.POST "project.ready"          # Checks if a project is setup and ready
-WEAVER.POST "application"            # Creates an application
+route.private.GET  "project"                 # Get a list of projects
+route.private.POST "project.create"          # Create a project
+route.private.POST "project.delete"          # Delete a project
+route.private.POST "project.ready"           # Checks if a project is setup and ready
 
 # Files management
-WEAVER.POST "uploadFile"             # Sends a file to be stored at the object storage server
-WEAVER.GET  "downloadFile"           # Retrieves a file from the object storage server by fileName
-WEAVER.GET  "downloadFileByID"       # Retrieves a file from the object storage server by ID
-WEAVER.POST "deleteFile"             # Deletes a file from the object storage server by name
-WEAVER.POST "deleteFileByID"         # Deletes a file from the object storage server by ID
+route.private.POST "uploadFile"              # Sends a file to be stored at the object storage server
+route.private.GET  "downloadFile"            # Retrieves a file from the object storage server by fileName
+route.private.GET  "downloadFileByID"        # Retrieves a file from the object storage server by ID
+route.private.POST "deleteFile"              # Deletes a file from the object storage server by name
+route.private.POST "deleteFileByID"          # Deletes a file from the object storage server by ID
 
-# Admin routes
-ADMIN.POST "wipe"                    # Wipe entire database
+
+# Return array of handlers
+module.exports = (handler for name, handler of route)

@@ -1,4 +1,8 @@
 module.exports =
+  admin:
+    enabled: true
+    password: 'yUU2PNzcs!69GZ4B4'
+
   application:
     scroll: true
     singleDatabase: true
@@ -8,13 +12,8 @@ module.exports =
       errors:  true
 
   server:
-    weaver:
-      port: 9487
-      cors: true
-    admin:
-      port: 9666
-      enablePassword: true
-      password: 'yUU2PNzcs!69GZ4B4'
+    port: 9487
+    cors: true
 
   comm:
     http:

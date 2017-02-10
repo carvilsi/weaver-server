@@ -1,9 +1,8 @@
 class RouteHandler
 
-  constructor: (@name) ->
+  constructor: (@bus) ->
     @getRoutes  = []
     @postRoutes = []
-    @bus        = require('EventBus').get(@name)
 
   GET: (route) ->
     @getRoutes.push(route)
@@ -14,23 +13,18 @@ class RouteHandler
   allRoutes: ->
     @getRoutes.concat(@postRoutes)
 
-  handleGet: (route, req, res) ->
-    # Test payload
-    try
-      req.payload = JSON.parse(req.payload)
-    catch error
-      console.log(error)
-      return
-
   handleRequest: (route, req, res) ->
-    @bus.emit(route, req, res).then((response)->
-      response = "OK" if not response?
-      res.send(response)
+    # State object that listeners can enrich with for instance the active user or project
+    req.state = {}
+
+    # Init payload on empty
+    req.payload = {} if not req.payload?
+
+    @bus.emit(route, req).then((data)->
+      res.success(data or "200")
     )
-    .catch((e) ->
-      res.error(e)
+    .catch((error) ->
+      res.fail(error)
     )
 
-
-Registry = require('registry')
-module.exports = new Registry(RouteHandler)
+module.exports = RouteHandler

@@ -1,7 +1,8 @@
 require('colors')
 conf   = require('config')
 logo   = require('./logo')
-pack   = require('../../package.json')
+packServer = require('../../package.json')
+packSDK    = require('../../node_modules/weaver-sdk/package.json')
 cursor = require('cursor')
 delay  = require('delay')
 
@@ -17,15 +18,13 @@ _ = (e) -> splash.push(e)
 _ "Weaver Server started and ready!"
 _ ""
 _ "# Versions"
-_ "Server:     #{pack.version}"
-_ "SDK:        #{pack['dependencies']['weaver-sdk']}"
+_ "Server:     #{packServer.version}"
+_ "SDK:        #{packSDK.version}"
 _ ""
-_ "# Ports"
-_ "Public:     #{conf.get('server.weaver.port')}"
-_ "Admin:      #{conf.get('server.admin.port')}"
-_ ""
-_ "# Comm"
+_ "# Server"
+_ "Port:       #{conf.get('server.port')}"
 _ "HTTP:       #{BOOL conf.get('comm.http.enable')}"
+_ "CORS allow: #{BOOL conf.get('server.cors')}"
 _ "Socket.io:  #{BOOL conf.get('comm.socket.enable')}"
 _ ""
 _ "# Services"
@@ -41,8 +40,8 @@ _ "File:      #{conf.get('logging.file').toUpperCase()}"
 _ ""
 _ "# Settings"
 _ "Projects:         #{getProjectsCtrlType()}"
-_ "CORS allow all:   #{BOOL conf.get('server.weaver.cors')}"
-_ "Admin password:   #{conf.get('server.admin.password')}"
+_ "Single database:  #{BOOL conf.get('application.singleDatabase')}"
+_ "Admin password:   #{conf.get('admin.password')}"
 _ ""
 _ require('./funnies')()
 

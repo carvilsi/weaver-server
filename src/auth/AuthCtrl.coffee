@@ -1,4 +1,4 @@
-bus          = require('EventBus').get('weaver')
+bus          = require('WeaverBus')
 rp           = require('request-promise')
 config       = require('config')
 Weaver       = require('weaver-sdk')
@@ -9,6 +9,7 @@ Validator    = require('jsonschema').Validator
 authSchemas  = require('authSchemas')
 logger       = require('logger')
 pick         = require('lodash/pick')
+return
 
 createUri = (suffix) ->
   "#{config.get('services.flock.endpoint')}/#{suffix}"

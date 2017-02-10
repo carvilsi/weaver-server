@@ -34,5 +34,20 @@ module.exports =
     query: (query) ->
       @_POST("#{@uri}/query", query)
 
+    nativeQuery: (query) ->
+      switch ('VIRTUOSO') #add all our different database types here, at some point
+        when 'NEO4J'                then return
+        when 'GRAPH_DB'             then return
+        when 'VIRTUOSO'             then @_GET("#{@uri}/sparql?query=" + query)
+        when 'THE_NEXT_BIG_THING'   then return
+        else return #do fail
+
+
+    listAllNodes: (args) ->
+      @_GET("#{@uri}/nodes", args)
+
+    listAllRelations: ->
+      @_GET("#{@uri}/relationKeys")
+
     wipe: ->
       @_GET("#{@uri}/wipe")
