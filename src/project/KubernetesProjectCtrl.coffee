@@ -1,5 +1,4 @@
 bus         = require('WeaverBus')
-expect      = require('util/bus').getExpect(bus)
 config      = require('config')
 rp          = require('request-promise')
 Weaver      = require('weaver-sdk')
@@ -23,26 +22,26 @@ doCall = (suffix) ->
     json: true
   })
 
-bus.on('project', (res, req) ->
+bus.private('project').on( ->
   doCall("list")
 )
 
-expect('id').bus('project.create').do((res, req, id) ->
+bus.private('project.create').require('id').on((req, id) ->
   doCall("create/#{id}")
 )
 
-expect('id').bus('project.delete').do((res, req, id) ->
+bus.private('project.delete').require('id').on((req, id) ->
   doCall("delete/#{id}")
 )
 
-expect('id').bus('project.ready').do((res, req, id) ->
+bus.private('project.ready').require('id').on((req, id) ->
   doCall("status/#{id}").then((status) ->
     { ready: status.ready }
   )
 )
 
-bus.on('getDatabaseForProject', (id) ->
-  doCall("status/#{id}").then((status) ->
+bus.internal('getDatabaseForProject').on((project) ->
+  doCall("status/#{project}").then((status) ->
     status.services.service
   )
 )
