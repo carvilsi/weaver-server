@@ -46,8 +46,8 @@ bus.internal('getDatabaseForProject').on((project) ->
   )
 )
 
-bus.on('getMinioForProject', (id) ->
-  doCall("status/#{id}").then((status) ->
+bus.internal('getMinioForProject').on((project) ->
+  doCall("status/#{project}").then((status) ->
     MinioClient.create({
       endpoint: status.services.minio
       region: 'us-east-1' 

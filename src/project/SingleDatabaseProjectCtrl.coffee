@@ -51,7 +51,8 @@ bus.internal('getDatabaseForProject').on((project) ->
   Promise.resolve(serviceDatabase.uri)
 )
 
-bus.on('getMinioForProject', (project) ->
+bus.internal('getMinioForProject').on((project) ->
+  logger.debug "Getting minio for #{project}"
   Promise.resolve(MinioClient.create(config.get('services.fileSystem')))
 )
 
