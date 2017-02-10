@@ -43,7 +43,7 @@ expect('id').bus('project.ready').do((res, req, id) ->
 
 bus.on('getDatabaseForProject', (id) ->
   doCall("status/#{id}").then((status) ->
-    Promise.resolve(status.service)
+    status.services.service
   )
 )
 
