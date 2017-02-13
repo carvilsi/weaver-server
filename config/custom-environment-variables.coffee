@@ -13,11 +13,7 @@ module.exports =
         __format: "json"
 
   server:
-    weaver:
-      port:      "SERVER_WEAVER_PORT"
-    admin:
-      port:         "SERVER_ADMIN_PORT"
-      password:     "SERVER_ADMIN_PASSWORD"
+    port:        "SERVER_PORT"
 
   services:
     projectController:
