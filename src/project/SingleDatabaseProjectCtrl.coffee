@@ -5,12 +5,12 @@ DbService   = require('DatabaseService')
 Weaver      = require('weaver-sdk')
 Error       = Weaver.LegacyError
 WeaverError = Weaver.Error
+MinioClient = require('MinioClient')
 logger      = require('logger')
 
 
 # NOTE: Functionality described here needs to match that in KubernetesProjectCtrl
 # This file is intended for development environments without access to a k8s cluster
-
 serviceDatabase = new DbService(config.get('services.projectDatabase.endpoint'))
 databases = {}
 
@@ -47,6 +47,11 @@ bus.private('project.ready').require('id').on((req, id) ->
 
 bus.internal('getDatabaseForProject').on((project) ->
   Promise.resolve(serviceDatabase.uri)
+)
+
+bus.internal('getMinioForProject').on((project) ->
+  logger.debug "Getting minio for #{project}"
+  Promise.resolve(MinioClient.create(config.get('services.fileSystem')))
 )
 
 logger.info("Single database project controller loaded")
