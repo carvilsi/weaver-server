@@ -11,7 +11,6 @@ logger      = require('logger')
 
 # NOTE: Functionality described here needs to match that in KubernetesProjectCtrl
 # This file is intended for development environments without access to a k8s cluster
-serviceMinio    = new DbService(config.get('services.fileSystem'))
 serviceDatabase = new DbService(config.get('services.projectDatabase.endpoint'))
 databases = {}
 
