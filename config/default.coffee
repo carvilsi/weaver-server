@@ -12,7 +12,8 @@ module.exports =
       errors:  true
 
   server:
-    port: 9487
+    port: 8787
+    # port: 9487
     cors: true
 
   comm:
