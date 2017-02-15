@@ -1,4 +1,5 @@
-rp = require('request-promise')
+rp     = require('request-promise')
+logger = require('logger')
 
 module.exports =
   class DatabaseService
@@ -10,12 +11,16 @@ module.exports =
         if response.statusCode is 200
           response.body
         else
+          logger.error('ERRRRRRRR')
+          logger.debug(response.body)
           Promise.reject({code: -1, message: "Server error: #{response.body}"})
       )
       .catch((err) ->
         if err.error.code is 'ECONNREFUSED'
           Promise.reject({code: -1, message: "Could not connect to database: #{err.error.address}:#{err.error.port}"})
         else
+          logger.error('ERRRRRRRR_____')
+          logger.debug(err)
           Promise.reject({code: -1, message: "Unexpected error occurred: #{err.message}"})
       )
 
