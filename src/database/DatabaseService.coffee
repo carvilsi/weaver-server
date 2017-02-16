@@ -1,4 +1,4 @@
-rp     = require('request-promise')
+rp = require('request-promise')
 
 module.exports =
   class DatabaseService

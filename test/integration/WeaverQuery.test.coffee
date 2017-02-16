@@ -5,7 +5,7 @@ config    = require('./../config/test')
 
 weaverServer = supertest.agent("http://#{config.server.ip}:#{config.server.port}")
 
-describe 'WeaverNode rest-API test', ->
+describe 'WeaverQuery rest-API test', ->
 
   ###
    wipe

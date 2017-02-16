@@ -6,7 +6,7 @@ config    = require('./../config/test')
 
 weaverServer = supertest.agent("http://#{config.server.ip}:#{config.server.port}")
 
-describe 'Weaver Application rest-API test', ->
+describe 'Weaver Version rest-API test', ->
   
   it 'should get the weaver-server version', ->
     weaverServer
