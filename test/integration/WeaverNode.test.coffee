@@ -7,7 +7,6 @@ weaverServer = supertest.agent("http://#{config.server.ip}:#{config.server.port}
 
 describe 'WeaverNode rest-API test', ->
 
-
   ###
    wipe
    
@@ -25,23 +24,10 @@ describe 'WeaverNode rest-API test', ->
     .type('json')
     .send('{"target":"$SYSTEM"}')
     .expect(200)
-    .then((res, error) ->
+    .then((res) ->
       res.status.should.equal(200)
       res.text.should.equal('OK')
     )
-    
-    
-  # it 'should create a new project', ->
-  #   this.timeout(2000)
-  #   weaverServer
-  #   .post('/project/create')
-  #   .type('json')
-  #   .send('{"id":"test","target":"$SYSTEM"}')
-  #   .expect(200)
-  #   .then((res, err) ->
-  #     res.status.should.equal(200)
-  #   )
-  
   
   it 'should create a node', ->
     ###
@@ -52,31 +38,31 @@ describe 'WeaverNode rest-API test', ->
     .type('json')
     .send('{"operations":[{"action":"create-node","id":"ciz5imq7p0000quxxbk3z4eaq"}],"target":"$SYSTEM"}')
     .expect(200)
-    .then((res, err) ->
+    .then((res) ->
       res.text.should.equal('[]')
+    ).then(  ->
       weaverServer
       .post('/query')
       .type('json')
       .send('{"query":{"_restrict":["ciz5imq7p0000quxxbk3z4eaq"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
-      .then((res, err) ->
-        res.body[0].should.have.property('nodeId','ciz5imq7p0000quxxbk3z4eaq')
-        res.body[0].attributes.should.have.property('createdOn')
-      )
+    ).then((res) ->
+      res.body[0].should.have.property('nodeId','ciz5imq7p0000quxxbk3z4eaq')
+      res.body[0].attributes.should.have.property('createdOn')
     )
-      
+    
+  
   it 'should add an attribute', ->
     weaverServer
     .post('/write')
     .type('json')
     .send('{"operations":[{"action":"create-attribute","id":"ciz5imq7p0000quxxbk3z4eaq","key":"name","value":"Foo"}],"target":"$SYSTEM"}')
-    .then((res, err) ->
+    .then( ->
       weaverServer
       .post('/query')
       .type('json')
       .send('{"query":{"_restrict":["ciz5imq7p0000quxxbk3z4eaq"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
-      .then((res, err) ->
-        res.body[0].attributes.should.have.property('name','Foo')
-      )
+    ).then((res) ->
+      res.body[0].attributes.should.have.property('name','Foo')
     )
   
   it 'should set a new boolean attribute', ->
@@ -84,93 +70,87 @@ describe 'WeaverNode rest-API test', ->
     .post('/write')
     .type('json')
     .send('{"operations":[{"action":"create-attribute","id":"ciz5imq7p0000quxxbk3z4eaq","key":"isBar","value":false}],"target":"$SYSTEM"}')
-    .then((res, err) ->
+    .then( ->
       weaverServer
       .post('/query')
       .type('json')
       .send('{"query":{"_restrict":["ciz5imq7p0000quxxbk3z4eaq"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
-      .then((res, err) ->
-        res.body[0].attributes.should.have.property('isBar',false)
-      )
+    ).then((res) ->
+      res.body[0].attributes.should.have.property('isBar',false)
     )
-    
+  
   it 'should set a new number attribute', ->
     weaverServer
     .post('/write')
     .type('json')
     .send('{"operations":[{"action":"create-attribute","id":"ciz5imq7p0000quxxbk3z4eaq","key":"length","value":3}],"target":"$SYSTEM"}')
-    .then((res, err) ->
+    .then( ->
       weaverServer
       .post('/query')
       .type('json')
       .send('{"query":{"_restrict":["ciz5imq7p0000quxxbk3z4eaq"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
-      .then((res, err) ->
-        res.body[0].attributes.should.have.property('length',3)
-      )
+    ).then((res, err) ->
+      res.body[0].attributes.should.have.property('length',3)
     )
-    
+  
   it 'should set a new number double attribute', ->
     weaverServer
     .post('/write')
     .type('json')
     .send('{"operations":[{"action":"create-attribute","id":"ciz5imq7p0000quxxbk3z4eaq","key":"high","value":165.33}],"target":"$SYSTEM"}')
-    .then((res, err) ->
+    .then( ->
       weaverServer
       .post('/query')
       .type('json')
       .send('{"query":{"_restrict":["ciz5imq7p0000quxxbk3z4eaq"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
-      .then((res, err) ->
-        res.body[0].attributes.should.have.property('high',165.33)
-      )
+    ).then((res) ->
+      res.body[0].attributes.should.have.property('high',165.33)
     )
-    
+  
   it 'should set an existing attribute with new value', ->
     weaverServer
     .post('/write')
     .type('json')
     .send('{"operations":[{"action":"create-attribute","id":"ciz5imq7p0000quxxbk3z4eaq","key":"name","value":"Bar"}],"target":"$SYSTEM"}')
-    .then((res, err) ->
+    .then( ->
       weaverServer
       .post('/query')
       .type('json')
       .send('{"query":{"_restrict":["ciz5imq7p0000quxxbk3z4eaq"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
-      .then((res, err) ->
-        res.body[0].attributes.should.have.property('name','Bar')
-      )
+    ).then((res) ->
+      res.body[0].attributes.should.have.property('name','Bar')
     )
-    
-    
+  
+  
   it 'should unset an attribute', ->
     weaverServer
     .post('/write')
     .type('json')
     .send('{"operations":[{"action":"remove-attribute","id":"ciz5imq7p0000quxxbk3z4eaq","key":"name"}],"target":"$SYSTEM"}')
-    .then((res, err) ->
+    .then( ->
       weaverServer
       .post('/query')
       .type('json')
       .send('{"query":{"_restrict":["ciz5imq7p0000quxxbk3z4eaq"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
-      .then((res, err) ->
-        res.body[0].attributes.should.not.have.property('name')
-      )
+    ).then((res) ->
+      res.body[0].attributes.should.not.have.property('name')
     )
-    
+  
   it 'should add a new relation', ->
     weaverServer
     .post('/write')
     .type('json')
     .send('{"operations":[{"action":"create-node","id":"one"},{"action":"create-node","id":"two"}, {"action":"create-relation","from":"one","key":"comesBefore","to":"two"}],"target":"$SYSTEM"}')
-    .then((res, err) ->
+    .then( ->
       weaverServer
       .post('/query')
       .type('json')
       .send('{"query":{"_restrict":["one"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
-      .then((res, err) ->
-        res.body[0].should.have.property('nodeId','one')
-        res.body[0].should.have.property('relations')
-        res.body[0].relations.should.have.property('comesBefore')
-        res.body[0].relations.comesBefore[0].should.have.property('nodeId','two')
-      )
+    ).then((res) ->
+      res.body[0].should.have.property('nodeId','one')
+      res.body[0].should.have.property('relations')
+      res.body[0].relations.should.have.property('comesBefore')
+      res.body[0].relations.comesBefore[0].should.have.property('nodeId','two')
     )
   
   it 'should remove a new relation', ->
@@ -178,16 +158,15 @@ describe 'WeaverNode rest-API test', ->
     .post('/write')
     .type('json')
     .send('{"operations":[{"action":"remove-relation","from":"one","key":"comesBefore","to":"two"}],"target":"$SYSTEM"}')
-    .then((res, err) ->
+    .then( ->
       weaverServer
       .post('/query')
       .type('json')
       .send('{"query":{"_restrict":["one"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
-      .then((res, err) ->
-        res.body[0].should.have.property('nodeId','one')
-        res.body[0].should.have.property('relations')
-        res.body[0].relations.should.not.have.property('comesBefore')
-      )
+    ).then((res) ->
+      res.body[0].should.have.property('nodeId','one')
+      res.body[0].should.have.property('relations')
+      res.body[0].relations.should.not.have.property('comesBefore')
     )
   
   # TODO: do not get the error
@@ -206,10 +185,10 @@ describe 'WeaverNode rest-API test', ->
     .type('json')
     .send('{"query":{"_restrict":["lol"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
     .then((res) ->
-      console.log res
+      # console.log res
     )
     .catch((err) ->
-      console.log err
+      # console.log err
     )
   
   it 'should not blow up when saving in circular chain', ->
@@ -250,21 +229,36 @@ describe 'WeaverNode rest-API test', ->
       )
     )
     
-  # it 'should remove a node', ->
-  #   weaverServer
-  #   .post('/write')
-  #   .type('json')
-  #   .send('{"operations":[{"action":"remove-node","id":"ciz5imq7p0000quxxbk3z4eaq"}],"target":"$SYSTEM"}')
-  #   .expect(200)
-  #   .then((res, err) ->
-  #     res.text.should.equal('[]')
-  #     weaverServer
-  #     .post('/query')
-  #     .type('json')
-  #     .send('{"query":{"_restrict":["ciz5imq7p0000quxxbk3z4eaq"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
-  #     .then((res, err) ->
-  #       console.log '=^^=|_'
-  #       console.log res.body
-  #     )
-  #   )
-  # 
+  it 'should remove a node', ->
+    weaverServer
+    .post('/write')
+    .type('json')
+    .send('{"operations":[{"action":"create-node","id":"norberto"}],"target":"$SYSTEM"}')
+    .expect(200)
+    .then((res) ->
+      res.text.should.equal('[]')
+    ).then( ->
+      weaverServer
+      .post('/query')
+      .type('json')
+      .send('{"query":{"_restrict":["norberto"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
+      .then((res) ->
+        res.body[0].should.have.property('nodeId','norberto')
+        res.body[0].attributes.should.have.property('createdOn')
+      )
+    ).then( ->
+      weaverServer
+      .post('/write')
+      .type('json')
+      .send('{"operations":[{"action":"remove-node","id":"norberto"}],"target":"$SYSTEM"}')
+      .expect(200)
+    ).then(  ->
+      weaverServer
+      .post('/query')
+      .type('json')
+      .send('{"query":{"_restrict":["norberto"],"_equals":{},"_orQueries":[],"_conditions":{},"_include":[],"_select":[],"_count":false,"_hollow":false,"_limit":1,"_skip":0,"_order":[],"_ascending":true},"target":"$SYSTEM"}')
+      .then((res) ->
+        res.body.should.empty
+      )
+    )
+    
