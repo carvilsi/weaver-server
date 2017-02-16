@@ -17,3 +17,4 @@ describe 'Weaver Application rest-API test', ->
       res.status.should.equal(200)
       res.text.should.equal(pckjson.version)
     )
+    

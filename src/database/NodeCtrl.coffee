@@ -2,7 +2,6 @@ Promise         = require('bluebird')
 config          = require('config')
 DatabaseService = require('DatabaseService')
 bus             = require('WeaverBus')
-logger          = require('logger')
 
 systemDatabase  = new DatabaseService(config.get('services.systemDatabase.endpoint'))
 
@@ -24,7 +23,6 @@ bus.private('read').require('target').on((req, target) ->
 
 bus.private('write').require('target').on((req, target) ->
   getDb(target).then((db) ->
-    logger.debug(req.payload.operations)
     db.write(req.payload.operations)
   )
 )
