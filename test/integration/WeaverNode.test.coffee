@@ -7,17 +7,6 @@ weaverServer = supertest.agent("http://#{config.server.ip}:#{config.server.port}
 
 describe 'WeaverNode rest-API test', ->
 
-  ###
-   wipe
-   
-   curl --request POST \
-    --url http://localhost:9487/wipe \
-    --header 'cache-control: no-cache' \
-    --header 'content-type: application/json' \
-    --data '{"target":"$SYSTEM"}'
-   
-  ###
-
   it 'should wipe the entire SYSTEM', ->
     weaverServer
     .post('/wipe')
