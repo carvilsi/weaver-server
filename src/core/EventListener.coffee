@@ -36,7 +36,7 @@ class EventListener
     # Load all state objects
     Promise.mapSeries(@_get, (stateName) ->
       require('WeaverBus').get('internal').emit("state.#{stateName}")
-    ).then((stateObjects) ->
+    ).then((stateObjects) =>
       args.push(s) for s in stateObjects # TODO: Test if concat works
 
       # Check if all fields are set in the request
