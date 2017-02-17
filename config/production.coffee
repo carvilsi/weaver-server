@@ -6,8 +6,7 @@ module.exports =
       muteAll: true
 
   server:
-    weaver:
-      port: 80
+    port: 80
 
   logging:
     console: 'info'

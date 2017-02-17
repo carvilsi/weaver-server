@@ -4,19 +4,12 @@ logger       = require('logger')
 minio        = require('minio')
 
 module.exports =
-  class MinioSingleton
-    instance = null
-    
-    class MinioClass
-      constructor: (@minioClient) ->
-        @minioClient = new minio.Client({
-          endPoint: "#{config.get('services.fileSystem.endpoint')}".split(":")[1].replace('\/\/','')
-          port: parseInt("#{config.get('services.fileSystem.endpoint')}".split(":")[2])
-          secure: "#{config.get('services.fileSystem.secure')}" is 'true'
-          accessKey: "#{config.get('services.fileSystem.accessKey')}"
-          secretKey: "#{config.get('services.fileSystem.secretKey')}"
-        })
-        
-        
-    @getInstance: ->
-      instance ?= new MinioClass()
+    create: (config) ->
+      logger.debug "Creating MinioClient with settings #{JSON.stringify(config)}"
+      new minio.Client({
+        endPoint: config.endpoint.split(":")[1].replace('\/\/','')
+        port: parseInt(config.endpoint.split(":")[2])
+        secure: config.secure
+        accessKey: config.accessKey
+        secretKey: config.secretKey
+      })
