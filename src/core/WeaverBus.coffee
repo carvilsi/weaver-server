@@ -2,6 +2,7 @@ EventBus = require('EventBus')
 
 busNames = [
   'internal'
+  'provide'
   'private'
   'public'
   'admin'

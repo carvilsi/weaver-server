@@ -3,7 +3,7 @@ Promise = require('bluebird')
 class EventListener
   constructor: (@eventName) ->
     @_require  = []
-    @_get      = []
+    @_provide      = []
     @_priority = 0
     @_enabled = true
 
@@ -21,9 +21,9 @@ class EventListener
   on: (func) ->
     @_func = func
 
-  # Gets state object based on some request argument
-  get: (args...) ->
-    @_get.push(a) for a in args
+  # Retrieve objects returned by the provide bus
+  retrieve: (args...) ->
+    @_provide.push(a) for a in args
     @
 
   require: (args...) ->
@@ -34,10 +34,14 @@ class EventListener
     return if not @_enabled
 
     # Load all state objects
-    Promise.mapSeries(@_get, (stateName) ->
-      require('WeaverBus').get('internal').emit("state.#{stateName}")
-    ).then((stateObjects) =>
-      args.push(s) for s in stateObjects # TODO: Test if concat works
+    bus = require('WeaverBus')
+    Promise.mapSeries(@_provide, (eventName) ->
+      req = args[0]
+      bus.get('provide').emit(eventName, req)
+    ).then((retrievedObjects) =>
+
+      # Add objects
+      args.push(o) for o in retrievedObjects
 
       # Check if all fields are set in the request
       # The first argument must be a request object with payload

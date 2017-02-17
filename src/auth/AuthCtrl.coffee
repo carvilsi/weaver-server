@@ -12,41 +12,40 @@ pick         = require('lodash/pick')
 UserService  = require('UserService')
 
 
-# 1. Sign up a new user.
+# Sign up a new user.
 bus.public("auth.signUp").require('userId', 'username', 'password', 'email').on((req, userId, username, password, email)->
   authToken = UserService.signUp(userId, username, email, password)
   authToken
 )
 
-
-# 2. Sign in existing user
+# Sign in existing user
 bus.public("auth.signIn").require('username', 'password').on((req, username, password) ->
   authToken = UserService.signIn(username, password)
   authToken
 )
 
-
-# 3. All private routes require a signed in user that is loaded in this handler based on authToken
-bus.private("*").priority(1000).require('authToken').on((req, authToken) ->
-  req.state.user = UserService.getUser(authToken)
+# All private routes require a signed in user that is loaded in this handler based on authToken
+bus.private("*").priority(1000).retrieve('user').on((req, user) ->
+  req.state.user = user
   return
 )
 
+bus.provide("user").require('authToken').on((req, authToken) ->
+  UserService.getUser(authToken)
+)
 
-# 4. Gives back user object that is currently signed in
+# Gives back user object that is currently signed in
 bus.private("auth.getUser").on((req) ->
   req.state.user
 )
 
-
-# 5. Sign out current signed in user
+# Sign out current signed in user
 bus.private("auth.signOut").require('authToken').on((req, authToken) ->
   UserService.signOut(authToken)
   return
 )
 
-
-# 6. Destroy user
+# Destroy user
 bus.private("auth.destroyUser").on((req) ->
   UserService.destroy(req.state.user)
   return
