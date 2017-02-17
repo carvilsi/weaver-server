@@ -3,6 +3,7 @@ Promise = require('bluebird')
 class EventListener
   constructor: (@eventName) ->
     @_require  = []
+    @_get      = []
     @_priority = 0
     @_enabled = true
 
@@ -20,35 +21,44 @@ class EventListener
   on: (func) ->
     @_func = func
 
+  # Gets state object based on some request argument
+  get: (args...) ->
+    @_get.push(a) for a in args
+    @
+
   require: (args...) ->
-    @_require.push(r) for r in args
+    @_require.push(a) for a in args
     @
 
   call: (args...) ->
     return if not @_enabled
 
-    # Check if all fields are set in the request
-    # The first argument must be a request object with payload
-    req = args[0]
-    for require in @_require
-      if not req.payload[require]?
-        return Promise.reject({code: -1, message: "Missing field " + require})
-      else
-        args.push(req.payload[require])
+    # Load all state objects
+    Promise.mapSeries(@_get, (stateName) ->
+      require('WeaverBus').get('internal').emit("state.#{stateName}")
+    ).then((stateObjects) ->
+      args.push(s) for s in stateObjects # TODO: Test if concat works
 
-    # All required fields are found
-    new Promise((resolve, reject) =>
+      # Check if all fields are set in the request
+      # The first argument must be a request object with payload
+      req = args[0]
+      for require in @_require
+        if not req.payload[require]?
+          return Promise.reject({code: -1, message: "Missing field " + require})
+        else
+          args.push(req.payload[require])
+
+      # All fields found, do the actual call now
       try
-        resolve(@_func(args...))
+        return @_func(args...)
       catch error
         isErrorObject = Object.prototype.toString.call(error) is '[object Error]'
 
         # TODO: Make all errors error objects, or log the error here
         if isErrorObject
-          reject({code: -1, message: error.message})
+          return Promise.reject({code: -1, message: error.message})
         else
-          reject(error)
+          return Promise.reject(error)
     )
-
 
 module.exports = EventListener
