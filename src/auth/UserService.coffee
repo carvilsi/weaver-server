@@ -39,7 +39,7 @@ class UserService extends LokiService
     if not session?
       throw {code: -1, message: "No session found for authToken #{authToken}"}
 
-    user = @users.find({username: session.username})[0]
+    user = @users.findOne({username: session.username})
     _.omit(user, ['password'])
 
 
@@ -48,7 +48,8 @@ class UserService extends LokiService
     return
 
   destroy: (user) ->
-    username = user.username
+    #username = user.username
+    @users.remove(user)
     # TODO: Google how to delete in loki
     return
 
