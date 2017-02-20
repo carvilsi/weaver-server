@@ -35,16 +35,17 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
 
 
 # Load libs
-Promise       = require('bluebird')
-conf          = require('config')       # Configuration loads files in the root config directory
-WeaverServer  = require('WeaverServer')
-splash        = require('splash')
-sounds        = require('sounds')
-Weaver        = require('weaver-sdk')
-UserService   = require('UserService')
-WeaverBus     = require('WeaverBus')
-routes        = require('routes')
-pjson         = require('../package.json')
+Promise         = require('bluebird')
+conf            = require('config')       # Configuration loads files in the root config directory
+WeaverServer    = require('WeaverServer')
+splash          = require('splash')
+sounds          = require('sounds')
+Weaver          = require('weaver-sdk')
+UserService     = require('UserService')
+ProjectService  = require('ProjectService')
+WeaverBus       = require('WeaverBus')
+routes          = require('routes')
+pjson           = require('../package.json')
 
 # Init routes and controllers by running once
 initModules = ->
@@ -67,7 +68,12 @@ server = new WeaverServer()
 # Run servers
 Promise.all([
   server.run()
-  UserService.load()
+
+  # Load services
+  [
+    UserService
+    ProjectService
+  ].forEach((service) -> service.load())
 ])
 .then(->
   # Initialize local Weaver
