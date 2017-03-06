@@ -164,26 +164,26 @@ deleteFileByID = (id, project) ->
     )
   )
 
-bus.private('uploadFile').require('target', 'buffer', 'fileName').on((req, target, buffer, fileName) ->
+bus.private('file.upload').require('target', 'buffer', 'fileName').on((req, target, buffer, fileName) ->
   uploadFile(buffer, fileName, target)
 )
 
-bus.private('downloadFile').require('target', 'fileName').on((req, target, fileName) ->
+bus.private('file.download').require('target', 'fileName').on((req, target, fileName) ->
   downloadFile(fileName, target)
 )
 
-bus.private('downloadFileByID').require('target', 'id').on((req, target, id) ->
+bus.private('file.downloadByID').require('target', 'id').on((req, target, id) ->
   downloadFileByID(id, target)
   .catch((err) ->
     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
   )
 )
 
-bus.private('deleteFile').require('target', 'fileName').on((req, target, fileName) ->
+bus.private('file.delete').require('target', 'fileName').on((req, target, fileName) ->
   deleteFile(fileName, target)
 )
 
-bus.private('deleteFileByID').require('target', 'id').on((req, target, id) ->
+bus.private('file.deleteByID').require('target', 'id').on((req, target, id) ->
   deleteFileByID(id, target)
   .catch((err) ->
     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'Project does not exists')
