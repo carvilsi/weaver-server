@@ -46,3 +46,25 @@ insert_final_newline = true
 [*.md]
 indent_style = tab
 ```
+
+2. Logging
+----------
+
+- Use these channels
+
+  - debug (can be switched of in production, nothing depends on these messages)
+  - configuration (some configuration setting is invalid or some availability requirement is, or is no longer, met)
+  - usage (some method is being used with the wrong inputs, or in a wrong state)
+  - error (some code invariant is broken, a programmer did not do his work properly)
+
+3. Microservices
+----------------
+
+- Serve a json with version information at /about
+
+- Check availability and version of required services on startup
+
+- Serve availability at /connection (?)
+
+- Inform monitoring system on unrecoverable crash and trigger external recovery
+
