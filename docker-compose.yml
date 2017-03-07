@@ -1,6 +1,6 @@
 version: '2'
 services:
-  system-virtuoso:
+  database:
     image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
     expose:
      - "1111"
@@ -13,50 +13,21 @@ services:
      - SPARQL_UPDATE=true
      - DEFAULT_GRAPH=http://www.example.com/my-graph
 
-  system-weaver-database-virtuoso:
+  weaver-database-virtuoso:
     image: sysunite/weaver-database-virtuoso:0.0.10
     expose:
      - "9474"
     ports:
      - "9474:9474"
     depends_on:
-     - system-virtuoso
+     - database
     links:
-     - system-virtuoso
+     - database
     environment:
       - WEAVER_VIRTUOSO_SERVICE_PORT=9474
       - VIRTUOSO_DB_USER=dba
       - VIRTUOSO_DB_PASSWORD=myDbaPassword
-      - VIRTUOSO_DB_PATH=jdbc:virtuoso://system-virtuoso:1111
-
-  project-virtuoso:
-    image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
-    expose:
-     - "1112"
-     - "8891"
-    ports:
-     - "1112:1111"
-     - "8891:8890"
-    environment:
-     - DBA_PASSWORD=myDbaPassword
-     - SPARQL_UPDATE=true
-     - DEFAULT_GRAPH=http://www.example.com/my-graph
-
-  project-weaver-database-virtuoso:
-    image: sysunite/weaver-database-virtuoso:0.0.10
-    expose:
-     - "9475"
-    ports:
-     - "9475:9475"
-    depends_on:
-     - project-virtuoso
-    links:
-     - project-virtuoso
-    environment:
-      - WEAVER_VIRTUOSO_SERVICE_PORT=9475
-      - VIRTUOSO_DB_USER=dba
-      - VIRTUOSO_DB_PASSWORD=myDbaPassword
-      - VIRTUOSO_DB_PATH=jdbc:virtuoso://project-virtuoso:1111
+      - VIRTUOSO_DB_PATH=jdbc:virtuoso://database:1111
 
   file-system:
     image: minio/minio
