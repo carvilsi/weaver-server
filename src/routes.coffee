@@ -6,8 +6,9 @@ route =
   private : new RouteHandler(bus.get("private"))
   admin   : new RouteHandler(bus.get("admin"))
 
-# General
-route.public.GET  "application.version"      # Application version
+# Application
+route.public.GET   "application.version"     # Application version
+route.private.POST "application.wipe"        # Complete system wipe of all data (users, projects, etc)
 
 # Database operations
 route.private.GET  "read"                    # Reads a single entity
@@ -36,6 +37,11 @@ route.private.POST "auth.signOut.all"        # Sign out all active sessions
 route.private.GET  "users"                   # Get all users
 route.private.POST "users.create"            # Creates a user
 route.private.GET  "users.delete"            # Deletes a user
+
+# Access Control List (ACL)
+route.private.POST "acl.read"                # Gets an ACL
+route.private.POST "acl.write"               # Creates or saves an ACL
+route.private.GET  "acl.delete"              # Deletes an ACL
 
 # Project management
 route.private.GET  "project"                 # Get a list of projects

@@ -1,9 +1,11 @@
 module.exports =
   admin:
-    enabled: true
-    password: 'yUU2PNzcs!69GZ4B4'
+    username: 'admin'
+    password: 'admin'
+    generatePassword: false
 
   application:
+    wipe: true
     scroll: true
     singleDatabase: true
     sounds:

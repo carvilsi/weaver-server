@@ -39,9 +39,10 @@ _ "Console:   #{conf.get('logging.console').toUpperCase()}"
 _ "File:      #{conf.get('logging.file').toUpperCase()}"
 _ ""
 _ "# Settings"
-_ "Projects:         #{getProjectsCtrlType()}"
-_ "Single database:  #{BOOL conf.get('application.singleDatabase')}"
-_ "Admin password:   #{conf.get('admin.password')}"
+_ "Projects:          #{getProjectsCtrlType()}"
+_ "Admin credentials: #{conf.get('admin.username')}:#{conf.get('admin.password')}"
+_ "Single database:   #{BOOL conf.get('application.singleDatabase')}"
+_ "System wipe:       #{BOOL conf.get('application.wipe')}"
 _ ""
 _ require('./funnies')()
 

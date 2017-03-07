@@ -12,6 +12,7 @@ MinioClient = require('MinioClient')
 logger         = require('logger')
 
 ProjectService = require('ProjectService')
+UserService    = require('UserService')
 
 
 # NOTE: Functionality described here needs to match that in KubernetesProjectCtrl
@@ -25,9 +26,10 @@ bus.private('project').on((req) ->
 )
 
 # TODO: Add name from the SDK
-bus.private('project.create').require('id').on((req, id, name) ->
+bus.private('project.create').retrieve('user').require('id').on((req, user, id, name) ->
   name = 'unnamed'
   ProjectService.create(id, name)
+  acl = UserService.createACL(id, user)
   return
 )
 

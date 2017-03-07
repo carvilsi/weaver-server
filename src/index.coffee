@@ -51,6 +51,7 @@ pjson           = require('../package.json')
 initModules = ->
   require(run) for run in [
     'routes'
+    'AclCtrl'
     'ApplicationCtrl'
     'AuthCtrl'
     'NodeCtrl'

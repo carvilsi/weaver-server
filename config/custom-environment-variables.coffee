@@ -1,4 +1,7 @@
 module.exports =
+  admin:
+    username: "ADMIN_USERNAME"
+
   application:
     scroll:
       # https://github.com/lorenwest/node-config/issues/272#issuecomment-223146123

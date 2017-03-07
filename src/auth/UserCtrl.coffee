@@ -13,6 +13,5 @@ logger       = require('logger')
 UserService = require('UserService')
 
 bus.private('users.create').on((req,res) ->
-  console.log(req.payload.id)
   Promise.resolve()
 )
