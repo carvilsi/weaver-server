@@ -10,7 +10,9 @@ expectations about how to format the Weaver Server CoffeeScript code.
 
 - Use 2 spaces for indenting, not tabs.
 
-- Always end a file with a new line
+- Always end a file with a new line.
+
+(NEW) - Files in nodejs project are dash-saperated, except for files with classes.
 
 - Files that export a class are UpperCamelCased. All other files are camelCased.
 
