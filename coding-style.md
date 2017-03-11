@@ -10,7 +10,9 @@ expectations about how to format the Weaver Server CoffeeScript code.
 
 - Use 2 spaces for indenting, not tabs.
 
-- Always end a file with a new line
+- Always end a file with a new line.
+
+(NEW) - Files in nodejs project are dash-saperated, except for files with classes.
 
 - Files that export a class are UpperCamelCased. All other files are camelCased.
 
@@ -50,12 +52,12 @@ indent_style = tab
 2. Logging
 ----------
 
-- Use these channels
+(UNDECIDED) - Use these loggers
 
-  - debug (can be switched of in production, nothing depends on these messages)
-  - configuration (some configuration setting is invalid or some availability requirement is, or is no longer, met)
-  - usage (some method is being used with the wrong inputs, or in a wrong state)
-  - error (some code invariant is broken, a programmer did not do his work properly)
+  - debug(.info .warn .error) (can be switched of in production, nothing depends on these messages)
+  - configuration(.info .warn .error) (some configuration setting is invalid or some availability requirement is, or is no longer, met)
+  - usage(.info) (some method is being used with the wrong inputs, or in a wrong state)
+  - error(.error) (some code invariant is broken, a programmer did not do his work properly)
 
 3. Microservices
 ----------------

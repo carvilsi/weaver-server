@@ -64,7 +64,7 @@ sendFileToServer = (file, fileName, project, minioClient) ->
     )
   )
 
-downloadFile = (fileName, project) ->
+downloadFile = (fileName, project, browserSDK) ->
   new Promise((resolve, reject) =>
     getMinioClient(project).then((minioClient) ->
       size = 0
@@ -80,7 +80,10 @@ downloadFile = (fileName, project) ->
             )
             stream.on('end', ->
               buffer = Buffer.concat(bufArray)
-              resolve(buffer)
+              if !browserSDK
+                resolve(buffer)
+              else
+                resolve(buffer.toString('base64'))
             )
             stream.on('error', (err) ->
               reject(err)
@@ -110,7 +113,7 @@ deleteFile = (fileName, project) ->
     )
   )
 
-downloadFileByID = (id, project) ->
+downloadFileByID = (id, project, browserSDK) ->
   new Promise((resolve, reject) =>
     getMinioClient(project).then((minioClient) ->
       size = 0
@@ -120,7 +123,7 @@ downloadFileByID = (id, project) ->
         stream = minioClient.listObjectsV2("#{project}","#{id}", true)
         stream.on('data', (obj) ->
           file = true
-          resolve(downloadFile(obj.name,project))
+          resolve(downloadFile(obj.name,project, browserSDK))
         )
         stream.on('error', (err) ->
           file = true
@@ -169,11 +172,22 @@ bus.private('file.upload').require('target', 'buffer', 'fileName').on((req, targ
 )
 
 bus.private('file.download').require('target', 'fileName').on((req, target, fileName) ->
-  downloadFile(fileName, target)
+  downloadFile(fileName, target, false)
+)
+
+bus.private('file.browser.sdk.download').require('target', 'fileName').on((req, target, fileName) ->
+  downloadFile(fileName, target, true)
 )
 
 bus.private('file.downloadByID').require('target', 'id').on((req, target, id) ->
-  downloadFileByID(id, target)
+  downloadFileByID(id, target, false)
+  .catch((err) ->
+    Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
+  )
+)
+
+bus.private('file.browser.sdk.downloadByID').require('target', 'id').on((req, target, id) ->
+  downloadFileByID(id, target, true)
   .catch((err) ->
     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
   )
