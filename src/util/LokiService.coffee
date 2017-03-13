@@ -27,8 +27,8 @@ class LokiService
       )
     )
 
-  # Clears all collections
-  clear: ->
+  # Wipes all collections
+  wipe: ->
     for collectionName in @_collections
       @[collectionName].clear()
 

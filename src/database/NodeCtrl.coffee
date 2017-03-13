@@ -2,6 +2,7 @@ Promise         = require('bluebird')
 config          = require('config')
 DatabaseService = require('DatabaseService')
 bus             = require('WeaverBus')
+UserService     = require('UserService')
 
 systemDatabase  = new DatabaseService(config.get('services.systemDatabase.endpoint'))
 
@@ -15,16 +16,20 @@ getDb = (target) ->
     )
 
 
-bus.private('read').require('target').on((req, target) ->
+# TODO: Can we remove this? Weaver.load uses Weaver.Query
+bus.private('read').retrieve('user').require('target', 'nodeId').on((req, user, target, nodeId) ->
+  UserService.assertACLReadPermission(user, nodeId)
+
   getDb(target).then((db) ->
-    db.read(req.payload.nodeId)
+    db.read(nodeId)
   )
 )
 
-bus.private('write').require('target').on((req, target) ->
-  getDb(target).then((db) ->
-    db.write(req.payload.operations)
-  )
+bus.private('write').retrieve('user', 'project', 'database').on((req, user, project, database) ->
+  # Check project write permission of database for current user
+  UserService.assertACLWritePermission(user, project.acl)
+
+  database.write(req.payload.operations)
 )
 
 bus.private('nodes').require('target').on((req, target) ->

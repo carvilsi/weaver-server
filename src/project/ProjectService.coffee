@@ -6,14 +6,14 @@ class ProjectService extends LokiService
 
   constructor: ->
     super('projects',
-      projects: ['id', 'name']
+      projects: ['id', 'name', 'endpoint', 'acl']
     )
 
-  create: (id, name) ->
+  create: (id, name, endpoint, acl) ->
     if @projects.find({id}).length isnt 0
       throw {code:-1, message: "Project with id #{id} already exists"}
 
-    @projects.insert({id, name})
+    @projects.insert({id, name, endpoint, acl})
 
   get: (id) ->
     project = @projects.find({id})[0]
@@ -27,8 +27,8 @@ class ProjectService extends LokiService
     return
 
   # TODO: check find all
-  list: ->
-    return []
+  all: ->
+    @projects.find()
 
 
 

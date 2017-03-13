@@ -1,6 +1,6 @@
 version: '2'
 services:
-  database:
+  database-alpha:
     image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
     expose:
      - "1111"
@@ -13,21 +13,51 @@ services:
      - SPARQL_UPDATE=true
      - DEFAULT_GRAPH=http://www.example.com/my-graph
 
-  weaver-database-virtuoso:
+  weaver-database-alpha:
     image: sysunite/weaver-database-virtuoso:0.0.10
     expose:
      - "9474"
     ports:
      - "9474:9474"
     depends_on:
-     - database
+     - database-alpha
     links:
-     - database
+     - database-alpha
     environment:
       - WEAVER_VIRTUOSO_SERVICE_PORT=9474
       - VIRTUOSO_DB_USER=dba
       - VIRTUOSO_DB_PASSWORD=myDbaPassword
-      - VIRTUOSO_DB_PATH=jdbc:virtuoso://database:1111
+      - VIRTUOSO_DB_PATH=jdbc:virtuoso://database-alpha:1111
+
+  database-beta:
+    image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
+    expose:
+     - "1112"
+     - "8891"
+    ports:
+     - "1112:1111"
+     - "8891:8890"
+    environment:
+     - DBA_PASSWORD=myDbaPassword
+     - SPARQL_UPDATE=true
+     - DEFAULT_GRAPH=http://www.example.com/my-graph
+
+  weaver-database-beta:
+    image: sysunite/weaver-database-virtuoso:0.0.10
+    expose:
+     - "9475"
+    ports:
+     - "9475:9475"
+    depends_on:
+     - database-beta
+    links:
+     - database-beta
+    environment:
+      - WEAVER_VIRTUOSO_SERVICE_PORT=9475
+      - VIRTUOSO_DB_USER=dba
+      - VIRTUOSO_DB_PASSWORD=myDbaPassword
+      - VIRTUOSO_DB_PATH=jdbc:virtuoso://database-beta:1111
+
 
   file-system:
     image: minio/minio

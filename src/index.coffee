@@ -57,6 +57,7 @@ initModules = ->
     'NodeCtrl'
     'ProjectAuthCtrl'
     'ProjectCtrlFactory'
+    'RoleCtrl'
     'WeaverQueryCtrl'
     'FileSystemCtrl'
   ]
@@ -86,7 +87,7 @@ Promise.all([
   sounds.loaded()
 )
 
-
+console.log(conf.get('databasePool'))
 
 #  safeEval = require('safe-eval')
 #  code = 'Promise.resolve("hello")'

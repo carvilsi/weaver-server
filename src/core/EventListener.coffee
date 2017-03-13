@@ -31,7 +31,8 @@ class EventListener
     @
 
   call: (args...) ->
-    return if not @_enabled
+    if not @_enabled
+      return Promise.reject({code: -1, message: "Route #{@eventName} is not enabled"})
 
     # Load all state objects
     bus = require('WeaverBus')
@@ -56,6 +57,7 @@ class EventListener
       try
         return @_func(args...)
       catch error
+        #console.log(error)
         isErrorObject = Object.prototype.toString.call(error) is '[object Error]'
 
         # TODO: Make all errors error objects, or log the error here

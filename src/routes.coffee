@@ -8,7 +8,7 @@ route =
 
 # Application
 route.public.GET   "application.version"     # Application version
-route.private.POST "application.wipe"        # Complete system wipe of all data (users, projects, etc)
+route.public.POST  "application.wipe"        # ONLY IN DEVELOPMENT! Complete system wipe of all data (users, projects, etc)
 
 # Database operations
 route.private.GET  "read"                    # Reads a single entity
@@ -29,19 +29,17 @@ route.private.POST "auth.destroyUser"        # Destroys user. Only user itself r
 route.private.POST "auth.signOut"            # Sign out session identified by authToken
 route.private.POST "auth.signOut.all"        # Sign out all active sessions
 
-###
-  User object must have an ACL because others can create the user. But what if users are created automatically?
-###
-
-# User management
-route.private.GET  "users"                   # Get all users
-route.private.POST "users.create"            # Creates a user
-route.private.GET  "users.delete"            # Deletes a user
-
 # Access Control List (ACL)
 route.private.POST "acl.read"                # Gets an ACL
+route.private.POST "acl.read.byObject"       # Gets an ACL using the object id
 route.private.POST "acl.write"               # Creates or saves an ACL
 route.private.GET  "acl.delete"              # Deletes an ACL
+
+# Roles CRUD used for authentication
+route.private.POST "role.create"
+route.private.GET  "role.read"
+route.private.POST "role.update"
+route.private.POST "role.delete"
 
 # Project management
 route.private.GET  "project"                 # Get a list of projects

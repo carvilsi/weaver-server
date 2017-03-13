@@ -2,6 +2,8 @@ Promise         = require('bluebird')
 config          = require('config')
 DatabaseService = require('DatabaseService')
 bus             = require('WeaverBus')
+UserService     = require('UserService')
+
 
 systemDatabase  = new DatabaseService(config.get('services.systemDatabase.endpoint'))
 
@@ -15,9 +17,18 @@ getDb = (target) ->
     )
 
 
-bus.private('query').require('target').on((req, target) ->
-  getDb(target).then((db) ->
-    db.query(req.payload.query)
+bus.private('query').retrieve('user', 'database').on((req, user, database) ->
+
+  database.query(req.payload.query).then((results) ->
+
+    # Check permission
+    #ids    = (r.nodeId for r in results)
+    #aclIds = UserService.getACLByObjects(ids)
+
+    #console.log(aclIds)
+    #UserService.assertACLReadPermission(user, ids)
+
+    results
   )
 )
 

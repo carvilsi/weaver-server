@@ -4,6 +4,11 @@ module.exports =
     password: 'admin'
     generatePassword: false
 
+  databasePool: [
+    'http://localhost:9474'
+    'http://localhost:9475'
+  ]
+
   application:
     wipe: true
     scroll: true

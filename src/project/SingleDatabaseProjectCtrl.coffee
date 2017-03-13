@@ -22,14 +22,26 @@ databases = {}
 
 
 bus.private('project').on((req) ->
-  ProjectService.list()
+  ProjectService.all()
 )
 
 # TODO: Add name from the SDK
-bus.private('project.create').retrieve('user').require('id').on((req, user, id, name) ->
-  name = 'unnamed'
-  ProjectService.create(id, name)
+bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
+
+  # Get an unused database endpoint
+  allEndpoints       = config.get('databasePool')
+  usedEndpoints      = (p.endpoint for p in ProjectService.all())
+  availableEndpoints = allEndpoints.filter((endpoint) -> usedEndpoints.indexOf(endpoint) is -1)
+
+  # TODO: Test this in WeaverProject.test
+  if availableEndpoints.length is 0
+    throw {code: -1, message: "No more available endpoints to use for new project #{name}"}
+
+  endpoint = availableEndpoints[0]
+
+  # Create an ACL for this user to set on the project
   acl = UserService.createACL(id, user)
+  ProjectService.create(id, name, endpoint, acl.id)
   return
 )
 
