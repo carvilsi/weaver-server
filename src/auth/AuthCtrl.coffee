@@ -6,7 +6,6 @@ Error        = Weaver.LegacyError
 WeaverError  = Weaver.Error
 Promise      = require('bluebird')
 Validator    = require('jsonschema').Validator
-authSchemas  = require('authSchemas')
 logger       = require('logger')
 pick         = require('lodash/pick')
 UserService  = require('UserService')

@@ -1,6 +1,3 @@
-# TODO: Change this to use ProjectService
-# TODO: Add project object to route req
-
 Promise     = require('bluebird')
 config      = require('config')
 bus         = require('WeaverBus')
@@ -28,7 +25,7 @@ bus.private('project').on((req) ->
 # TODO: Add name from the SDK
 bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
 
-  # Get an unused database endpoint
+# Get an unused database endpoint
   allEndpoints       = config.get('databasePool')
   usedEndpoints      = (p.endpoint for p in ProjectService.all())
   availableEndpoints = allEndpoints.filter((endpoint) -> usedEndpoints.indexOf(endpoint) is -1)

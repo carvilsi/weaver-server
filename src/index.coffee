@@ -24,7 +24,6 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   'admin'
   'application'
   'auth'
-  'schemas'
   'cli'
   'core'
   'database'
@@ -47,6 +46,7 @@ WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
 
+
 # Init routes and controllers by running once
 initModules = ->
   require(run) for run in [
@@ -55,7 +55,6 @@ initModules = ->
     'ApplicationCtrl'
     'AuthCtrl'
     'NodeCtrl'
-    'ProjectAuthCtrl'
     'ProjectCtrlFactory'
     'RoleCtrl'
     'WeaverQueryCtrl'
@@ -78,21 +77,13 @@ Promise.all([
   ].forEach((service) -> service.load())
 ])
 .then(->
+
   # Initialize local Weaver
   Weaver.local(routes)
+
 ).then(->
   initModules()
 
   splash.printLoaded()
   sounds.loaded()
 )
-
-console.log(conf.get('databasePool'))
-
-#  safeEval = require('safe-eval')
-#  code = 'Promise.resolve("hello")'
-#  evaluated = safeEval(code, {Promise}) # "apple"
-#  evaluated.then((Res) -> console.log(Res))
-#  console.log(evaluated)
-
-

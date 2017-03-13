@@ -4,7 +4,6 @@ logo   = require('./logo')
 packServer = require('../../package.json')
 packSDK    = require('../../node_modules/weaver-sdk/package.json')
 cursor = require('cursor')
-delay  = require('delay')
 
 getProjectsCtrlType = require('ProjectCtrlFactory')
 
@@ -86,6 +85,6 @@ module.exports =
       console.log(getText(spaceUp).cyan)
       spaceUp--
 
-      delay(30, print) if spaceUp > 0
+      setTimeout(print, 30) if spaceUp > 0
 
     print()

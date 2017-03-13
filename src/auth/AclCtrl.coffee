@@ -13,8 +13,7 @@ bus.private('acl.read.byObject').retrieve('user').require('objectId').on((req, u
 )
 
 bus.private('acl.write').retrieve('user').require('acl').on((req, user, acl) ->
-  # TODO: Fix this later
-  #UserService.assertACLWritePermission(user, acl._id)
+  UserService.assertACLWritePermission(user, acl._id)
   UserService.writeACL(acl)
 )
 

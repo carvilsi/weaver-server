@@ -8,7 +8,7 @@ route =
 
 # Application
 route.public.GET   "application.version"     # Application version
-route.public.POST  "application.wipe"        # ONLY IN DEVELOPMENT! Complete system wipe of all data (users, projects, etc)
+route.public.POST  "application.wipe"        # Complete system wipe of all data (users, projects, etc)
 
 # Database operations
 route.private.GET  "read"                    # Reads a single entity
@@ -25,7 +25,7 @@ route.private.POST "query.native"            # Execute a native query
 route.public.POST  "auth.signUp"             # Sign up a new user
 route.public.POST  "auth.signIn"             # Sign in using username and password
 route.private.POST "auth.getUser"            # Gets user object using authToken
-route.private.POST "auth.destroyUser"        # Destroys user. Only user itself right now. TODO: WHO CAN DO THIS?
+route.private.POST "auth.destroyUser"        # Destroys user
 route.private.POST "auth.signOut"            # Sign out session identified by authToken
 route.private.POST "auth.signOut.all"        # Sign out all active sessions
 

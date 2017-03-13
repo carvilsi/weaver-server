@@ -14,8 +14,6 @@ bus.public('application.version').on(->
 # Complete system wipe of all data
 bus.public('application.wipe').enable(config.get('application.wipe')).on((req) ->
 
-  #console.log ProjectService.all()
-
   # Wipe all project data first
   endpoints = (p.endpoint for p in ProjectService.all())
   databases = (new DatabaseService(endpoint) for endpoint in endpoints)

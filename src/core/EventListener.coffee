@@ -57,7 +57,6 @@ class EventListener
       try
         return @_func(args...)
       catch error
-        #console.log(error)
         isErrorObject = Object.prototype.toString.call(error) is '[object Error]'
 
         # TODO: Make all errors error objects, or log the error here
