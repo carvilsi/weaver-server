@@ -1,5 +1,10 @@
-bus = require('WeaverBus')
+bus         = require('WeaverBus')
 UserService = require('UserService')
+
+
+bus.private('acl.create').retrieve('user').require('acl').on((req, user, acl) ->
+  UserService.storeACL(acl, user)
+)
 
 bus.private('acl.read').retrieve('user').require('id').on((req, user, id) ->
   UserService.assertACLReadPermission(user, id)
@@ -12,7 +17,7 @@ bus.private('acl.read.byObject').retrieve('user').require('objectId').on((req, u
   acl
 )
 
-bus.private('acl.write').retrieve('user').require('acl').on((req, user, acl) ->
+bus.private('acl.update').retrieve('user').require('acl').on((req, user, acl) ->
   UserService.assertACLWritePermission(user, acl._id)
   UserService.writeACL(acl)
 )

@@ -29,13 +29,14 @@ route.private.POST "auth.destroyUser"        # Destroys user
 route.private.POST "auth.signOut"            # Sign out session identified by authToken
 route.private.POST "auth.signOut.all"        # Sign out all active sessions
 
-# Access Control List (ACL)
-route.private.POST "acl.read"                # Gets an ACL
-route.private.POST "acl.read.byObject"       # Gets an ACL using the object id
-route.private.POST "acl.write"               # Creates or saves an ACL
-route.private.GET  "acl.delete"              # Deletes an ACL
+# CRUD: Access Control List (ACL)
+route.private.POST "acl.create"
+route.private.POST "acl.read"
+route.private.POST "acl.read.byObject"       # Gets the ACL by the object id that it applies to
+route.private.POST "acl.update"
+route.private.GET  "acl.delete"
 
-# Roles CRUD used for authentication
+# CRUD: Roles used for authentication
 route.private.POST "role.create"
 route.private.GET  "role.read"
 route.private.POST "role.update"

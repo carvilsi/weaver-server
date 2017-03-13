@@ -42,9 +42,11 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
   return
 )
 
-bus.private('project.delete').require('id').on((req, id) ->
-  ProjectService.delete(id)
-  return
+bus.private('project.delete').retrieve('project', 'database').on((req, project, database) ->
+  Promise.all([
+    database.wipe()
+    ProjectService.delete(project)
+  ])
 )
 
 bus.private('project.ready').require('id').on((req, id) ->

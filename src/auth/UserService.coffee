@@ -68,9 +68,7 @@ class UserService extends LokiService
 
 
   destroy: (user) ->
-    #username = user.username
     @users.remove(user)
-    # TODO: Google how to delete in loki
     return
 
 
@@ -153,8 +151,6 @@ class UserService extends LokiService
       for roleId in acl.roleRead
         role = @getRole(roleId)
 
-        console.log(role)
-
         users[u] = null for u in role.users
 
         # Recursively go down the roles
@@ -181,8 +177,6 @@ class UserService extends LokiService
       for roleId in acl.roleWrite
         role = @getRole(roleId)
 
-        console.log(role)
-
         users[u] = null for u in role.users
 
         # Recursively go down the roles
@@ -198,35 +192,6 @@ class UserService extends LokiService
 
 
   writeACL: (aclServerObject) ->
-    ###
-  { _id: 'cj081ufb5000clmxkr4qaq2cw',
-  _objects: [],
-  _publicRead: false,
-  _publicWrite: false,
-  _userReadMap: {},
-  _userWriteMap: { admin: null },
-  _roleReadMap: { cj081ufdc0006mcxkdo3otxwq: true },
-  _roleWriteMap: {},
-  _created: true,
-  _deleted: false,
-  _userRead: [],
-  _userWrite: [],
-  _roleRead: [ 'cj081ufdc0006mcxkdo3otxwq' ],
-  _roleWrite: [] }
-
-
-      acl =
-      id:          cuid()
-      userRead:    []
-      userWrite:   [user.username]
-      userManage:  []
-      roleRead:    []
-      roleWrite:   []
-      roleManage:  []
-      publicRead:  false
-      publicWrite: false
-###
-
     acl = @acl.findOne({id: aclServerObject._id})
     acl.publicRead  = aclServerObject._publicRead
     acl.publicWrite = aclServerObject._publicWrite
@@ -237,8 +202,23 @@ class UserService extends LokiService
     acl.roleWrite = aclServerObject._roleWrite
 
     @acl.update(acl)
-    #console.log(acl)
     return
+
+
+  storeACL: (aclServerObject) ->
+    acl = {}
+    acl.id = aclServerObject._id
+    acl.publicRead  = aclServerObject._publicRead
+    acl.publicWrite = aclServerObject._publicWrite
+
+    acl.userRead  = aclServerObject._userRead
+    acl.userWrite = aclServerObject._userWrite
+    acl.roleRead  = aclServerObject._roleRead
+    acl.roleWrite = aclServerObject._roleWrite
+
+    @acl.insert(acl)
+    return
+
 
 
   assertACLReadPermission: (user, aclId) ->

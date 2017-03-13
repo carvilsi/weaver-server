@@ -22,14 +22,11 @@ class ProjectService extends LokiService
 
     project
 
-  # TODO: check docs
-  delete: (id) ->
-    return
+  delete: (project) ->
+    @projects.remove(project)
 
-  # TODO: check find all
   all: ->
     @projects.find()
-
 
 
 module.exports = new ProjectService()
