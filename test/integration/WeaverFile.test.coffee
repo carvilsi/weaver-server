@@ -22,7 +22,7 @@ describe 'WeaverFile rest-API test', ->
   
   it 'should create a new file', ->
     weaverServer
-    .post('/uploadFile')
+    .post('/file/upload')
     .type('json')
     .send('{"buffer":{"type":"Buffer","data":['+img.data+']},"target":"area51","fileName":"weaverIcon.png"}')
     .expect(200)
@@ -33,7 +33,7 @@ describe 'WeaverFile rest-API test', ->
     
   it 'should retrieve a file by fileName', ->
     weaverServer
-    .get('/downloadFile?payload={"fileName":"' + file + '","target":"area51"}')
+    .get('/file/download?payload={"fileName":"' + file + '","target":"area51"}')
     .expect(200)
     .then((res) ->
       json = JSON.stringify(res.body)
@@ -48,7 +48,7 @@ describe 'WeaverFile rest-API test', ->
   
   it 'should fails retrieving a file, because the file does not exits on server', ->
     weaverServer
-    .get('/downloadFile?payload={"fileName":"foo.bar","target":"area51"}')
+    .get('/file/download?payload={"fileName":"foo.bar","target":"area51"}')
     .expect(503)
     .then((res) ->
       error = JSON.parse(res.text)
@@ -61,7 +61,7 @@ describe 'WeaverFile rest-API test', ->
   ###
   it 'should fails retrieving a file, because the project does not exits on server', ->
     weaverServer
-    .get('/downloadFile?payload={"fileName":"' + file + '","target":"area56"}')
+    .get('/file/download?payload={"fileName":"' + file + '","target":"area56"}')
     .expect(503)
     .then((res, err) ->
       error = JSON.parse(res.text)
@@ -72,7 +72,7 @@ describe 'WeaverFile rest-API test', ->
   it 'should retrieve a file by ID', ->
     fileId = "#{file}".split('-')[0]
     weaverServer
-    .get('/downloadFileByID?payload={"id":"' + fileId + '","target":"area51"}')
+    .get('/file/downloadByID?payload={"id":"' + fileId + '","target":"area51"}')
     .expect(200)
     .then((res) ->
       json = JSON.stringify(res.body)
@@ -87,7 +87,7 @@ describe 'WeaverFile rest-API test', ->
   
   it 'should fails retrieving a file by ID, because there is no file matching this ID', ->
     weaverServer
-    .get('/downloadFileByID?payload={"id":"555","target":"area51"}')
+    .get('/file/downloadByID?payload={"id":"555","target":"area51"}')
     .expect(503)
     .then((res) ->
       error = JSON.parse(res.text)
@@ -98,7 +98,7 @@ describe 'WeaverFile rest-API test', ->
   
   it 'should deletes a file by name', ->
     weaverServer
-    .post('/deleteFile')
+    .post('/file/delete')
     .type('json')
     .send('{"fileName":"' + file + '","target":"area51"}')
     .expect(200)
@@ -106,7 +106,7 @@ describe 'WeaverFile rest-API test', ->
   
   it 'should deletes a file by id', ->
     weaverServer
-    .post('/uploadFile')
+    .post('/file/upload')
     .type('json')
     .send('{"buffer":{"type":"Buffer","data":['+img.data+']},"target":"area51","fileName":"weaverIcon.png"}')
     .expect(200)
@@ -115,7 +115,7 @@ describe 'WeaverFile rest-API test', ->
       res.text.should.containEql('-weaverIcon.png')
       fileId = "#{file}".split('-')[0]
       weaverServer
-      .post('/deleteFileByID')
+      .post('/file/deleteByID')
       .type('json')
       .send('{"id":"' + fileId + '","target":"area51"}')
       .expect(200)
@@ -124,7 +124,7 @@ describe 'WeaverFile rest-API test', ->
   
   it 'should fails trying to delete a file because the project does not exists', ->
     weaverServer
-    .post('/deleteFile')
+    .post('/file/delete')
     .type('json')
     .send('{"fileName":"' + file + '","target":"area56"}')
     .expect(503)
@@ -137,7 +137,7 @@ describe 'WeaverFile rest-API test', ->
   
   it 'should fails trying to delete a file by ID because the project does not exists', ->
     weaverServer
-    .post('/deleteFileByID')
+    .post('/file/deleteByID')
     .type('json')
     .send('{"id":"' + file + '","target":"area56"}')
     .expect(503)
