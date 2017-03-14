@@ -5,11 +5,10 @@ mustacheExpress = require('mustache-express')   # Templating
 bodyParser      = require('body-parser')        # POST requests
 HttpComm        = require('HttpComm')
 SocketComm      = require('SocketComm')
-config = require('config')
-pjson       = require('../../package.json')
+config          = require('config')
+pjson           = require('../../package.json')
 
-module.exports =
-class Server
+class WeaverServer
 
   constructor: () ->
 
@@ -41,9 +40,9 @@ class Server
     # CORS allow all
     if @options.cors
       @app.all('*', (req, res, next) ->
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
-        res.header('Access-Control-Allow-Headers', 'Content-Type');
+        res.header('Access-Control-Allow-Origin', '*')
+        res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS')
+        res.header('Access-Control-Allow-Headers', 'Content-Type')
         next()
       )
 
@@ -52,12 +51,12 @@ class Server
     @app.use(bodyParser.urlencoded({limit: '1000000mb', extended: true })) # Support encoded bodies
 
     # Default static serving
-    @app.use('/img', express.static('img'));
-    @app.use('/sdk', express.static('node_modules/weaver-sdk/dist'));
+    @app.use('/img', express.static('img'))
+    @app.use('/sdk', express.static('node_modules/weaver-sdk/dist'))
 
     # Additional static serving
     for path, folder of @options.static
-      @app.use(path, express.static(folder));
+      @app.use(path, express.static(folder))
 
     # Views
     for view in @options.views
@@ -81,6 +80,8 @@ class Server
     @socketComm  = new SocketComm(@routes)
     @socketComm.wire(@http)
 
+  getApp: ->
+    @app
 
   run: ->
     new Promise((resolve, reject) =>
@@ -88,3 +89,5 @@ class Server
         if error then reject(error) else resolve()
       )
     )
+
+module.exports = new WeaverServer()

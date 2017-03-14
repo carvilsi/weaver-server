@@ -15,6 +15,9 @@ Promise      = require('bluebird')
 logger       = require('logger')
 fs           = require('fs')
 cuid         = require('cuid')
+server       = require('WeaverServer')
+multer       = require('multer')
+
 
 getMinioClient = (project) ->
   bus.get("internal").emit('getMinioForProject', project)
@@ -49,6 +52,39 @@ uploadFile = (file, fileName, project) ->
     .then( ->
       logger.debug "Sending file to server"
       sendFileToServer(file, fileName, project, minioClient)
+    )
+  )
+
+uploadFileStream = (filePath, fileName, project) ->
+  logger.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"
+  getMinioClient(project).then((minioClient) ->
+    logger.debug "Got minioclient #{minioClient}"
+    checkBucket(project, minioClient)
+    .then( ->
+      logger.debug "Sending file to server"
+      readStream = fs.createReadStream(filePath)
+      sendFileToServerStream(readStream, fileName, project, minioClient, filePath)
+    )
+  )
+
+sendFileToServerStream = (readStream, fileName, project, minioClient, filePath) ->
+  uuid = cuid()
+  new Promise((resolve, reject) =>
+    minioClient.putObject("#{project}","#{uuid}-#{fileName}",readStream, 'application/octet-stream', (err) ->
+      if err
+        reject(err)
+      else
+        try
+          fs.unlink(filePath, (err) ->
+            if err
+              logger.error('An error trying to delete the file: '.concat(err))
+            else
+              logger.debug('successfully deleted')
+          )
+        catch error
+          logger.error('An error trying to delete the file: '.concat(error))
+        finally
+          resolve("#{uuid}-#{fileName}")
     )
   )
 
@@ -166,6 +202,24 @@ deleteFileByID = (id, project) ->
       reject(err)
     )
   )
+
+upload = multer({
+  dest: 'uploads/'
+})
+
+server.getApp().post('/upload', upload.single('file'), (req, res, next) ->
+  logger.debug('target: ' + req.body.target)
+  logger.debug('file name: ' + req.body.fileName)
+  logger.debug('accessToken: ' + req.body.accessToken)
+  uploadFileStream(req.file.path,req.body.fileName, req.body.target)
+  .then((resol) ->
+    logger.debug(resol)
+    res.send(resol)
+  )
+  .catch((err) ->
+    res.status(500).send('Error somewhere')
+  )
+)
 
 bus.private('file.upload').require('target', 'buffer', 'fileName').on((req, target, buffer, fileName) ->
   uploadFile(buffer, fileName, target)
