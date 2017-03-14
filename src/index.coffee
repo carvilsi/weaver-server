@@ -21,7 +21,6 @@ console.log(`'\033[36mLoading...'`)  # Loading in cyan
 # Note: This must be the first running code in the application before any require() works
 require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   '.'
-  'admin'
   'application'
   'auth'
   'cli'

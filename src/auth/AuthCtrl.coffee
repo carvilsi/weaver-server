@@ -1,17 +1,7 @@
-bus          = require('WeaverBus')
-rp           = require('request-promise')
-config       = require('config')
-Weaver       = require('weaver-sdk')
-Error        = Weaver.LegacyError
-WeaverError  = Weaver.Error
-Promise      = require('bluebird')
-Validator    = require('jsonschema').Validator
-logger       = require('logger')
-pick         = require('lodash/pick')
-UserService  = require('UserService')
+bus             = require('WeaverBus')
+UserService     = require('UserService')
 ProjectService  = require('ProjectService')
 DatabaseService = require('DatabaseService')
-UserService  = require('UserService')
 
 
 # Sign up a new user.

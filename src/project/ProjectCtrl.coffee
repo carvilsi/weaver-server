@@ -1,13 +1,7 @@
-Promise     = require('bluebird')
-config      = require('config')
-bus         = require('WeaverBus')
-DbService   = require('DatabaseService')
-Weaver      = require('weaver-sdk')
-Error       = Weaver.LegacyError
-WeaverError = Weaver.Error
-MinioClient = require('MinioClient')
-logger         = require('logger')
-
+Promise        = require('bluebird')
+config         = require('config')
+bus            = require('WeaverBus')
+MinioClient    = require('MinioClient')
 ProjectService = require('ProjectService')
 ProjectPool    = require('ProjectPool')
 UserService    = require('UserService')
@@ -41,6 +35,5 @@ bus.private('project.ready').require('id').on((req, id) ->
 )
 
 bus.internal('getMinioForProject').on((project) ->
-  logger.debug "Getting minio for #{project}"
   Promise.resolve(MinioClient.create(config.get('services.fileSystem')))
 )
