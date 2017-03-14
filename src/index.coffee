@@ -55,7 +55,7 @@ initModules = ->
     'ApplicationCtrl'
     'AuthCtrl'
     'NodeCtrl'
-    'ProjectCtrlFactory'
+    'ProjectCtrl'
     'RoleCtrl'
     'WeaverQueryCtrl'
     'FileSystemCtrl'

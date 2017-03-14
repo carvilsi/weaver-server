@@ -4,9 +4,21 @@ module.exports =
     password: 'admin'
     generatePassword: false
 
-  databasePool: [
-    'http://localhost:9474'
-    'http://localhost:9475'
+  projectPool: [
+    {
+      database: 'http://localhost:9474'
+      fileServer:
+        endpoint: 'http://localhost:9000'
+        accessKey: 'NYLEXGR6MF2IE99LZ4UE'
+        secretKey: 'CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD'
+    }
+    {
+      database: 'http://localhost:9475'
+      fileServer:
+        endpoint: 'http://localhost:9000'
+        accessKey: 'NYLEXGR6MF2IE99LZ4UE'
+        secretKey: 'CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD'
+    }
   ]
 
   application:
