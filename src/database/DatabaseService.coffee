@@ -38,7 +38,7 @@ module.exports =
       switch ('VIRTUOSO') #add all our different database types here, at some point
         when 'NEO4J'                then return
         when 'GRAPH_DB'             then return
-        when 'VIRTUOSO'             then @_GET("#{@uri}/sparql?query=" + encodeURI(query))
+        when 'VIRTUOSO'             then @_GET("#{@uri}/sparql?query=" + encodeURIComponent(query))
         when 'THE_NEXT_BIG_THING'   then return
         else return #do fail
 
