@@ -30,9 +30,7 @@ bus.provide("project").require('target').on((req, target) ->
 )
 
 bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
-  # Check permission of current user to project
   AclService.assertACLReadPermission(user, project.acl)
-
   new DatabaseService(project.endpoint)
 )
 

@@ -42,8 +42,7 @@ class UserService extends LokiService
     sessionId = cuid()
     @sessions.insert({sessionId, authToken, username})
 
-    # Should create the admin user here when not created
-    # TODO Must change so that admin is created
+    # TODO Should create the admin user here when not created
     authToken
 
 

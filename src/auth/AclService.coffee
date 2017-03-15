@@ -71,7 +71,7 @@ class AclService extends LokiService
 
   getAllowedUsers: (acl) ->
 
-  # Use object to easily avoid duplicates
+   # Use object to easily avoid duplicates
     users = {}
 
     # Add all direct users

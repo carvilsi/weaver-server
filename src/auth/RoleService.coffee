@@ -18,10 +18,10 @@ class RoleService extends LokiService
 
     @roles.insert({
       roleId: role.roleId
-      name: role.name
-      users: role._users
-      roles: role._roles
-      acl: aclId
+      name:   role.name
+      users:  role._users
+      roles:  role._roles
+      acl:    aclId
     })
 
 
