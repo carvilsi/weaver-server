@@ -6,14 +6,12 @@ DatabaseService = require('DatabaseService')
 
 # Sign up a new user.
 bus.public("auth.signUp").require('userId', 'username', 'password', 'email').on((req, userId, username, password, email)->
-  authToken = UserService.signUp(userId, username, email, password)
-  authToken
+  UserService.signUp(userId, username, email, password)
 )
 
 # Sign in existing user
 bus.public("auth.signIn").require('username', 'password').on((req, username, password) ->
-  authToken = UserService.signIn(username, password)
-  authToken
+  UserService.signIn(username, password)
 )
 
 # All private routes require a signed in user that is loaded in this handler based on authToken
