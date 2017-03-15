@@ -55,7 +55,6 @@ class UserService extends LokiService
     if not session?
       throw {code: -1, message: "No session found for authToken #{authToken}"}
 
-    # Hack
     return {username: adminUser} if session.username is adminUser
 
     user = @users.findOne({username: session.username})
@@ -63,13 +62,11 @@ class UserService extends LokiService
 
 
   signOut: (authToken) ->
-    # TODO: Google how to delete in loki
-    return
-
+    session = @sessions.findOne({authToken})
+    @sessions.remove(session)
 
   destroy: (user) ->
     @users.remove(user)
-    return
 
 
   createACL: (objectId, user) ->
@@ -134,8 +131,14 @@ class UserService extends LokiService
     users[u] = null for u in role.users
 
     # Recursively go down the roles
-    # TODO: Breaks when circular
+    # TODO: Fix that this breaks when circular dependency
     @getUsersFromRole(r, level) for r in role.roles
+
+
+
+
+
+
 
   getAllowedUsers: (acl) ->
 
@@ -154,7 +157,7 @@ class UserService extends LokiService
         users[u] = null for u in role.users
 
         # Recursively go down the roles
-        # TODO: Breaks when circular
+        # TODO: Fix that this breaks when circular dependency
         getUsersFromRole(r) for r in role.roles
 
 
@@ -180,7 +183,7 @@ class UserService extends LokiService
         users[u] = null for u in role.users
 
         # Recursively go down the roles
-        # TODO: Breaks when circular
+        # TODO: Fix that this breaks when circular dependency
         getUsersFromRole(r) for r in role.roles
 
 
@@ -195,30 +198,25 @@ class UserService extends LokiService
     acl = @acl.findOne({id: aclServerObject._id})
     acl.publicRead  = aclServerObject._publicRead
     acl.publicWrite = aclServerObject._publicWrite
-
-    acl.userRead  = aclServerObject._userRead
-    acl.userWrite = aclServerObject._userWrite
-    acl.roleRead  = aclServerObject._roleRead
-    acl.roleWrite = aclServerObject._roleWrite
+    acl.userRead    = aclServerObject._userRead
+    acl.userWrite   = aclServerObject._userWrite
+    acl.roleRead    = aclServerObject._roleRead
+    acl.roleWrite   = aclServerObject._roleWrite
 
     @acl.update(acl)
-    return
 
 
   storeACL: (aclServerObject) ->
-    acl = {}
-    acl.id = aclServerObject._id
-    acl.publicRead  = aclServerObject._publicRead
-    acl.publicWrite = aclServerObject._publicWrite
-
-    acl.userRead  = aclServerObject._userRead
-    acl.userWrite = aclServerObject._userWrite
-    acl.roleRead  = aclServerObject._roleRead
-    acl.roleWrite = aclServerObject._roleWrite
+    acl =
+      id          : aclServerObject._id
+      publicRead  : aclServerObject._publicRead
+      publicWrite : aclServerObject._publicWrite
+      userRead    : aclServerObject._userRead
+      userWrite   : aclServerObject._userWrite
+      roleRead    : aclServerObject._roleRead
+      roleWrite   : aclServerObject._roleWrite
 
     @acl.insert(acl)
-    return
-
 
 
   assertACLReadPermission: (user, aclId) ->
@@ -241,13 +239,5 @@ class UserService extends LokiService
     if denied
       throw {code: -1, message: "User #{user.username} has no write permission for ACL #{aclId}"}
 
-
-    true
-
-  assertObjectReadPermission: (user, objectId) ->
-    true
-
-  assertObjectWritePermission: (user, objectId) ->
-    true
 
 module.exports = new UserService()
