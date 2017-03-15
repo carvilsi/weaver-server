@@ -14,7 +14,7 @@ services:
      - DEFAULT_GRAPH=http://www.example.com/my-graph
 
   weaver-database-alpha:
-    image: sysunite/weaver-database-virtuoso:0.0.10
+    image: sysunite/weaver-database-virtuoso:0.0.11
     expose:
      - "9474"
     ports:
@@ -43,7 +43,7 @@ services:
      - DEFAULT_GRAPH=http://www.example.com/my-graph
 
   weaver-database-beta:
-    image: sysunite/weaver-database-virtuoso:0.0.10
+    image: sysunite/weaver-database-virtuoso:0.0.11
     expose:
      - "9475"
     ports:
@@ -58,13 +58,24 @@ services:
       - VIRTUOSO_DB_PASSWORD=myDbaPassword
       - VIRTUOSO_DB_PATH=jdbc:virtuoso://database-beta:1111
 
-
-  file-system:
+  file-system-alpha:
     image: minio/minio
     expose:
       - "9000"
     ports:
       - "9000:9000"
+    environment:
+      - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
+      - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
+    command: server /data
+
+
+  file-system-beta:
+    image: minio/minio
+    expose:
+      - "9001"
+    ports:
+      - "9001:9000"
     environment:
       - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
       - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD

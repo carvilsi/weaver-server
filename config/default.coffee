@@ -15,7 +15,7 @@ module.exports =
     {
       database: 'http://localhost:9475'
       fileServer:
-        endpoint: 'http://localhost:9000'
+        endpoint: 'http://localhost:9001'
         accessKey: 'NYLEXGR6MF2IE99LZ4UE'
         secretKey: 'CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD'
     }
