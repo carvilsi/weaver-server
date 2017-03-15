@@ -12,8 +12,8 @@ class FixedProjectPool
 
 
   create: (id) ->
-    # Get the database endpoints of all projects currently in use
-    usedDatabases = (p.database for p in ProjectService.all())
+    # Get the database endpoints of all projects currently in use]
+    usedDatabases = (p.endpoint for p in ProjectService.all())
 
     # See which projects in the pool are still available by matching for unused database endpoints
     availableProjects = @projectPool.filter((p) ->
