@@ -1,28 +1,27 @@
 bus         = require('WeaverBus')
-UserService = require('UserService')
-
+AclService  = require('AclService')
 
 bus.private('acl.create').retrieve('user').require('acl').on((req, user, acl) ->
-  UserService.storeACL(acl, user)
+  AclService.storeACL(acl, user)
 )
 
 bus.private('acl.read').retrieve('user').require('id').on((req, user, id) ->
-  UserService.assertACLReadPermission(user, id)
-  UserService.getACL(id)
+  AclService.assertACLReadPermission(user, id)
+  AclService.getACL(id)
 )
 
 bus.private('acl.read.byObject').retrieve('user').require('objectId').on((req, user, objectId) ->
-  acl = UserService.getACLByObject(objectId)
-  UserService.assertACLReadPermission(user, acl.id)
+  acl = AclService.getACLByObject(objectId)
+  AclService.assertACLReadPermission(user, acl.id)
   acl
 )
 
 bus.private('acl.update').retrieve('user').require('acl').on((req, user, acl) ->
-  UserService.assertACLWritePermission(user, acl._id)
-  UserService.writeACL(acl)
+  AclService.assertACLWritePermission(user, acl._id)
+  AclService.writeACL(acl)
 )
 
 bus.private('acl.delete').retrieve('user').require('id').on((req, user, id) ->
-  UserService.assertACLWritePermission(user, id)
-  UserService.deleteACL(id)
+  AclService.assertACLWritePermission(user, id)
+  AclService.deleteACL(id)
 )

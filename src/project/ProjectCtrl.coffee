@@ -4,7 +4,7 @@ bus            = require('WeaverBus')
 MinioClient    = require('MinioClient')
 ProjectService = require('ProjectService')
 ProjectPool    = require('ProjectPool')
-UserService    = require('UserService')
+AclService     = require('AclService')
 
 
 bus.private('project').on((req) ->
@@ -16,7 +16,7 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
   ProjectPool.create().then((project) ->
 
     # Create an ACL for this user to set on the project
-    acl = UserService.createACL(id, user)
+    acl = AclService.createACL(id, user)
     ProjectService.create(id, name, project.database, acl.id)
 
     return

@@ -2,6 +2,8 @@ config          = require('config')
 pjson           = require('../../package.json')
 bus             = require('WeaverBus')
 UserService     = require('UserService')
+AclService      = require('AclService')
+RoleService     = require('RoleService')
 ProjectService  = require('ProjectService')
 DatabaseService = require('DatabaseService')
 Promise         = require('bluebird')
@@ -24,6 +26,8 @@ bus.public('application.wipe').enable(config.get('application.wipe')).on((req) -
 
     # Wipe all users and projects
     UserService.wipe()
+    AclService.wipe()
+    RoleService.wipe()
     ProjectService.wipe()
   )
 )

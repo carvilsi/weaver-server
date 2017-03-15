@@ -1,9 +1,9 @@
-bus             = require('WeaverBus')
-UserService     = require('UserService')
+bus        = require('WeaverBus')
+AclService = require('AclService')
 
 
 bus.private('write').retrieve('user', 'project', 'database').on((req, user, project, database) ->
-  UserService.assertACLWritePermission(user, project.acl)
+  AclService.assertACLWritePermission(user, project.acl)
   database.write(req.payload.operations)
 )
 

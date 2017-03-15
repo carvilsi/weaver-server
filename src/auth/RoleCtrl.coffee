@@ -1,21 +1,23 @@
 bus = require('WeaverBus')
-UserService = require('UserService')
+AclService  = require('AclService')
+RoleService = require('RoleService')
 
 bus.private('role.create').retrieve('user').require('role').on((req, user, role) ->
-  UserService.createRole(role, user)
+  acl = AclService.createACL(role.roleId, user.username)
+  RoleService.createRole(role, acl.id)
 )
 
 bus.private('role.read').retrieve('user').require('id').on((req, user, id) ->
-  UserService.assertACLReadPermission(user, id)
-  UserService.getRole(id)
+  AclService.assertACLReadPermission(user, id)
+  RoleService.getRole(id)
 )
 
 bus.private('role.update').retrieve('user').require('role').on((req, user, role) ->
-  UserService.assertACLWritePermission(user, role._id)
-  UserService.updateRole(role)
+  AclService.assertACLWritePermission(user, role._id)
+  RoleService.updateRole(role)
 )
 
 bus.private('role.delete').retrieve('user').require('id').on((req, user, id) ->
-  UserService.assertACLWritePermission(user, id)
-  UserService.deleteRole(id)
+  AclService.assertACLWritePermission(user, id)
+  RoleService.deleteRole(id)
 )

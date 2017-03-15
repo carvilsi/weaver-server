@@ -40,6 +40,8 @@ splash          = require('splash')
 sounds          = require('sounds')
 Weaver          = require('weaver-sdk')
 UserService     = require('UserService')
+AclService      = require('AclService')
+RoleService     = require('RoleService')
 ProjectService  = require('ProjectService')
 WeaverBus       = require('WeaverBus')
 routes          = require('routes')
@@ -72,6 +74,8 @@ Promise.all([
   # Load services
   [
     UserService
+    AclService
+    RoleService
     ProjectService
   ].forEach((service) -> service.load())
 ])
