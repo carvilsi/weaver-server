@@ -17,7 +17,6 @@ bus.public("auth.signIn").require('username', 'password').on((req, username, pas
 
 # All private routes require a signed in user that is loaded in this handler based on authToken
 bus.private("*").priority(1000).retrieve('user').on((req, user) ->
-  req.state.user = user
   return
 )
 
@@ -35,8 +34,8 @@ bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
 )
 
 # Gives back user object that is currently signed in
-bus.private("auth.getUser").on((req) ->
-  req.state.user
+bus.private("auth.getUser").retrieve('user').on((req, user) ->
+  user
 )
 
 # Sign out current signed in user
@@ -46,7 +45,7 @@ bus.private("auth.signOut").require('authToken').on((req, authToken) ->
 )
 
 # Destroy user
-bus.private("auth.destroyUser").on((req) ->
-  UserService.destroy(req.state.user)
+bus.private("auth.destroyUser").retrieve('user').on((req, user) ->
+  UserService.destroy(user)
   return
 )

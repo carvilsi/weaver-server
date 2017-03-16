@@ -14,7 +14,6 @@ class UserService extends LokiService
       sessions: ['authToken']
     )
 
-
   signUp: (userId, username, email, password) ->
     userExists = @users.findOne({username})? or username is adminUser
 
