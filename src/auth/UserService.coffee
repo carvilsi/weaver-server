@@ -3,9 +3,6 @@ LokiService = require('LokiService')
 cuid        = require('cuid')
 _           = require('lodash')
 
-adminUser   = conf.get('admin.username')
-adminPass   = conf.get('admin.password')
-
 class UserService extends LokiService
 
   constructor: ->
@@ -15,7 +12,7 @@ class UserService extends LokiService
     )
 
   signUp: (userId, username, email, password) ->
-    userExists = @users.findOne({username})? or username is adminUser
+    userExists = @users.findOne({username})?
 
     if userExists
       throw {code:-1, message: "User with username #{username} already exists"}
@@ -25,23 +22,18 @@ class UserService extends LokiService
 
 
   signIn: (username, password) ->
-    # There is always an admin user
-    grantedAdmin = username is adminUser and password is adminPass
+    user = @users.find({username})[0]
 
-    if not grantedAdmin
-      user = @users.find({username})[0]
+    if not user?
+      throw {code: -1, message: "User not found"}
 
-      if not user?
-        throw {code: -1, message: "User not found"}
-
-      if user.password isnt password
-        throw {code: -1, message: "Password incorrect"}
+    if user.password isnt password
+      throw {code: -1, message: "Password incorrect"}
 
     authToken = cuid()
     sessionId = cuid()
     @sessions.insert({sessionId, authToken, username})
 
-    # TODO Should create the admin user here when not created
     authToken
 
 
@@ -50,11 +42,8 @@ class UserService extends LokiService
     if not session?
       throw {code: -1, message: "No session found for authToken #{authToken}"}
 
-    return {username: adminUser} if session.username is adminUser
-
     user = @users.findOne({username: session.username})
     _.omit(user, ['password'])
-
 
   signOut: (authToken) ->
     session = @sessions.findOne({authToken})

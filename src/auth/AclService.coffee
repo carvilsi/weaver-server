@@ -4,8 +4,6 @@ RoleService = require('RoleService')
 cuid        = require('cuid')
 _           = require('lodash')
 
-adminUser   = conf.get('admin.username')
-adminPass   = conf.get('admin.password')
 
 class AclService extends LokiService
 
@@ -83,7 +81,7 @@ class AclService extends LokiService
 
 
   assertACLPermission: (user, aclId, writeAllowed) ->
-    return if user.username is adminUser
+    return if user.isAdmin()
 
     acl = @getACL(aclId)
     allowedUsers = @getAllowedUsers(acl, writeAllowed)
