@@ -17,7 +17,6 @@ bus.public("auth.signIn").require('username', 'password').on((req, username, pas
 
 # All private routes require a signed in user that is loaded in this handler based on authToken
 bus.private("*").priority(1000).retrieve('user').on((req, user) ->
-  return
 )
 
 bus.provide("user").require('authToken').on((req, authToken) ->
