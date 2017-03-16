@@ -11,7 +11,7 @@ class AclService extends LokiService
 
   constructor: ->
     super('acl',
-      acl:      []
+      acl:      ['id']
       objects:  ['acl']
     )
 
@@ -20,10 +20,8 @@ class AclService extends LokiService
       id:          cuid()
       userRead:    []
       userWrite:   [user.username]
-      userManage:  []
       roleRead:    []
       roleWrite:   []
-      roleManage:  []
       publicRead:  false
       publicWrite: false
 
@@ -32,15 +30,13 @@ class AclService extends LokiService
     aclDoc
 
 
-
   getACL: (aclId) ->
     @acl.findOne({id: aclId})
 
 
   getACLByObject: (objectId) ->
     object = @objects.findOne({id: objectId})
-    acl    = @acl.findOne({id: object.acl})
-    acl
+    @getACL(object.acl)
 
 
   writeACL: (aclServerObject) ->
@@ -68,7 +64,6 @@ class AclService extends LokiService
     @acl.insert(acl)
 
 
-
   getAllowedUsers: (acl, writeAllowed) ->
 
     writeAllowed = writeAllowed or false
@@ -80,24 +75,10 @@ class AclService extends LokiService
     users[u] = null for u in acl.userRead
     users[u] = null for u in acl.userWrite if writeAllowed
 
-    # Add users from given role
-    getUsersFromRole = (acl) =>
-      roleCollection = if writeAllowed then acl.roleWrite else acl.roleRead
-
-      for roleId in roleCollection
-        role = RoleService.getRole(roleId)
-
-        users[u] = null for u in role.users
-
-        # Recursively go down the roles
-        # TODO: Fix that this breaks when circular dependency
-        getUsersFromRole(r) for r in role.roles
-
-
-    getUsersFromRole(acl)
-
-    # Return array
-    (key for key of users)
+    if writeAllowed
+      RoleService.getUsersFromRoles(acl.roleWrite)
+    else
+      RoleService.getUsersFromRoles(acl.roleRead.concat(acl.roleWrite))
 
 
   assertACLPermission: (user, aclId, writeAllowed) ->

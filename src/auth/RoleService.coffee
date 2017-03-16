@@ -28,4 +28,19 @@ class RoleService extends LokiService
   getRole: (roleId) ->
     @roles.findOne({roleId})
 
+  # Expects role id's
+  # Recursively go down all roles and add the users
+  getUsersFromRoles: (roles, users) ->
+    users = users or {}
+    for roleId in roles
+      role = @getRole(roleId)
+
+      users[u] = null for u in role.users
+
+      # TODO: Fix that this breaks due to circular dependency
+      @getUsersFromRole(r, users) for r in role.roles
+
+    # Return unique users
+    (user for user of users)
+
 module.exports = new RoleService()
