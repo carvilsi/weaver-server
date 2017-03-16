@@ -42,6 +42,7 @@
     "coffee-script": "^1.12.3",
     "istanbul": "^0.4.3",
     "mocha": "^2.2.5",
+    "request": "^2.81.0",
     "should": "^11.2.0",
     "sinon": "^1.15.4",
     "socket.io-client": "~1.4.6",
