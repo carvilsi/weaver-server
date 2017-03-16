@@ -54,10 +54,10 @@ initModules = ->
     'routes'
     'AclCtrl'
     'ApplicationCtrl'
-    'AuthCtrl'
     'NodeCtrl'
     'ProjectCtrl'
     'RoleCtrl'
+    'UserCtrl'
     'WeaverQueryCtrl'
     'FileSystemCtrl'
   ]

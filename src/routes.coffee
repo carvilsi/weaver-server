@@ -22,12 +22,11 @@ route.private.POST "query"                   # Execute a WeaverQuery
 route.private.POST "query.native"            # Execute a native query
 
 # Authentication
-route.public.POST  "auth.signUp"             # Sign up a new user
-route.public.POST  "auth.signIn"             # Sign in using username and password
-route.private.POST "auth.getUser"            # Gets user object using authToken
-route.private.POST "auth.destroyUser"        # Destroys user
-route.private.POST "auth.signOut"            # Sign out session identified by authToken
-route.private.POST "auth.signOut.all"        # Sign out all active sessions
+route.public.POST  "user.signUp"             # Sign up a new user
+route.public.POST  "user.signIn"             # Sign in using username and password
+route.private.POST "user.signOut"            # Sign out session identified by authToken
+route.private.POST "user.read"               # Gets user object using authToken
+route.private.POST "user.delete"             # Destroys user
 
 # CRUD: Access Control List (ACL)
 route.private.POST "acl.create"

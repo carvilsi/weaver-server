@@ -1,11 +1,22 @@
-Promise        = require('bluebird')
-config         = require('config')
-bus            = require('WeaverBus')
-MinioClient    = require('MinioClient')
-ProjectService = require('ProjectService')
-ProjectPool    = require('ProjectPool')
-AclService     = require('AclService')
+Promise         = require('bluebird')
+config          = require('config')
+bus             = require('WeaverBus')
+MinioClient     = require('MinioClient')
+ProjectService  = require('ProjectService')
+ProjectPool     = require('ProjectPool')
+AclService      = require('AclService')
+DatabaseService = require('DatabaseService')
 
+
+
+bus.provide("project").require('target').on((req, target) ->
+  ProjectService.get(target)
+)
+
+bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
+  AclService.assertACLReadPermission(user, project.acl)
+  new DatabaseService(project.endpoint)
+)
 
 bus.private('project').on((req) ->
   ProjectService.all()
