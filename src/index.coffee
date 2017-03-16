@@ -21,10 +21,8 @@ console.log(`'\033[36mLoading...'`)  # Loading in cyan
 # Note: This must be the first running code in the application before any require() works
 require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   '.'
-  'admin'
   'application'
   'auth'
-  'schemas'
   'cli'
   'core'
   'database'
@@ -35,25 +33,31 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
 
 
 # Load libs
-Promise       = require('bluebird')
-conf          = require('config')       # Configuration loads files in the root config directory
-WeaverServer  = require('WeaverServer')
-splash        = require('splash')
-sounds        = require('sounds')
-Weaver        = require('weaver-sdk')
-WeaverBus     = require('WeaverBus')
-routes        = require('routes')
-pjson         = require('../package.json')
+Promise         = require('bluebird')
+conf            = require('config')       # Configuration loads files in the root config directory
+WeaverServer    = require('WeaverServer')
+splash          = require('splash')
+sounds          = require('sounds')
+Weaver          = require('weaver-sdk')
+UserService     = require('UserService')
+AclService      = require('AclService')
+RoleService     = require('RoleService')
+ProjectService  = require('ProjectService')
+WeaverBus       = require('WeaverBus')
+routes          = require('routes')
+pjson           = require('../package.json')
+
 
 # Init routes and controllers by running once
 initModules = ->
   require(run) for run in [
     'routes'
+    'AclCtrl'
     'ApplicationCtrl'
-    'AuthCtrl'
     'NodeCtrl'
-    'ProjectAuthCtrl'
-    'ProjectCtrlFactory'
+    'ProjectCtrl'
+    'RoleCtrl'
+    'UserCtrl'
     'WeaverQueryCtrl'
     'FileSystemCtrl'
   ]
@@ -66,10 +70,20 @@ server = new WeaverServer()
 # Run servers
 Promise.all([
   server.run()
+
+  # Load services
+  [
+    UserService
+    AclService
+    RoleService
+    ProjectService
+  ].forEach((service) -> service.load())
 ])
 .then(->
+
   # Initialize local Weaver
   Weaver.local(routes)
+
 ).then(->
   initModules()
 

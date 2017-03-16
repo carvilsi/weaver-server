@@ -15,6 +15,5 @@ play = (file) ->
 
 # Export sounds
 module.exports =
-  
   loaded: ->
     play "chirp.wav" if enabled('loaded')

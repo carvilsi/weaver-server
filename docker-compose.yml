@@ -1,6 +1,6 @@
 version: '2'
 services:
-  system-virtuoso:
+  database-alpha:
     image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
     expose:
      - "1111"
@@ -13,23 +13,23 @@ services:
      - SPARQL_UPDATE=true
      - DEFAULT_GRAPH=http://www.example.com/my-graph
 
-  system-weaver-database-virtuoso:
-    image: sysunite/weaver-database-virtuoso:0.0.10
+  weaver-database-alpha:
+    image: sysunite/weaver-database-virtuoso:0.0.11
     expose:
      - "9474"
     ports:
      - "9474:9474"
     depends_on:
-     - system-virtuoso
+     - database-alpha
     links:
-     - system-virtuoso
+     - database-alpha
     environment:
       - WEAVER_VIRTUOSO_SERVICE_PORT=9474
       - VIRTUOSO_DB_USER=dba
       - VIRTUOSO_DB_PASSWORD=myDbaPassword
-      - VIRTUOSO_DB_PATH=jdbc:virtuoso://system-virtuoso:1111
+      - VIRTUOSO_DB_PATH=jdbc:virtuoso://database-alpha:1111
 
-  project-virtuoso:
+  database-beta:
     image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
     expose:
      - "1112"
@@ -42,28 +42,40 @@ services:
      - SPARQL_UPDATE=true
      - DEFAULT_GRAPH=http://www.example.com/my-graph
 
-  project-weaver-database-virtuoso:
-    image: sysunite/weaver-database-virtuoso:0.0.10
+  weaver-database-beta:
+    image: sysunite/weaver-database-virtuoso:0.0.11
     expose:
      - "9475"
     ports:
      - "9475:9475"
     depends_on:
-     - project-virtuoso
+     - database-beta
     links:
-     - project-virtuoso
+     - database-beta
     environment:
       - WEAVER_VIRTUOSO_SERVICE_PORT=9475
       - VIRTUOSO_DB_USER=dba
       - VIRTUOSO_DB_PASSWORD=myDbaPassword
-      - VIRTUOSO_DB_PATH=jdbc:virtuoso://project-virtuoso:1111
+      - VIRTUOSO_DB_PATH=jdbc:virtuoso://database-beta:1111
 
-  file-system:
+  file-system-alpha:
     image: minio/minio
     expose:
       - "9000"
     ports:
       - "9000:9000"
+    environment:
+      - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
+      - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
+    command: server /data
+
+
+  file-system-beta:
+    image: minio/minio
+    expose:
+      - "9001"
+    ports:
+      - "9001:9000"
     environment:
       - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
       - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD

@@ -217,6 +217,7 @@ messages = [
   "100 Certified It Works on My Machine"
   "We are going to build a great firewall and _ _ _ _ _ is going to pay for it"
   "npm is like a box of chocolates. You never know what you're gonna get."
+  "Murphy was an optimist."
 ]
 
 module.exports = ->
