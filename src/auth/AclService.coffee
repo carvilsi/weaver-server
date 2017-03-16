@@ -69,44 +69,22 @@ class AclService extends LokiService
 
 
 
-  getAllowedUsers: (acl) ->
+  getAllowedUsers: (acl, writeAllowed) ->
 
-   # Use object to easily avoid duplicates
-    users = {}
-
-    # Add all direct users
-    users[u] = null for u in acl.userRead
-    users[u] = null for u in acl.userWrite
-
-    # Add users from given role
-    getUsersFromRole = (acl) =>
-      for roleId in acl.roleRead
-        role = RoleService.getRole(roleId)
-
-        users[u] = null for u in role.users
-
-        # Recursively go down the roles
-        # TODO: Fix that this breaks when circular dependency
-        getUsersFromRole(r) for r in role.roles
-
-
-    getUsersFromRole(acl)
-
-    # Return array
-    (key for key of users)
-
-
-  getAllowedWriteUsers: (acl) ->
+    writeAllowed = writeAllowed or false
 
     # Use object to easily avoid duplicates
     users = {}
 
     # Add all direct users
-    users[u] = null for u in acl.userWrite
+    users[u] = null for u in acl.userRead
+    users[u] = null for u in acl.userWrite if writeAllowed
 
     # Add users from given role
     getUsersFromRole = (acl) =>
-      for roleId in acl.roleWrite
+      roleCollection = if writeAllowed then acl.roleWrite else acl.roleRead
+
+      for roleId in roleCollection
         role = RoleService.getRole(roleId)
 
         users[u] = null for u in role.users
@@ -122,26 +100,23 @@ class AclService extends LokiService
     (key for key of users)
 
 
-  assertACLReadPermission: (user, aclId) ->
+  assertACLPermission: (user, aclId, writeAllowed) ->
     return if user.username is adminUser
 
     acl = @getACL(aclId)
-    allowedUsers = @getAllowedUsers(acl)
+    allowedUsers = @getAllowedUsers(acl, writeAllowed)
 
     denied = allowedUsers.indexOf(user.userId) is -1
     if denied
-      throw {code: -1, message: "User #{user.username} has no read permission for ACL #{aclId}"}
+      throw {code: -1, message: "Permission denied for #{user.username}"}
+
+
+  assertACLReadPermission: (user, aclId) ->
+    @assertACLPermission(user, aclId, false)
 
 
   assertACLWritePermission: (user, aclId) ->
-    return if user.username is adminUser
-
-    acl = @getACL(aclId)
-    allowedUsers = @getAllowedWriteUsers(acl)
-
-    denied = allowedUsers.indexOf(user.userId) is -1
-    if denied
-      throw {code: -1, message: "User #{user.username} has no write permission for ACL #{aclId}"}
+    @assertACLPermission(user, aclId, true)
 
 
 module.exports = new AclService()
