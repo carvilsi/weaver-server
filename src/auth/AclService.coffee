@@ -15,6 +15,7 @@ class AclService extends LokiService
       objects:  ['acl']
     )
 
+
   createACL: (objectId, user) ->
     acl =
       id:          cuid()
@@ -30,28 +31,7 @@ class AclService extends LokiService
     aclDoc
 
 
-  getACL: (aclId) ->
-    @acl.findOne({id: aclId})
-
-
-  getACLByObject: (objectId) ->
-    object = @objects.findOne({id: objectId})
-    @getACL(object.acl)
-
-
-  writeACL: (aclServerObject) ->
-    acl = @acl.findOne({id: aclServerObject._id})
-    acl.publicRead  = aclServerObject._publicRead
-    acl.publicWrite = aclServerObject._publicWrite
-    acl.userRead    = aclServerObject._userRead
-    acl.userWrite   = aclServerObject._userWrite
-    acl.roleRead    = aclServerObject._roleRead
-    acl.roleWrite   = aclServerObject._roleWrite
-
-    @acl.update(acl)
-
-
-  storeACL: (aclServerObject) ->
+  createACLFromServer: (aclServerObject) ->
     acl =
       id          : aclServerObject._id
       publicRead  : aclServerObject._publicRead
@@ -62,6 +42,27 @@ class AclService extends LokiService
       roleWrite   : aclServerObject._roleWrite
 
     @acl.insert(acl)
+
+
+  getACL: (aclId) ->
+    @acl.findOne({id: aclId})
+
+
+  getACLByObject: (objectId) ->
+    object = @objects.findOne({id: objectId})
+    @getACL(object.acl)
+
+
+  updateACL: (aclServerObject) ->
+    acl = @acl.findOne({id: aclServerObject._id})
+    acl.publicRead  = aclServerObject._publicRead
+    acl.publicWrite = aclServerObject._publicWrite
+    acl.userRead    = aclServerObject._userRead
+    acl.userWrite   = aclServerObject._userWrite
+    acl.roleRead    = aclServerObject._roleRead
+    acl.roleWrite   = aclServerObject._roleWrite
+
+    @acl.update(acl)
 
 
   getAllowedUsers: (acl, writeAllowed) ->
