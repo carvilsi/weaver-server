@@ -20,7 +20,7 @@ class AdminUser
     delete authTokens[authToken]
 
   hasAuthToken: (authToken) ->
-    authTokens[authToken]
+    authTokens[authToken] is true
 
   getAuthToken: ->
     authToken = cuid()

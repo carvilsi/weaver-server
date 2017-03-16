@@ -63,28 +63,27 @@ class AclService extends LokiService
     @acl.update(acl)
 
 
-  getAllowedUsers: (acl, writeAllowed) ->
-
-    writeAllowed = writeAllowed or false
-
+  getAllowedUsers: (acl, readOnly) ->
     # Use object to easily avoid duplicates
     users = {}
 
     # Add all direct users
-    users[u] = null for u in acl.userRead
-    users[u] = null for u in acl.userWrite if writeAllowed
+    users[u] = null for u in acl.userRead if readOnly
+    users[u] = null for u in acl.userWrite
 
-    if writeAllowed
-      RoleService.getUsersFromRoles(acl.roleWrite)
-    else
-      RoleService.getUsersFromRoles(acl.roleRead.concat(acl.roleWrite))
+    roles = if readOnly then acl.roleRead.concat(acl.roleWrite) else acl.roleWrite
+
+    usersFromRole = RoleService.getUsersFromRoles(roles)
+    users[u] = null for u in usersFromRole
+
+    (user for user of users)
 
 
-  assertACLPermission: (user, aclId, writeAllowed) ->
+  assertACLPermission: (user, aclId, readOnly) ->
     return if user.isAdmin()
 
     acl = @getACL(aclId)
-    allowedUsers = @getAllowedUsers(acl, writeAllowed)
+    allowedUsers = @getAllowedUsers(acl, readOnly)
 
     denied = allowedUsers.indexOf(user.userId) is -1
     if denied
@@ -92,11 +91,11 @@ class AclService extends LokiService
 
 
   assertACLReadPermission: (user, aclId) ->
-    @assertACLPermission(user, aclId, false)
+    @assertACLPermission(user, aclId, true)
 
 
   assertACLWritePermission: (user, aclId) ->
-    @assertACLPermission(user, aclId, true)
+    @assertACLPermission(user, aclId, false)
 
 
 module.exports = new AclService()
