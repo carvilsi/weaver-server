@@ -61,9 +61,9 @@ class EventListener
 
         # TODO: Make all errors error objects, or log the error here
         if isErrorObject
-          return Promise.reject({code: -1, message: error.message})
+          Promise.reject({code: -1, message: error.message})
         else
-          return Promise.reject(error)
+          Promise.reject(error)
     )
 
 module.exports = EventListener
