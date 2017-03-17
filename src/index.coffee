@@ -35,7 +35,7 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
 # Load libs
 Promise         = require('bluebird')
 conf            = require('config')       # Configuration loads files in the root config directory
-WeaverServer    = require('WeaverServer')
+server    = require('WeaverServer')
 splash          = require('splash')
 sounds          = require('sounds')
 Weaver          = require('weaver-sdk')
@@ -64,7 +64,8 @@ initModules = ->
 
 
 # Init servers
-server = new WeaverServer()
+# server = new WeaverServer()
+# server = WeaverServer
 
 
 # Run servers
