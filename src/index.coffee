@@ -29,6 +29,7 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   'project'
   'util'
   'fileSystem'
+  'tracker'
 ]
 
 
@@ -46,6 +47,7 @@ ProjectService  = require('ProjectService')
 WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
+tracker         = require('Tracker')
 
 
 # Init routes and controllers by running once
@@ -60,6 +62,7 @@ initModules = ->
     'UserCtrl'
     'WeaverQueryCtrl'
     'FileSystemCtrl'
+    'TrackerCtrl'
   ]
 
 
@@ -78,6 +81,8 @@ Promise.all([
     RoleService
     ProjectService
   ].forEach((service) -> service.load())
+
+  tracker.initDb()
 ])
 .then(->
 
