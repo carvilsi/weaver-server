@@ -9,6 +9,7 @@ authTokens = {}
 class AdminUser
 
   constructor: (@username) ->
+    @id = @username
 
   hasUsername: (username) ->
     @username is username
