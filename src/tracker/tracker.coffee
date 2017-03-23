@@ -13,6 +13,7 @@ class Tracker
       user     : config.get('services.tracker.user')
       password : config.get('services.tracker.password')
       database : config.get('services.tracker.database')
+      dateStrings: true # force dates as string, no javascript date
     })
 
   checkInited: ->
@@ -33,7 +34,7 @@ class Tracker
       @db.query('DROP TABLE IF EXISTS `tracker`;').then(=>
         @db.query('
           CREATE TABLE `tracker` (
-          `seqnr` INT NOT NULL AUTO_INCREMENT,
+          `seqnr` BIGINT NOT NULL AUTO_INCREMENT,
           `timestamp` datetime  NOT NULL,
           `user` varchar(128) NOT NULL,
           `action` varchar(128) NOT NULL,
@@ -58,6 +59,10 @@ class Tracker
 
 
   processWrites: (writes, user, project)->
+
+    console.log(user)
+    console.log(user.id())
+
     query = 'INSERT INTO `trackerdb`.`tracker` (`timestamp`, `user`, `action`, `node`, `key`, `to`, `value`, `payload`) VALUES '
     quote = '\''
 
@@ -92,9 +97,29 @@ class Tracker
     @db.query(query)
 
   getHistoryFor: (req)->
-    id = req.payload.id
+
+    console.log(req)
+
     quote = '\''
-    query = 'SELECT `seqnr`, `timestamp`, `user`, `action`, `node`, `key`, `to`, `value` FROM `trackerdb`.`tracker` WHERE `node` = ' + quote + id + quote + ';'
+    conditions = []
+
+
+
+    if req.payload.id?
+      conditions.push('`node` = ' + quote + req.payload.id + quote)
+
+    if req.payload.fromDateTime?
+      conditions.push('`timestamp` >= ' + quote + req.payload.fromDateTime + quote)
+
+    if req.payload.beforeDateTime?
+      conditions.push('`timestamp` < ' + quote + req.payload.beforeDateTime + quote)
+
+    if conditions.length < 1
+      return Promise.resolve([])
+
+
+    query = 'SELECT `seqnr`, `timestamp`, `user`, `action`, `node`, `key`, `to`, `value` FROM `trackerdb`.`tracker` WHERE ' + conditions.join(' AND ') + ' ORDER BY `seqnr` ASC;'
+    console.log(query)
     @db.query(query).then((result)->
       result[0]
     )
