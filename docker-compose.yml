@@ -81,13 +81,13 @@ services:
     command: server /data
 
 
-  file-system-beta:
-    image: minio/minio
-    expose:
-      - "9001"
-    ports:
-      - "9001:9000"
-    environment:
-      - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
-      - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
-    command: server /data
+  # file-system-beta:
+  #   image: minio/minio
+  #   expose:
+  #     - "9001"
+  #   ports:
+  #     - "9001:9000"
+  #   environment:
+  #     - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
+  #     - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
+  #   command: server /data
