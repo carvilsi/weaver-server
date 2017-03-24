@@ -13,21 +13,32 @@ services:
      - SPARQL_UPDATE=true
      - DEFAULT_GRAPH=http://www.example.com/my-graph
 
-  weaver-database-alpha:
-    image: sysunite/weaver-database-virtuoso:0.0.13
+  trackerdb-alpha:
+    image: mysql:5.7
     expose:
-     - "9474"
+     - "3306"
     ports:
-     - "9474:9474"
-    depends_on:
-     - database-alpha
-    links:
-     - database-alpha
+     - "3306:3306"
+    volumes:
+    - ./trackerdb:/var/lib/mysql
     environment:
-      - WEAVER_VIRTUOSO_SERVICE_PORT=9474
-      - VIRTUOSO_DB_USER=dba
-      - VIRTUOSO_DB_PASSWORD=myDbaPassword
-      - VIRTUOSO_DB_PATH=jdbc:virtuoso://database-alpha:1111
+     - MYSQL_ROOT_PASSWORD=K00B88HQB1UV9MZ7YYUP
+
+  weaver-database-alpha:
+   image: sysunite/weaver-database-virtuoso:0.0.13
+   expose:
+    - "9474"
+   ports:
+    - "9474:9474"
+   depends_on:
+    - database-alpha
+   links:
+    - database-alpha
+   environment:
+     - WEAVER_VIRTUOSO_SERVICE_PORT=9474
+     - VIRTUOSO_DB_USER=dba
+     - VIRTUOSO_DB_PASSWORD=myDbaPassword
+     - VIRTUOSO_DB_PATH=jdbc:virtuoso://database-alpha:1111
 
 #  database-beta:
 #    image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
