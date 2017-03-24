@@ -230,13 +230,13 @@ server
 )
 
 bus.private('file.download')
-.retrieve('target', 'fileName', 'authToken')
+.require('target', 'fileName', 'authToken')
 .on((req, target, fileName) ->
   downloadFile(fileName, target, false)
 )
 
 bus.private('file.downloadByID')
-.retrieve('target', 'id', 'authToken')
+.require('target', 'id', 'authToken')
 .on((req, target, id) ->
   downloadFileByID(id, target, false)
   .catch((err) ->
@@ -245,14 +245,14 @@ bus.private('file.downloadByID')
 )
 
 bus.private('file.delete')
-.retrieve('target', 'fileName','authToken')
+.require('target', 'fileName','authToken')
 .on((req, target, fileName) ->
   logger.debug('_______________')
   deleteFile(fileName, target)
 )
 
 bus.private('file.deleteByID')
-.retrieve('target', 'id', 'authToken')
+.require('target', 'id', 'authToken')
 .on((req, target, id) ->
   deleteFileByID(id, target)
   .catch((err) ->

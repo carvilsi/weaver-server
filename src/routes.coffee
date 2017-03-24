@@ -47,7 +47,7 @@ route.private.POST "project.create"          # Create a project
 route.private.POST "project.delete"          # Delete a project
 route.private.POST "project.ready"           # Checks if a project is setup and ready
 
-# Files management
+# File management
 route.private.GET  "file.download"           # Retrieves a file from the object storage server by fileName
 route.private.GET  "file.downloadByID"       # Retrieves a file from the object storage server by ID
 route.private.POST "file.delete"             # Deletes a file from the object storage server by name

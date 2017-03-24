@@ -18,6 +18,13 @@ bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
   new DatabaseService(project.endpoint)
 )
 
+# Move to FileController
+bus.provide('minio').retrieve('project').on((req, project) ->
+  MinioClient.create(project.fileServer)
+)
+
+
+
 bus.private('project').on((req) ->
   ProjectService.all()
 )
