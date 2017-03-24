@@ -3,8 +3,6 @@ mysql      = require('mysql-promise')
 
 class Tracker
 
-
-
   constructor: ->
     @db = mysql()
     @dbName = config.get('services.tracker.database')
@@ -16,29 +14,22 @@ class Tracker
       dateStrings: true # force dates as string, no javascript date
     })
 
-  checkInited: ->
-    @db.query('USE `'+@dbName+'`;')
-    .then(
-      ()=>
-        @db.query('SELECT * FROM `tracker` LIMIT 1;').then(
-          ()->
-            return true;
-          (error)->
-            if error.code is 'ER_NO_SUCH_TABLE'
-              return false
-            else
-              throw Error('not connected properly '+error.code)
-        )
-      (error)->
-        if error.code is 'ER_BAD_DB_ERROR'
-          return false
-        else
-          throw Error('not connected properly '+error.code)
+
+  checkInitialized: ->
+    @db.query('USE `'+@dbName+'`;').then(=>
+      @db.query('SELECT * FROM `tracker` LIMIT 1;')
+    ).then(->
+      true
+    ).catch((error)->
+      if error.code in [ 'ER_BAD_DB_ERROR', 'ER_NO_SUCH_TABLE' ]
+        return false
+      else
+        Promise.reject('not connected properly '+error.code)
     )
 
 
   initDb: ->
-    @checkInited().then((done)=>
+    @checkInitialized().then((done)=>
       return Promise.resolve() if done
       @db.query('CREATE DATABASE IF NOT EXISTS `'+@dbName+'`;')
       .then(=>
