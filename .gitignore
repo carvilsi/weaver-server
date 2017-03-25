@@ -9,4 +9,10 @@ coverage/
 data
 
 loki
+uploads
+
+# Example plugins
+plugins/calculator/lib
+plugins/calculator/node_modules
+
 trackerdb

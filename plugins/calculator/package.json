@@ -1,0 +1,11 @@
+{
+  "name": "calculator",
+  "version": "1.0.0",
+  "description": "Calculator plugin for Weaver",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublish": "coffee -o lib -c src"
+  },
+  "author": "Mohamad Alamili",
+  "license": "MIT"
+}

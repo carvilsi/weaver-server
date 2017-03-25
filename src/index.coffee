@@ -27,6 +27,7 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   'core'
   'database'
   'project'
+  'plugin'
   'util'
   'fileSystem'
   'tracker'
@@ -42,8 +43,11 @@ sounds          = require('sounds')
 Weaver          = require('weaver-sdk')
 UserService     = require('UserService')
 AclService      = require('AclService')
+FclService      = require('FclService')
 RoleService     = require('RoleService')
 ProjectService  = require('ProjectService')
+PluginService   = require('PluginService')
+PluginLoader    = require('PluginLoader')
 WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
@@ -56,7 +60,9 @@ initModules = ->
     'routes'
     'AclCtrl'
     'ApplicationCtrl'
+    'FclCtrl'
     'NodeCtrl'
+    'PluginCtrl'
     'ProjectCtrl'
     'RoleCtrl'
     'UserCtrl'
