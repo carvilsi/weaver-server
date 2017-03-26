@@ -14,5 +14,7 @@ uploads
 # Example plugins
 plugins/calculator/lib
 plugins/calculator/node_modules
+plugins/nodes-counter/lib
+plugins/nodes-counter/node_modules
 
 trackerdb

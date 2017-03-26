@@ -7,14 +7,6 @@ RoleService     = require('RoleService')
 ProjectService  = require('ProjectService')
 DatabaseService = require('DatabaseService')
 Promise         = require('bluebird')
-Weaver          = require('weaver-sdk')
-
-
-# Provide Weaver SDK as Weaver
-bus.provide("Weaver").on(->
-  Weaver
-)
-
 
 # Version
 bus.public('application.version').on(->

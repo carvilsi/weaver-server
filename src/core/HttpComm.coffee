@@ -13,7 +13,7 @@ class HTTP
 
   wire: (app) ->
     # Wire GET requests
-    @routes.forEach((routeHandler) =>
+    (handler for name, handler of @routes).forEach((routeHandler) =>
       routeHandler.getRoutes.forEach((route) =>
          app.get(@transform(route), (req, res) =>
 

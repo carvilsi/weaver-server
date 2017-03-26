@@ -1,7 +1,7 @@
 {
-  "name": "calculator",
+  "name": "nodes-counter",
   "version": "1.0.0",
-  "description": "Calculator plugin as an example for Weaver",
+  "description": "Plugin demonstrating accessing current project to count the number of nodes",
   "main": "lib/index.js",
   "scripts": {
     "prepublish": "coffee -o lib -c src"

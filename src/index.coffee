@@ -47,7 +47,6 @@ FclService      = require('FclService')
 RoleService     = require('RoleService')
 ProjectService  = require('ProjectService')
 PluginService   = require('PluginService')
-PluginLoader    = require('PluginLoader')
 WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
@@ -72,13 +71,8 @@ initModules = ->
   ]
 
 
-# Init servers
-server = new WeaverServer()
-
-
-# Run servers
+# Initialize
 Promise.all([
-  server.run()
 
   # Load services
   [
@@ -86,11 +80,21 @@ Promise.all([
     AclService
     RoleService
     ProjectService
+    PluginService
   ].forEach((service) -> service.load())
 
+  # Initialize the Tracker database
   tracker.initDb()
-])
-.then(->
+
+]).then(->
+
+  # Init WeaverServer
+  server = new WeaverServer()
+
+  # Run the express and socket server
+  server.run()
+
+).then(->
 
   # Initialize local Weaver
   Weaver.local(routes)
@@ -98,6 +102,6 @@ Promise.all([
 ).then(->
   initModules()
 
-  splash.printLoaded()
+  #splash.printLoaded()
   sounds.loaded()
 )
