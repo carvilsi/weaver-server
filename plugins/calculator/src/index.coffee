@@ -1,11 +1,6 @@
-# Export a function that gets the bus injected
+# Export a function with the bus injected
+# Using a plugin always requires a signed in user. Therefore, public routes are disabled
 # You may return a promise if you need asynchronous initialization
-
-###
-  - Using a plugin always requires a signed in user. Therefore, public routes are disabled
-
-###
-
 module.exports = (bus) ->
 
   bus.private("getBase").on((req) ->

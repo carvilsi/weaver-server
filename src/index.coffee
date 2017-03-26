@@ -102,6 +102,6 @@ Promise.all([
 ).then(->
   initModules()
 
-  #splash.printLoaded()
+  splash.printLoaded()
   sounds.loaded()
 )

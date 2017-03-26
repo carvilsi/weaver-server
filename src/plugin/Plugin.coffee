@@ -1,5 +1,4 @@
 path      = require('path')
-jailed    = require('jailed')
 PluginBus = require('PluginBus')
 
 class Plugin

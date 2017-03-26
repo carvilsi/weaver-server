@@ -12,6 +12,6 @@ bus.private('plugins').on((req) ->
 )
 
 bus.private('plugin.read').retrieve('user').retrieve('plugin').on((req, user, plugin) ->
-  #AclService.assertACLReadPermission(user, plugin.id())
+  # TODO: Assert read access
   plugin
 )

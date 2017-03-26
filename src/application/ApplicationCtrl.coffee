@@ -13,7 +13,6 @@ bus.public('application.version').on(->
   pjson.version
 )
 
-
 # Complete system wipe of all data
 bus.public('application.wipe').enable(config.get('application.wipe')).on((req) ->
 

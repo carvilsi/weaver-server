@@ -23,23 +23,13 @@ class PluginBus
     @listeners.push(listener)
     listener
 
-
-  getFunction: (listener) ->
-    route:    listener.eventName
-    name:     listener._functionName
-    require:  listener._require
-    provide:  listener._provide
-
   getFunctions: ->
-    (@getFunction(l) for l in @listeners)
+    compileFunction = (listener) ->
+      route:    listener.eventName
+      name:     listener._functionName
+      require:  listener._require
+      provide:  listener._provide
+
+    (compileFunction(l) for l in @listeners)
 
 module.exports = PluginBus
-
-
-###
-  Default FunctionAccess
-
-  - create project
-  - create user
-  - access plugin
-###
