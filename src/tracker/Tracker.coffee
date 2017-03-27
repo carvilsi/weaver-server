@@ -40,12 +40,14 @@ class Tracker
         @db.query('
           CREATE TABLE `tracker` (
           `seqnr` BIGINT NOT NULL AUTO_INCREMENT,
-          `timestamp` datetime  NOT NULL,
+          `timestamp` BIGINT  NOT NULL,
+          `datetime` datetime  NOT NULL,
           `user` varchar(128) NOT NULL,
           `action` varchar(128) NOT NULL,
           `node` varchar(128) NOT NULL,
           `key` varchar(128) NULL,
           `to` varchar(128) NULL,
+          `oldTo` varchar(128) NULL,
           `value` text NULL,
           `payload` text NOT NULL,
           PRIMARY KEY (`seqnr`),
@@ -65,18 +67,20 @@ class Tracker
 
   processWrites: (writes, user, project)->
 
-    query = 'INSERT INTO `trackerdb`.`tracker` (`timestamp`, `user`, `action`, `node`, `key`, `to`, `value`, `payload`) VALUES '
+    query = 'INSERT INTO `trackerdb`.`tracker` (`timestamp`, `datetime`, `user`, `action`, `node`, `key`, `to`, `oldTo`, `value`, `payload`) VALUES '
     quote = '\''
 
     for operation in writes
 
-      timestamp = 'now()'
+      timestamp = operation.timestamp
+      datetime = Math.round(operation.timestamp / 1000)
       user_id = quote + user.id + quote
       action = quote + operation.action + quote
 
       node_id = 'NULL'
       key = 'NULL'
       to = 'NULL'
+      oldTo = 'NULL'
       value = 'NULL'
 
       if operation.id?
@@ -87,12 +91,16 @@ class Tracker
         key = quote + operation.key + quote
       if operation.to?
         to = quote + operation.to + quote
+      if operation.newTo?
+        to = quote + operation.newTo + quote
+      if operation.oldTo?
+        oldTo = quote + operation.oldTo + quote
       if operation.value?
         value = @db.pool.escape(operation.value)
 
       payload = quote + JSON.stringify(operation) + quote
 
-      query += "(#{timestamp}, #{user_id}, #{action}, #{node_id}, #{key}, #{to}, #{value}, #{payload}),"
+      query += "(#{timestamp}, FROM_UNIXTIME(#{datetime}), #{user_id}, #{action}, #{node_id}, #{key}, #{to}, #{oldTo}, #{value}, #{payload}),"
 
     query = query.slice(0, -1)+';'
 
@@ -115,15 +123,15 @@ class Tracker
       conditions.push('`key` IN (' + quote + req.payload.keys.join(quote + ', ' + quote) + quote + ')')
 
     if req.payload.fromDateTime?
-      conditions.push('`timestamp` >= ' + quote + req.payload.fromDateTime + quote)
+      conditions.push('`datetime` >= ' + quote + req.payload.fromDateTime + quote)
 
     if req.payload.beforeDateTime?
-      conditions.push('`timestamp` < ' + quote + req.payload.beforeDateTime + quote)
+      conditions.push('`datetime` < ' + quote + req.payload.beforeDateTime + quote)
 
     if conditions.length < 1
       return Promise.resolve([])
 
-    query = 'SELECT `seqnr`, `timestamp`, `user`, `action`, `node`, `key`, `to`, `value` FROM `trackerdb`.`tracker` WHERE ' + conditions.join(' AND ') + ' ORDER BY `seqnr` ASC;'
+    query = 'SELECT `seqnr`, `datetime`, `user`, `action`, `node`, `key`, `to`, `value` FROM `trackerdb`.`tracker` WHERE ' + conditions.join(' AND ') + ' ORDER BY `seqnr` ASC;'
 
     @db.query(query).then((result)->
       result[0]
