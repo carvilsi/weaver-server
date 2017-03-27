@@ -8,6 +8,7 @@ route =
 
 # Application
 route.public.GET   "application.version"     # Application version
+route.public.GET   "application.time"        # Server system time
 route.public.POST  "application.wipe"        # Complete system wipe of all data (users, projects, etc)
 
 # Database operations
