@@ -27,6 +27,7 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   'core'
   'database'
   'project'
+  'plugin'
   'util'
   'fileSystem'
   'tracker'
@@ -42,8 +43,10 @@ sounds          = require('sounds')
 Weaver          = require('weaver-sdk')
 UserService     = require('UserService')
 AclService      = require('AclService')
+FclService      = require('FclService')
 RoleService     = require('RoleService')
 ProjectService  = require('ProjectService')
+PluginService   = require('PluginService')
 WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
@@ -56,7 +59,9 @@ initModules = ->
     'routes'
     'AclCtrl'
     'ApplicationCtrl'
+    'FclCtrl'
     'NodeCtrl'
+    'PluginCtrl'
     'ProjectCtrl'
     'RoleCtrl'
     'UserCtrl'
@@ -66,13 +71,8 @@ initModules = ->
   ]
 
 
-# Init servers
-server = new WeaverServer()
-
-
-# Run servers
+# Initialize
 Promise.all([
-  server.run()
 
   # Load services
   [
@@ -80,11 +80,21 @@ Promise.all([
     AclService
     RoleService
     ProjectService
+    PluginService
   ].forEach((service) -> service.load())
 
+  # Initialize the Tracker database
   tracker.initDb()
-])
-.then(->
+
+]).then(->
+
+  # Init WeaverServer
+  server = new WeaverServer()
+
+  # Run the express and socket server
+  server.run()
+
+).then(->
 
   # Initialize local Weaver
   Weaver.local(routes)

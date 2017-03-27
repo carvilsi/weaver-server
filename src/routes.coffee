@@ -8,6 +8,7 @@ route =
 
 # Application
 route.public.GET   "application.version"     # Application version
+route.public.GET   "application.time"        # Server system time
 route.public.POST  "application.wipe"        # Complete system wipe of all data (users, projects, etc)
 
 # Database operations
@@ -48,6 +49,10 @@ route.private.POST "project.create"          # Create a project
 route.private.POST "project.delete"          # Delete a project
 route.private.POST "project.ready"           # Checks if a project is setup and ready
 
+# Plugins
+route.private.GET  "plugins"                 # Get a list of plugins
+route.private.POST "plugin.read"             # Get a single plugin
+
 # Files management
 route.private.POST "file.upload"                          # Sends a file to be stored at the object storage server
 route.private.GET  "file.download"                        # Retrieves a file from the object storage server by fileName
@@ -57,6 +62,4 @@ route.private.GET  "file.browser.sdk.downloadByID"        # Retrieves a file fro
 route.private.POST "file.delete"                          # Deletes a file from the object storage server by name
 route.private.POST "file.deleteByID"                      # Deletes a file from the object storage server by ID
 
-
-# Return array of handlers
-module.exports = (handler for name, handler of route)
+module.exports = route
