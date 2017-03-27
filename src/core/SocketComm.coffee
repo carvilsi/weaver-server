@@ -21,7 +21,7 @@ class Socket
       )
 
       # Wire GET requests
-      @routes.forEach((routeHandler) =>
+      (handler for name, handler of @routes).forEach((routeHandler) =>
         routeHandler.allRoutes().forEach((route) =>
           socket.on(route, (payload, ack) =>
             # Must always give a ack function from client

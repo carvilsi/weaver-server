@@ -44,6 +44,14 @@ module.exports =
     projectController:
       endpoint: 'http://localhost:9888'
 
+    tracker:
+      enabled: true
+      host: 'localhost'
+      port: 3306
+      user: 'root'
+      password: 'K00B88HQB1UV9MZ7YYUP'
+      database: 'trackerdb'
+
   logging:
     console: 'error'
     file:    'warn'

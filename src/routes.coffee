@@ -8,6 +8,7 @@ route =
 
 # Application
 route.public.GET   "application.version"     # Application version
+route.public.GET   "application.time"        # Server system time
 route.public.POST  "application.wipe"        # Complete system wipe of all data (users, projects, etc)
 
 # Database operations
@@ -16,6 +17,7 @@ route.private.POST "write"                   # Execute Create, Update and Delete
 route.private.POST "wipe"                    # Wipe entire database
 route.private.POST "nodes"                   # Lists all nodes on the database
 route.private.GET  "relations"               # Lists all relations on the database
+route.private.GET  "history"                 # Change history by element
 
 # Querying
 route.private.POST "query"                   # Execute a WeaverQuery
@@ -47,7 +49,11 @@ route.private.POST "project.create"          # Create a project
 route.private.POST "project.delete"          # Delete a project
 route.private.POST "project.ready"           # Checks if a project is setup and ready
 
-# File management
+# Plugins
+route.private.GET  "plugins"                 # Get a list of plugins
+route.private.POST "plugin.read"             # Get a single plugin
+
+# Files management
 route.private.GET  "file.download"           # Retrieves a file from the object storage server by fileName
 route.private.GET  "file.downloadByID"       # Retrieves a file from the object storage server by ID
 route.private.POST "file.delete"             # Deletes a file from the object storage server by name

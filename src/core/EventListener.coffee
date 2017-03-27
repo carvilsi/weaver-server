@@ -3,9 +3,9 @@ Promise = require('bluebird')
 class EventListener
   constructor: (@eventName) ->
     @_require  = []
-    @_provide      = []
+    @_provide  = []
     @_priority = 0
-    @_enabled = true
+    @_enabled  = true
 
   priority: (value) ->
     @_priority = value
