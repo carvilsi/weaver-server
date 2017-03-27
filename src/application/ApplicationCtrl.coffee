@@ -13,6 +13,12 @@ bus.public('application.version').on(->
   pjson.version
 )
 
+# Server time
+bus.public('application.time').on(->
+  servertime = new Date().getTime()
+  servertime
+)
+
 # Complete system wipe of all data
 bus.public('application.wipe').enable(config.get('application.wipe')).on((req) ->
 

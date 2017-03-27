@@ -27,25 +27,30 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   'core'
   'database'
   'project'
+  'plugin'
   'util'
   'fileSystem'
+  'tracker'
 ]
 
 
 # Load libs
 Promise         = require('bluebird')
 conf            = require('config')       # Configuration loads files in the root config directory
-server    = require('WeaverServer')
+server          = require('WeaverServer')
 splash          = require('splash')
 sounds          = require('sounds')
 Weaver          = require('weaver-sdk')
 UserService     = require('UserService')
 AclService      = require('AclService')
+FclService      = require('FclService')
 RoleService     = require('RoleService')
 ProjectService  = require('ProjectService')
+PluginService   = require('PluginService')
 WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
+tracker         = require('Tracker')
 
 
 # Init routes and controllers by running once
@@ -54,23 +59,20 @@ initModules = ->
     'routes'
     'AclCtrl'
     'ApplicationCtrl'
+    'FclCtrl'
     'NodeCtrl'
+    'PluginCtrl'
     'ProjectCtrl'
     'RoleCtrl'
     'UserCtrl'
     'WeaverQueryCtrl'
     'FileSystemCtrl'
+    'TrackerCtrl'
   ]
 
 
-# Init servers
-# server = new WeaverServer()
-# server = WeaverServer
-
-
-# Run servers
+# Initialize
 Promise.all([
-  server.run()
 
   # Load services
   [
@@ -78,9 +80,21 @@ Promise.all([
     AclService
     RoleService
     ProjectService
+    PluginService
   ].forEach((service) -> service.load())
-])
-.then(->
+
+  # Initialize the Tracker database
+  tracker.initDb()
+
+]).then(->
+
+  # Init WeaverServer
+  server = new WeaverServer()
+
+  # Run the express and socket server
+  server.run()
+
+).then(->
 
   # Initialize local Weaver
   Weaver.local(routes)

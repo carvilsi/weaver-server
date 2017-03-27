@@ -31,6 +31,24 @@ expectations about how to format the Weaver Server CoffeeScript code.
 
 - Do not try/catch and then just log the error, but rethrow or reject a promise to let the callee handle it.
 
+- Chaining promises: Prefer 
+```
+somePromise(...).then((r) ->
+  someOtherPromise(r)
+).then((q) ->
+  resultReturning(q)
+)
+```
+over
+```
+somePromise(...).then((r) ->
+  someOtherPromise(r).then((q) ->
+    resultReturning(q)
+  )
+)
+```
+This keeps the promise nesting shallow and code more cleanly separated.
+
 
 See .editorconfig file below that you can use:
 
