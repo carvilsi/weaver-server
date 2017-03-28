@@ -22,13 +22,24 @@ formatter = (options) ->
 
 # Create console transports array using timestamp and formatter functions
 Console    = winston.transports.Console
-transports = [new Console({timestamp, formatter})]
+transports = [new Console({
+  timestamp
+  formatter
+  level: "#{config.get('logging.console')}"
+  })]
+
+# Create file trnasport
+File = new (winston.transports.File)({
+  filename: "#{config.get('logging.logFilePath')}"
+  formatter
+  level: "#{config.get('logging.file')}"
+  })
+
+transports.push(File)
 
 # Create logger
 Logger = winston.Logger
 logger = new Logger({transports})
 
-# Set minimum level
-logger.level = "#{config.get('logging.console')}"
 
 module.exports = logger

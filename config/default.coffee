@@ -55,3 +55,4 @@ module.exports =
   logging:
     console: 'error'
     file:    'warn'
+    logFilePath: './logs/weaver.log'
