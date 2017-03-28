@@ -67,6 +67,9 @@ class Tracker
 
   processWrites: (writes, user, project)->
 
+    if not writes? or writes.length < 1
+      return Promise.resolve()
+
     query = 'INSERT INTO `trackerdb`.`tracker` (`timestamp`, `datetime`, `user`, `action`, `node`, `key`, `to`, `oldTo`, `value`, `payload`) VALUES '
     quote = '\''
 
