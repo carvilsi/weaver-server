@@ -60,4 +60,4 @@ route.private.POST "file.delete"             # Deletes a file from the object st
 route.private.POST "file.deleteByID"         # Deletes a file from the object storage server by ID
 
 # Return array of handlers
-module.exports = (handler for name, handler of route)
+module.exports = route
