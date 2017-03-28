@@ -1,5 +1,6 @@
 require('colors')
 winston = require('winston')      # Logging library
+require('winston-daily-rotate-file');
 moment  = require('moment')       # Easy date formatting library
 config  = require('config')
 
@@ -38,19 +39,25 @@ usageTransports.push(consoleLogger)
 
 # Create file transport
 
-configTransports.push(new (winston.transports.File)({
+configTransports.push(new (winston.transports.DailyRotateFile)({
   filename: "#{config.get('logging.logFilePath.config')}"
   formatter
+  datePattern: '.yyyy-MM-dd.log'
+  prepend: false
   level: "#{config.get('logging.file')}"
   }))
-codeTransports.push(new (winston.transports.File)({
+codeTransports.push(new (winston.transports.DailyRotateFile)({
   filename: "#{config.get('logging.logFilePath.code')}"
   formatter
+  datePattern: '.yyyy-MM-dd.log'
+  prepend: false
   level: "#{config.get('logging.file')}"
   }))
-usageTransports.push(new (winston.transports.File)({
+usageTransports.push(new (winston.transports.DailyRotateFile)({
   filename: "#{config.get('logging.logFilePath.usage')}"
   formatter
+  datePattern: '.yyyy-MM-dd.log'
+  prepend: false
   level: "#{config.get('logging.file')}"
   }))
 
