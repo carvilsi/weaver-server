@@ -21,9 +21,9 @@ getMinioClient = (project) ->
 
 checkBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
-    logger.debug "Going to check project: #{project}"
+    logger.code.debug "Going to check project: #{project}"
     minioClient.bucketExists("#{project}", (err) ->
-      logger.debug "bucket #{project} exists: #{err.code if err?}"
+      logger.code.debug "bucket #{project} exists: #{err.code if err?}"
       if err and err.code is 'NoSuchBucket'
         createBucket("#{project}", minioClient)
       else
@@ -42,12 +42,12 @@ createBucket = (project, minioClient) ->
   )
 
 uploadFile = (file, fileName, project) ->
-  logger.debug "Uploading file: #{file}, #{fileName}, #{project}"
+  logger.code.debug "Uploading file: #{file}, #{fileName}, #{project}"
   getMinioClient(project).then((minioClient) ->
-    logger.debug "Got minioclient #{minioClient}"
+    logger.code.debug "Got minioclient #{minioClient}"
     checkBucket(project, minioClient)
     .then( ->
-      logger.debug "Sending file to server"
+      logger.code.debug "Sending file to server"
       sendFileToServer(file, fileName, project, minioClient)
     )
   )
