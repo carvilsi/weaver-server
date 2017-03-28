@@ -51,6 +51,7 @@ WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
 tracker         = require('Tracker')
+logger          = require('logger')
 
 
 # Init routes and controllers by running once
@@ -102,6 +103,7 @@ Promise.all([
 ).then(->
   initModules()
 
+  logger.config.info('weaver-server restarted')
   splash.printLoaded()
   sounds.loaded()
 )
