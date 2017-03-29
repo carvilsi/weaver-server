@@ -5,8 +5,8 @@ mustacheExpress = require('mustache-express')   # Templating
 bodyParser      = require('body-parser')        # POST requests
 HttpComm        = require('HttpComm')
 SocketComm      = require('SocketComm')
-config = require('config')
-pjson       = require('../../package.json')
+config          = require('config')
+pjson           = require('../../package.json')
 
 module.exports =
 class Server

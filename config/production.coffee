@@ -10,7 +10,8 @@ module.exports =
       muteAll: true
 
   server:
-    port: 80
+    port: 8080
 
   logging:
-    console: 'info'
+    console: 'error'
+    file:    'warn'
