@@ -24,7 +24,7 @@ class Tracker
       if error.code in [ 'ER_BAD_DB_ERROR', 'ER_NO_SUCH_TABLE' ]
         return false
       else
-        Promise.reject('not connected properly '+error.code)
+        Promise.reject("Tracker could not connect to mysql database, #{error.code}. Tried with #{config.get('services.tracker.user')}@#{config.get('services.tracker.host')}:#{config.get('services.tracker.port')} with pass #{config.get('services.tracker.password')}")
     )
 
 
