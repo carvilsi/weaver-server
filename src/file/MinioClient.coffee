@@ -9,7 +9,7 @@ module.exports =
       new minio.Client({
         endPoint: config.endpoint.split(":")[1].replace('\/\/','')
         port: parseInt(config.endpoint.split(":")[2])
-        secure: config.secure
+        secure: false
         accessKey: config.accessKey
         secretKey: config.secretKey
       })

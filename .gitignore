@@ -7,7 +7,6 @@ coverage/
 *.iml
 *.log
 data
-
 loki
 uploads
 

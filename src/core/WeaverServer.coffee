@@ -8,7 +8,7 @@ SocketComm      = require('SocketComm')
 config          = require('config')
 pjson           = require('../../package.json')
 
-module.exports =
+
 class Server
 
   constructor: () ->
@@ -82,9 +82,14 @@ class Server
     @socketComm.wire(@http)
 
 
+  getApp: ->
+    @app
+
   run: ->
     new Promise((resolve, reject) =>
       @http.listen(@options.port, @options.host, (error) ->
         if error then reject(error) else resolve()
       )
     )
+
+module.exports = new Server()

@@ -18,6 +18,13 @@ bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
   new DatabaseService(project.endpoint)
 )
 
+# Move to FileController
+bus.provide('minio').retrieve('project').on((req, project) ->
+  MinioClient.create(project.fileServer)
+)
+
+
+
 bus.private('project').on((req) ->
   ProjectService.all()
 )
@@ -46,5 +53,7 @@ bus.private('project.ready').require('id').on((req, id) ->
 )
 
 bus.internal('getMinioForProject').on((project) ->
-  Promise.resolve(MinioClient.create(config.get('services.fileSystem')))
+  pool = config.get('projectPool')[0]
+  # Promise.resolve(MinioClient.create(config.get('services.fileSystem')))
+  Promise.resolve(MinioClient.create(pool.fileServer))
 )
