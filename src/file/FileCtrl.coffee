@@ -15,17 +15,23 @@ Promise      = require('bluebird')
 logger       = require('logger')
 fs           = require('fs')
 cuid         = require('cuid')
+server       = require('WeaverServer')
+multer       = require('multer')
+MinioClient     = require('MinioClient')
 
 getMinioClient = (project) ->
   bus.get("internal").emit('getMinioForProject', project)
 
+
 checkBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
-    logger.debug "Going to check project: #{project}"
+    logger.code.debug "Going to check project: #{project}"
     minioClient.bucketExists("#{project}", (err) ->
-      logger.debug "bucket #{project} exists: #{err.code if err?}"
+      logger.code.debug "bucket #{project} exists: #{err.code if err?}"
       if err and err.code is 'NoSuchBucket'
-        createBucket("#{project}", minioClient)
+        createBucket("#{project}", minioClient).then(->
+          resolve()
+        )
       else
         resolve()
     )
@@ -33,22 +39,45 @@ checkBucket = (project, minioClient) ->
 
 createBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
-    minioClient.makeBucket("#{project}", "#{config.get('services.fileSystem.region')}", (err) ->
+    minioClient.makeBucket("#{project}", "us-east-1", (err) ->
       if err
+        logger.code.error(err)
         reject()
       else
         resolve()
     )
   )
 
-uploadFile = (file, fileName, project) ->
-  logger.debug "Uploading file: #{file}, #{fileName}, #{project}"
+uploadFileStream = (filePath, fileName, project) ->
+  logger.code.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"
   getMinioClient(project).then((minioClient) ->
-    logger.debug "Got minioclient #{minioClient}"
+    logger.code.debug "Got minioclient #{minioClient}"
     checkBucket(project, minioClient)
     .then( ->
-      logger.debug "Sending file to server"
-      sendFileToServer(file, fileName, project, minioClient)
+      logger.code.debug "Sending file to server"
+      readStream = fs.createReadStream(filePath)
+      sendFileToServerStream(readStream, fileName, project, minioClient, filePath)
+    )
+  )
+
+sendFileToServerStream = (readStream, fileName, project, minioClient, filePath) ->
+  uuid = cuid()
+  new Promise((resolve, reject) =>
+    minioClient.putObject("#{project}","#{uuid}-#{fileName}",readStream, 'application/octet-stream', (err) ->
+      if err
+        reject(err)
+      else
+        try
+          fs.unlink(filePath, (err) ->
+            if err
+              logger.code.error('An error trying to delete the file: '.concat(err))
+            else
+              logger.code.debug('successfully deleted')
+          )
+        catch error
+          logger.code.error('An error trying to delete the file: '.concat(error))
+        finally
+          resolve("#{uuid}-#{fileName}")
     )
   )
 
@@ -120,6 +149,7 @@ downloadFileByID = (id, project, browserSDK) ->
       bufArray = []
       try
         file = false
+        logger.code.debug("The id of the desire file: #{id}")
         stream = minioClient.listObjectsV2("#{project}","#{id}", true)
         stream.on('data', (obj) ->
           file = true
@@ -167,37 +197,44 @@ deleteFileByID = (id, project) ->
     )
   )
 
-bus.private('file.upload').require('target', 'buffer', 'fileName').on((req, target, buffer, fileName) ->
-  uploadFile(buffer, fileName, target)
+upload = multer({
+  dest: 'uploads/'
+})
+
+
+server
+.getApp()
+.post('/upload', upload.single('file'), (req, res, next) ->
+  getMinioClient(req.body.target)
+  logger.code.debug('target: ' + req.body.target)
+  logger.code.debug('file name: ' + req.body.fileName)
+  logger.code.debug('authToken: ' + req.body.authToken)
+  if !req.body.authToken
+    res.status(500).send('No authToken provided')
+  else
+    uploadFileStream(req.file.path,req.body.fileName, req.body.target)
+    .then((resol) ->
+      logger.code.debug(resol)
+      res.send(resol)
+    )
+    .catch((err) ->
+      logger.code.error(err)
+      res.status(500).send('Error somewhere')
+    )
 )
 
-bus.private('file.download').require('target', 'fileName').on((req, target, fileName) ->
-  downloadFile(fileName, target, false)
-)
-
-bus.private('file.browser.sdk.download').require('target', 'fileName').on((req, target, fileName) ->
-  downloadFile(fileName, target, true)
-)
-
-bus.private('file.downloadByID').require('target', 'id').on((req, target, id) ->
+bus.private('file.downloadByID')
+.require('target', 'id', 'authToken')
+.on((req, target, id) ->
   downloadFileByID(id, target, false)
   .catch((err) ->
     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
   )
 )
 
-bus.private('file.browser.sdk.downloadByID').require('target', 'id').on((req, target, id) ->
-  downloadFileByID(id, target, true)
-  .catch((err) ->
-    Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
-  )
-)
-
-bus.private('file.delete').require('target', 'fileName').on((req, target, fileName) ->
-  deleteFile(fileName, target)
-)
-
-bus.private('file.deleteByID').require('target', 'id').on((req, target, id) ->
+bus.private('file.deleteByID')
+.require('target', 'id', 'authToken')
+.on((req, target, id) ->
   deleteFileByID(id, target)
   .catch((err) ->
     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'Project does not exists')

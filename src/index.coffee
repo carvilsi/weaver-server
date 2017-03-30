@@ -26,10 +26,10 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   'cli'
   'core'
   'database'
+  'file'
   'project'
   'plugin'
   'util'
-  'fileSystem'
   'tracker'
 ]
 
@@ -37,7 +37,6 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
 # Load libs
 Promise         = require('bluebird')
 conf            = require('config')       # Configuration loads files in the root config directory
-WeaverServer    = require('WeaverServer')
 splash          = require('splash')
 sounds          = require('sounds')
 Weaver          = require('weaver-sdk')
@@ -51,6 +50,7 @@ WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
 tracker         = require('Tracker')
+logger          = require('logger')
 
 
 # Init routes and controllers by running once
@@ -59,6 +59,7 @@ initModules = ->
     'routes'
     'AclCtrl'
     'ApplicationCtrl'
+    'FileCtrl'
     'FclCtrl'
     'NodeCtrl'
     'PluginCtrl'
@@ -66,7 +67,6 @@ initModules = ->
     'RoleCtrl'
     'UserCtrl'
     'WeaverQueryCtrl'
-    'FileSystemCtrl'
     'TrackerCtrl'
   ]
 
@@ -88,10 +88,8 @@ Promise.all([
 
 ]).then(->
 
-  # Init WeaverServer
-  server = new WeaverServer()
-
   # Run the express and socket server
+  server = require('WeaverServer')
   server.run()
 
 ).then(->
@@ -102,6 +100,7 @@ Promise.all([
 ).then(->
   initModules()
 
+  logger.config.info('weaver-server restarted')
   splash.printLoaded()
   sounds.loaded()
 )

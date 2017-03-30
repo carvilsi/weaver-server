@@ -7,8 +7,6 @@ coverage/
 *.iml
 *.log
 data
-config/local.coffee
-
 loki
 uploads
 
