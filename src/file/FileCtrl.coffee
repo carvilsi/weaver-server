@@ -41,7 +41,7 @@ createBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
     minioClient.makeBucket("#{project}", "us-east-1", (err) ->
       if err
-        logger.error(err)
+        logger.code.error(err)
         reject()
       else
         resolve()
@@ -49,12 +49,12 @@ createBucket = (project, minioClient) ->
   )
 
 uploadFileStream = (filePath, fileName, project) ->
-  logger.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"
+  logger.code.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"
   getMinioClient(project).then((minioClient) ->
     logger.code.debug "Got minioclient #{minioClient}"
     checkBucket(project, minioClient)
     .then( ->
-      logger.debug "Sending file to server"
+      logger.code.debug "Sending file to server"
       readStream = fs.createReadStream(filePath)
       sendFileToServerStream(readStream, fileName, project, minioClient, filePath)
     )
@@ -70,12 +70,12 @@ sendFileToServerStream = (readStream, fileName, project, minioClient, filePath) 
         try
           fs.unlink(filePath, (err) ->
             if err
-              logger.error('An error trying to delete the file: '.concat(err))
+              logger.code.error('An error trying to delete the file: '.concat(err))
             else
-              logger.debug('successfully deleted')
+              logger.code.debug('successfully deleted')
           )
         catch error
-          logger.error('An error trying to delete the file: '.concat(error))
+          logger.code.error('An error trying to delete the file: '.concat(error))
         finally
           resolve("#{uuid}-#{fileName}")
     )
@@ -149,7 +149,7 @@ downloadFileByID = (id, project, browserSDK) ->
       bufArray = []
       try
         file = false
-        logger.debug("The id of the desire file: #{id}")
+        logger.code.debug("The id of the desire file: #{id}")
         stream = minioClient.listObjectsV2("#{project}","#{id}", true)
         stream.on('data', (obj) ->
           file = true
@@ -206,19 +206,19 @@ server
 .getApp()
 .post('/upload', upload.single('file'), (req, res, next) ->
   getMinioClient(req.body.target)
-  logger.debug('target: ' + req.body.target)
-  logger.debug('file name: ' + req.body.fileName)
-  logger.debug('authToken: ' + req.body.authToken)
+  logger.code.debug('target: ' + req.body.target)
+  logger.code.debug('file name: ' + req.body.fileName)
+  logger.code.debug('authToken: ' + req.body.authToken)
   if !req.body.authToken
     res.status(500).send('No authToken provided')
   else
     uploadFileStream(req.file.path,req.body.fileName, req.body.target)
     .then((resol) ->
-      logger.debug(resol)
+      logger.code.debug(resol)
       res.send(resol)
     )
     .catch((err) ->
-      logger.error(err)
+      logger.code.error(err)
       res.status(500).send('Error somewhere')
     )
 )
