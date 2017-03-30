@@ -1,5 +1,6 @@
 require('colors')
 winston = require('winston')      # Logging library
+require('winston-daily-rotate-file');
 moment  = require('moment')       # Easy date formatting library
 config  = require('config')
 
@@ -22,13 +23,52 @@ formatter = (options) ->
 
 # Create console transports array using timestamp and formatter functions
 Console    = winston.transports.Console
-transports = [new Console({timestamp, formatter})]
+
+configTransports = []
+codeTransports = []
+usageTransports = []
+
+consoleLogger = new Console({
+  timestamp
+  formatter
+  level: "#{config.get('logging.console')}"
+  })
+configTransports.push(consoleLogger)
+codeTransports.push(consoleLogger)
+usageTransports.push(consoleLogger)
+
+# Create file transport
+
+configTransports.push(new (winston.transports.DailyRotateFile)({
+  filename: "#{config.get('logging.logFilePath.config')}"
+  formatter
+  datePattern: '.yyyy-MM-dd.log'
+  prepend: false
+  level: "#{config.get('logging.file')}"
+  }))
+codeTransports.push(new (winston.transports.DailyRotateFile)({
+  filename: "#{config.get('logging.logFilePath.code')}"
+  formatter
+  datePattern: '.yyyy-MM-dd.log'
+  prepend: false
+  level: "#{config.get('logging.file')}"
+  }))
+usageTransports.push(new (winston.transports.DailyRotateFile)({
+  filename: "#{config.get('logging.logFilePath.usage')}"
+  formatter
+  datePattern: '.yyyy-MM-dd.log'
+  prepend: false
+  level: "#{config.get('logging.file')}"
+  }))
+
+
 
 # Create logger
 Logger = winston.Logger
-logger = new Logger({transports})
+logger = {}
+logger.config = new Logger({transports:configTransports})
+logger.code = new Logger({transports:codeTransports})
+logger.usage = new Logger({transports:usageTransports})
 
-# Set minimum level
-logger.level = "#{config.get('logging.console')}"
 
 module.exports = logger

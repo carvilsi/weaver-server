@@ -8,7 +8,7 @@ ProjectService = require('ProjectService')
 class FixedProjectPool
 
   constructor:  (@projectPool) ->
-    logger.info("Fixed project pool loaded")
+    logger.code.info("Fixed project pool loaded")
 
 
   create: (id) ->

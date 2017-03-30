@@ -13,7 +13,7 @@ class Socket
 
       # Error handler
       socket.on('error',  (err) ->
-        logger.log('error', err.stack)
+        logger.config.log('error', err.stack)
       )
 
       # Disconnect

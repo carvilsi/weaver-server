@@ -16,7 +16,7 @@ expectations about how to format the Weaver Server CoffeeScript code.
 
 - Files that export a class are UpperCamelCased. All other files are camelCased.
 
-- Class names are UpperCamelCased. 
+- Class names are UpperCamelCased.
 
 - All atributes are camelCased. Don't use underscores.
 
@@ -31,7 +31,7 @@ expectations about how to format the Weaver Server CoffeeScript code.
 
 - Do not try/catch and then just log the error, but rethrow or reject a promise to let the callee handle it.
 
-- Chaining promises: Prefer 
+- Chaining promises: Prefer
 ```
 somePromise(...).then((r) ->
   someOtherPromise(r)
@@ -70,12 +70,20 @@ indent_style = tab
 2. Logging
 ----------
 
-(UNDECIDED) - Use these loggers
+- Use these loggers
 
-  - debug(.info .warn .error) (can be switched of in production, nothing depends on these messages)
-  - configuration(.info .warn .error) (some configuration setting is invalid or some availability requirement is, or is no longer, met)
-  - usage(.info) (some method is being used with the wrong inputs, or in a wrong state)
-  - error(.error) (some code invariant is broken, a programmer did not do his work properly)
+  - config: some configuration setting is invalid or some availability requirement is, or is no longer, met. e.g. `logger.config.error("No connection to database")`
+  - usage: some method is being used with the wrong inputs, or in a wrong state. e.g. `logger.usage.warn("Incorrect payload")`
+  - code: related with developing process, e.g. for debugging purposes `logger.code.debug("print this")`
+
+	For each one you can use the next levels:
+
+		- error
+		- warn
+		- info
+		- verbose
+		- debug
+		- silly
 
 3. Microservices
 ----------------
@@ -87,4 +95,3 @@ indent_style = tab
 - Serve availability at /connection (?)
 
 - Inform monitoring system on unrecoverable crash and trigger external recovery
-

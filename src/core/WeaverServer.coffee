@@ -7,9 +7,8 @@ HttpComm        = require('HttpComm')
 SocketComm      = require('SocketComm')
 config          = require('config')
 pjson           = require('../../package.json')
-logger          = require('logger')
 
-# module.exports =
+
 class Server
 
   constructor: () ->

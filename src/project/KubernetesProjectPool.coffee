@@ -6,7 +6,7 @@ logger  = require('logger')
 class KubernetesProjectPool
 
   constructor: (@endpoint) ->
-    logger.info("K8s project pool loaded")
+    logger.config.info("K8s project pool loaded")
 
   request: (path) ->
     rp({
