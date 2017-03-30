@@ -46,7 +46,7 @@ module.exports =
 
     tracker:
       enabled: true
-      host: 'trackerdb-alpha'
+      host: 'localhost'
       port: 3306
       user: 'root'
       password: 'K00B88HQB1UV9MZ7YYUP'
