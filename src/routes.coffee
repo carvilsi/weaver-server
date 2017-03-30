@@ -54,9 +54,7 @@ route.private.GET  "plugins"                 # Get a list of plugins
 route.private.POST "plugin.read"             # Get a single plugin
 
 # Files management
-route.private.GET  "file.download"           # Retrieves a file from the object storage server by fileName
 route.private.GET  "file.downloadByID"       # Retrieves a file from the object storage server by ID
-route.private.POST "file.delete"             # Deletes a file from the object storage server by name
 route.private.POST "file.deleteByID"         # Deletes a file from the object storage server by ID
 
 # Return array of handlers

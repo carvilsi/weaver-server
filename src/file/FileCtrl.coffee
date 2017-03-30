@@ -29,9 +29,11 @@ checkBucket = (project, minioClient) ->
     minioClient.bucketExists("#{project}", (err) ->
       logger.debug "bucket #{project} exists: #{err.code if err?}"
       if err and err.code is 'NoSuchBucket'
-        createBucket("#{project}", minioClient)
-      # else
-      resolve()
+        createBucket("#{project}", minioClient).then(->
+          resolve()
+        )
+      else
+        resolve()
     )
   )
 
@@ -39,22 +41,12 @@ createBucket = (project, minioClient) ->
   new Promise((resolve, reject) =>
     minioClient.makeBucket("#{project}", "us-east-1", (err) ->
       if err
+        logger.error(err)
         reject()
       else
         resolve()
     )
   )
-
-# uploadFile = (file, fileName, project) ->
-#   logger.debug "Uploading file: #{file}, #{fileName}, #{project}"
-#   getMinioClient(project).then((minioClient) ->
-#     logger.debug "Got minioclient #{minioClient}"
-#     checkBucket(project, minioClient)
-#     .then( ->
-#       logger.debug "Sending file to server"
-#       sendFileToServer(file, fileName, project, minioClient)
-#     )
-#   )
 
 uploadFileStream = (filePath, fileName, project) ->
   logger.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"
@@ -157,6 +149,7 @@ downloadFileByID = (id, project, browserSDK) ->
       bufArray = []
       try
         file = false
+        logger.debug("The id of the desire file: #{id}")
         stream = minioClient.listObjectsV2("#{project}","#{id}", true)
         stream.on('data', (obj) ->
           file = true
@@ -225,14 +218,9 @@ server
       res.send(resol)
     )
     .catch((err) ->
+      logger.error(err)
       res.status(500).send('Error somewhere')
     )
-)
-
-bus.private('file.download')
-.require('target', 'fileName', 'authToken')
-.on((req, target, fileName) ->
-  downloadFile(fileName, target, false)
 )
 
 bus.private('file.downloadByID')
@@ -242,13 +230,6 @@ bus.private('file.downloadByID')
   .catch((err) ->
     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
   )
-)
-
-bus.private('file.delete')
-.require('target', 'fileName','authToken')
-.on((req, target, fileName) ->
-  logger.debug('_______________')
-  deleteFile(fileName, target)
 )
 
 bus.private('file.deleteByID')
