@@ -101,7 +101,7 @@ class Tracker
       if operation.value?
         value = @db.pool.escape(operation.value)
 
-      payload = quote + JSON.stringify(operation) + quote
+      payload = @db.pool.escape(JSON.stringify(operation))
 
       query += "(#{timestamp}, FROM_UNIXTIME(#{datetime}), #{user_id}, #{action}, #{node_id}, #{key}, #{to}, #{oldTo}, #{value}, #{payload}),"
 
