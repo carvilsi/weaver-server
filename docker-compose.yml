@@ -2,7 +2,7 @@ version: '2.1'
 services:
 
   weaver-server:
-    image: sysunite/weaver-server:2.2.0
+    image: sysunite/weaver-server:2.2.1
     expose:
     - "8080"
     ports:
@@ -57,7 +57,7 @@ services:
     - MYSQL_PASSWORD=K00B88HQB1UV9MZ7YYUP
 
   weaver-database-alpha:
-    image: sysunite/weaver-database-virtuoso:0.0.15
+    image: sysunite/weaver-database-virtuoso:0.1.0
     expose:
     - "9474"
     ports:
