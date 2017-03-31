@@ -1,9 +1,11 @@
 config     = require('config')
 mysql      = require('mysql-promise')
+Promise   = require('bluebird')
 
 class Tracker
 
   constructor: ->
+    @tries = 10
     @db = mysql()
     @dbName = config.get('services.tracker.database')
     @db.configure({
@@ -16,15 +18,20 @@ class Tracker
 
 
   checkInitialized: ->
+    console.log('try to connect to trackerdb')
+    delay = 5000
     @db.query('USE `'+@dbName+'`;').then(=>
       @db.query('SELECT * FROM `tracker` LIMIT 1;')
-    ).then(->
+    ).then(=>
       true
-    ).catch((error)->
+    ).catch((error)=>
       if error.code in [ 'ER_BAD_DB_ERROR', 'ER_NO_SUCH_TABLE' ]
         return false
       else
-        Promise.reject("Tracker could not connect to mysql database, #{error.code}. Tried with #{config.get('services.tracker.user')}@#{config.get('services.tracker.host')}:#{config.get('services.tracker.port')} with pass #{config.get('services.tracker.password')}")
+        if @tries-- > 0
+          Promise.delay(delay).then(=>@checkInitialized())
+        else
+          Promise.reject("Tracker could not connect to mysql database, #{error.code}. Tried with #{config.get('services.tracker.user')}@#{config.get('services.tracker.host')}:#{config.get('services.tracker.port')} with pass #{config.get('services.tracker.password')}")
     )
 
 
