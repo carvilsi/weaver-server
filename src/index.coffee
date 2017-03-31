@@ -70,23 +70,23 @@ initModules = ->
     'TrackerCtrl'
   ]
 
+servicesToLoad = [
+  UserService
+  AclService
+  RoleService
+  ProjectService
+  PluginService
+]
 
-# Initialize
-Promise.all([
+# Initialize services
+Promise.map(servicesToLoad, (service) ->
+  service.load()
 
-  # Load services
-  [
-    UserService
-    AclService
-    RoleService
-    ProjectService
-    PluginService
-  ].forEach((service) -> service.load())
-
-  # Initialize the Tracker database
+# Initialize tracker
+).then(->
   tracker.initDb()
 
-]).then(->
+).then(->
 
   # Run the express and socket server
   server = require('WeaverServer')
