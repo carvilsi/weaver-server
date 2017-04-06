@@ -1,5 +1,5 @@
 conf = require('config')
-cuid = require('cuid')
+jwt  = require('jsonwebtoken')
 
 adminUser = conf.get('admin.username')
 adminPass = conf.get('admin.password')
@@ -24,7 +24,11 @@ class AdminUser
     authTokens[authToken] is true
 
   getAuthToken: ->
-    authToken = cuid()
+    authToken = jwt.sign(
+      { test: "token" },
+      conf.get("auth.secret"),
+      { expiresIn: conf.get("auth.expire") }
+    )
     authTokens[authToken] = true
     authToken
 
