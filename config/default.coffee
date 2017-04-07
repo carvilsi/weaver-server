@@ -4,6 +4,10 @@ module.exports =
     password: 'admin'
     generatePassword: false
 
+  auth:
+    secret: 'mysupersecretstring'
+    expire: '7d'
+
   projectPool: [
     {
       database: 'http://localhost:9474'
