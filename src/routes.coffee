@@ -25,7 +25,7 @@ route.private.POST "query.native"            # Execute a native query
 
 # Authentication
 route.public.POST  "user.signUp"             # Sign up a new user
-route.public.POST  "user.signIn"             # Sign in using username and password
+route.public.POST  "user.signInUsername"             # Sign in using username and password
 route.public.POST  "user.signInToken"        # Sign in using a token
 route.private.POST "user.signOut"            # Sign out session identified by authToken
 route.private.POST "user.read"               # Gets user object using authToken

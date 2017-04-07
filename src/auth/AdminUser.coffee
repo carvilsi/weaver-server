@@ -3,6 +3,8 @@ jwt  = require('jsonwebtoken')
 
 adminUser = conf.get('admin.username')
 adminPass = conf.get('admin.password')
+secret = conf.get('auth.secret')
+expiresIn = conf.get('auth.expire')
 
 authTokens = {}
 
@@ -14,8 +16,13 @@ class AdminUser
   hasUsername: (username) ->
     @username is username
 
-  signIn: (username, password) ->
+  signInUsername: (username, password) ->
     username is @username and password is adminPass
+
+  signInToken: (authToken) ->
+    @verifyToken(authToken)
+    authTokens[authToken] = true
+    authToken
 
   signOut: (authToken) ->
     delete authTokens[authToken]
@@ -25,14 +32,20 @@ class AdminUser
 
   getAuthToken: ->
     authToken = jwt.sign(
-      { test: "token" },
-      conf.get("auth.secret"),
-      { expiresIn: conf.get("auth.expire") }
+      { username: adminUser },
+      secret,
+      { expiresIn }
     )
     authTokens[authToken] = true
     authToken
 
   isAdmin: ->
     true
+
+  verifyToken: (authToken) ->
+    try
+      decoded = jwt.verify(authToken, secret)
+    catch error
+      throw {code: -1, message: "Invalid token supplied #{authToken}"}
 
 module.exports = new AdminUser(adminUser)
