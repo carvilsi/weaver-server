@@ -16,11 +16,9 @@ if arg[0] isnt 'default' and arg[0] isnt 'production'
   process.exit(1)
 
 try
-  shelljs.ls('-R','plugins/*/config/').forEach((list) ->
-    shelljs.cat({'-n':1},"plugins/*/config/#{list}")
-    .sed(/module.exports=/g,'')
-    .toEnd("config/#{arg[0]}.coffee")
-  )
+  shelljs.cat({'-n':1},"plugins/*/config/config.coffee")
+  .sed(/module.exports=/g,'')
+  .toEnd("config/#{arg[0]}.coffee")
 catch error
   console.error('something went wrong :S')
   process.exit(1)
