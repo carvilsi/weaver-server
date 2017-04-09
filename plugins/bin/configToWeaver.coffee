@@ -16,7 +16,7 @@ if arg[0] isnt 'default' and arg[0] isnt 'production'
   process.exit(1)
 
 try
-  shelljs.cat({'-n':1},"plugins/*/config/config.coffee")
+  shelljs.cat({'-n':1},"plugins/*/config/#{arg[0]}.coffee")
   .sed(/module.exports=/g,'')
   .toEnd("config/#{arg[0]}.coffee")
 catch error
