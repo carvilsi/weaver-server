@@ -1,0 +1,22 @@
+version: '2.1'
+services:
+
+  weaver-server:
+    image: sysunite/weaver-server:2.2.1
+    expose:
+    - "8080"
+    ports:
+    - "8080:8080"
+    depends_on:
+      trackerdb-alpha:
+        condition: service_started
+      weaver-database-alpha:
+        condition: service_healthy
+      file-system-alpha:
+        condition: service_started
+    links:
+    - trackerdb-alpha
+    - weaver-database-alpha
+    - file-system-alpha
+    environment:
+    - NODE_ENV=production
