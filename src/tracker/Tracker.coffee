@@ -1,6 +1,7 @@
 config     = require('config')
 mysql      = require('mysql-promise')
 Promise   = require('bluebird')
+logger = require('logger')
 
 class Tracker
 
@@ -18,7 +19,7 @@ class Tracker
 
 
   checkInitialized: ->
-    console.log('try to connect to trackerdb')
+    logger.code.debug('try to connect to trackerdb')
     delay = 5000
     @db.query('USE `'+@dbName+'`;').then(=>
       @db.query('SELECT * FROM `tracker` LIMIT 1;')
@@ -122,6 +123,7 @@ class Tracker
 
     quote = '\''
     conditions = []
+    query = 'SELECT `seqnr`, `datetime`, `user`, `action`, `node`, `key`, `to`, `value` FROM `trackerdb`.`tracker`'
 
     if req.payload.users?
       conditions.push('`user` IN (' + quote + req.payload.users.join(quote + ', ' + quote) + quote + ')')
@@ -138,10 +140,17 @@ class Tracker
     if req.payload.beforeDateTime?
       conditions.push('`datetime` < ' + quote + req.payload.beforeDateTime + quote)
 
-    if conditions.length < 1
-      return Promise.resolve([])
+    if conditions.length > 0
+      query = query.concat(' WHERE ' + conditions.join(' AND '))
 
-    query = 'SELECT `seqnr`, `datetime`, `user`, `action`, `node`, `key`, `to`, `value` FROM `trackerdb`.`tracker` WHERE ' + conditions.join(' AND ') + ' ORDER BY `seqnr` ASC;'
+    query = query.concat(' ORDER BY `seqnr` ASC')
+
+    if req.payload.limit?
+      query = query.concat(" limit #{req.payload.limit}")
+
+    query = query.concat(';')
+
+    logger.code.debug("The query: #{query}")
 
     @db.query(query).then((result)->
       result[0]
