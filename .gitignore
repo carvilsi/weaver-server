@@ -15,4 +15,5 @@ plugins/calculator/node_modules
 plugins/nodes-counter/node_modules
 
 trackerdb
-plugins
+plugins/*
+!plugins/bin/

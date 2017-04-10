@@ -45,10 +45,11 @@
     "coffee-script": "^1.12.3",
     "istanbul": "^0.4.3",
     "mocha": "^2.2.5",
+    "request": "^2.81.0",
+    "shelljs": "^0.7.7",
     "should": "^11.2.0",
     "sinon": "^1.15.4",
     "socket.io-client": "~1.4.6",
-    "request": "^2.81.0",
     "supertest": "^3.0.0"
   },
   "engines": {
@@ -58,7 +59,8 @@
   "scripts": {
     "start": "./node_modules/coffee-script/bin/coffee src/index.coffee",
     "prepublish": "./node_modules/coffee-script/bin/coffee -o lib -c src && echo '#!/usr/bin/env node' | cat - ./lib/index.js > ./lib/index-exe.js && mv ./lib/index-exe.js ./lib/index.js",
-    "test": "./node_modules/.bin/mocha && ./node_modules/.bin/istanbul report"
+    "test": "./node_modules/.bin/mocha && ./node_modules/.bin/istanbul report",
+    "copyPluginsConfig":"./node_modules/coffee-script/bin/coffee plugins/bin/configToWeaver.coffee default"
   },
   "config": {
     "blanket": {
