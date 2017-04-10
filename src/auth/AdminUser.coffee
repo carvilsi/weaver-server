@@ -20,9 +20,12 @@ class AdminUser
     username is @username and password is adminPass
 
   signInToken: (authToken) ->
-    @verifyToken(authToken)
-    authTokens[authToken] = true
-    authToken
+    payload = @verifyToken(authToken)
+    if(payload.admin)
+      authTokens[authToken] = true
+      authToken
+    else
+      false
 
   signOut: (authToken) ->
     delete authTokens[authToken]
@@ -32,7 +35,7 @@ class AdminUser
 
   getAuthToken: ->
     authToken = jwt.sign(
-      { username: adminUser },
+      { username: adminUser, admin: true },
       secret,
       { expiresIn }
     )
@@ -44,7 +47,7 @@ class AdminUser
 
   verifyToken: (authToken) ->
     try
-      decoded = jwt.verify(authToken, secret)
+      jwt.verify(authToken, secret)
     catch error
       throw {code: -1, message: "Invalid token supplied #{authToken}"}
 
