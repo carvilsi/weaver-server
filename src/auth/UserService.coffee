@@ -71,7 +71,7 @@ class UserService extends LokiService
   # Verify if the token is valid and not expired. if not -> throw error
   verifyToken: (authToken) ->
     try
-      decoded = jwt.verify(authToken, secret)
+      jwt.verify(authToken, secret)
     catch error
       throw {code: -1, message: "Invalid token supplied #{authToken}"}
 
