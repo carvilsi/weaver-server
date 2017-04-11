@@ -9,6 +9,7 @@ coverage/
 data
 loki
 uploads
+config/local.coffee
 
 # Example plugins
 plugins/calculator/node_modules
