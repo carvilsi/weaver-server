@@ -30,8 +30,6 @@ class KubernetesProjectPool
     @request("delete/#{id}")
 
   isReady: (id) ->
-    @request("status/#{id}").then((status) ->
-      status.ready
-    )
+    @request("status/#{id}")
 
 module.exports = new KubernetesProjectPool(config.get('services.projectController.endpoint'))
