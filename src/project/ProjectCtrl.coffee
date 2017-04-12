@@ -23,15 +23,13 @@ bus.provide('minio').retrieve('project').on((req, project) ->
   MinioClient.create(project.fileServer)
 )
 
-
-
 bus.private('project').on((req) ->
   ProjectService.all()
 )
 
 bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
 
-  ProjectPool.create().then((project) ->
+  ProjectPool.create(id).then((project) ->
 
     # Create an ACL for this user to set on the project
     acl = AclService.createACL(id, user)
@@ -44,6 +42,7 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
 bus.private('project.delete').retrieve('project', 'database').on((req, project, database) ->
   Promise.all([
     database.wipe()
+    ProjectPool.clean(project.id)
     ProjectService.delete(project)
   ])
 )

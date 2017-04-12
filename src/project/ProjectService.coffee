@@ -1,6 +1,7 @@
 LokiService = require('LokiService')
 cuid        = require('cuid')
 _           = require('lodash')
+logger      = require('logger')
 
 class ProjectService extends LokiService
 
@@ -13,6 +14,7 @@ class ProjectService extends LokiService
     if @projects.find({id}).length isnt 0
       throw {code:-1, message: "Project with id #{id} already exists"}
 
+    logger.code.info "ProjectService creating project with id #{id}"
     @projects.insert({id, name, endpoint, acl})
 
   get: (id) ->
@@ -23,6 +25,7 @@ class ProjectService extends LokiService
     project
 
   delete: (project) ->
+    logger.code.info "ProjectService deleting project with id #{project.id if project}"
     @projects.remove(project)
 
   all: ->

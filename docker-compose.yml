@@ -1,34 +1,5 @@
 version: '2.1'
 services:
-
-  weaver-server:
-    image: sysunite/weaver-server:2.2.1
-    expose:
-    - "8080"
-    ports:
-    - "8080:8080"
-    depends_on:
-      trackerdb-alpha:
-        condition: service_started
-      weaver-database-alpha:
-        condition: service_healthy
-      file-system-alpha:
-        condition: service_started
-    links:
-    - trackerdb-alpha
-    - weaver-database-alpha
-    - file-system-alpha
-    environment:
-    - NODE_ENV=production
-#      - SERVER_ADMIN_PORT=9488
-#      - SERVER_ADMIN_PASSWORD=Secret
-#      - SERVICES_PROJECT_ENDPOINT=http://weaver-database-alpha:9474
-#      - SERVICES_SYSTEM_DATABASE_ENDPOINT=http://weaver-database-alpha:9474
-#      - SERVICES_FILESYSTEM_ENDPOINT=http://file-system:9000
-#      - SERVICES_FILESYSTEM_ACCESSKEY=NYLEXGR6MF2IE99LZ4UE
-#      - SERVICES_FILESYSTEM_SECRETKEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
-
-
   database-alpha:
     image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
     expose:
@@ -76,36 +47,7 @@ services:
       interval: 5s
       timeout: 2s
       retries: 10
-
-#  database-beta:
-#    image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
-#    expose:
-#    - "1112"
-#    - "8891"
-#    ports:
-#    - "1112:1111"
-#    - "8891:8890"
-#    environment:
-#    - DBA_PASSWORD=myDbaPassword
-#    - SPARQL_UPDATE=true
-#    - DEFAULT_GRAPH=http://www.example.com/my-graph
-
-#  weaver-database-beta:
-#    image: sysunite/weaver-database-virtuoso:0.0.13
-#    expose:
-#    - "9475"
-#    ports:
-#    - "9475:9475"
-#    depends_on:
-#    - database-beta
-#    links:
-#    - database-beta
-#    environment:
-#    - WEAVER_VIRTUOSO_SERVICE_PORT=9475
-#    - VIRTUOSO_DB_USER=dba
-#    - VIRTUOSO_DB_PASSWORD=myDbaPassword
-#    - VIRTUOSO_DB_PATH=jdbc:virtuoso://database-beta:1111
-#
+  
   file-system-alpha:
     image: minio/minio
     expose:
@@ -117,14 +59,58 @@ services:
     - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
     command: server /data
 
+  database-beta:
+    image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
+    expose:
+    - "1111"
+    - "8890"
+    environment:
+    - DBA_PASSWORD=myDbaPassword
+    - SPARQL_UPDATE=true
+    - DEFAULT_GRAPH=http://www.example.com/my-graph
 
-  # file-system-beta:
-  #   image: minio/minio
-  #   expose:
-  #    - "9001"
-  #   ports:
-  #    - "9001:9000"
-  #   environment:
-  #    - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
-  #    - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
-  #   command: server /data
+  trackerdb-beta:
+    image: mysql:5.7
+    expose:
+    - "3306"
+    ports:
+    - "3307:3306"
+    volumes:
+    - ./trackerdb-beta:/var/lib/mysql
+    environment:
+    - MYSQL_ROOT_PASSWORD=K00B88HQB1UV9MZ7YYUP
+    - MYSQL_DATABASE=trackerdb
+    - MYSQL_USER=trackerdb
+    - MYSQL_PASSWORD=K00B88HQB1UV9MZ7YYUP
+
+  weaver-database-beta:
+    image: sysunite/weaver-database-virtuoso:0.1.0
+    expose:
+    - "9474"
+    ports:
+    - "9475:9474"
+    depends_on:
+    - database-beta
+    links:
+    - database-beta
+    environment:
+    - WEAVER_VIRTUOSO_SERVICE_PORT=9474
+    - VIRTUOSO_DB_USER=dba
+    - VIRTUOSO_DB_PASSWORD=myDbaPassword
+    - VIRTUOSO_DB_PATH=jdbc:virtuoso://database-beta:1111
+    healthcheck:
+      test: ["CMD","/usr/health.sh"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+  
+  file-system-beta:
+    image: minio/minio
+    expose:
+    - "9000"
+    ports:
+    - "9001:9000"
+    environment:
+    - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
+    - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
+    command: server /data

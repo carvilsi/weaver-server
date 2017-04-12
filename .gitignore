@@ -9,11 +9,13 @@ coverage/
 data
 loki
 uploads
+config/local.coffee
 
 # Example plugins
 plugins/calculator/node_modules
 plugins/nodes-counter/node_modules
 
 trackerdb
+trackerdb-beta
 plugins/*
 !plugins/bin/
