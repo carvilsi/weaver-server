@@ -7,15 +7,15 @@ class ProjectService extends LokiService
 
   constructor: ->
     super('projects',
-      projects: ['id', 'name', 'endpoint', 'acl']
+      projects: ['id', 'name', 'database', 'acl', 'fileServer', 'tracker']
     )
 
-  create: (id, name, endpoint, acl) ->
+  create: (id, name, database, acl, fileServer, tracker) ->
     if @projects.find({id}).length isnt 0
       throw {code:-1, message: "Project with id #{id} already exists"}
 
     logger.code.info "ProjectService creating project with id #{id}"
-    @projects.insert({id, name, endpoint, acl})
+    @projects.insert({id, name, database, acl, fileServer, tracker })
 
   get: (id) ->
     project = @projects.find({id})[0]

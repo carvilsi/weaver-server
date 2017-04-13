@@ -15,7 +15,7 @@ bus.provide("project").require('target').on((req, target) ->
 
 bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
   AclService.assertACLReadPermission(user, project.acl)
-  new DatabaseService(project.endpoint)
+  new DatabaseService(project.database)
 )
 
 # Move to FileController
@@ -33,14 +33,16 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
 
     # Create an ACL for this user to set on the project
     acl = AclService.createACL(id, user)
-    ProjectService.create(id, name, project.database, acl.id)
+    ProjectService.create(id, name, project.database, acl.id, project.fileServer, project.tracker)
 
     return
   )
 )
 
-bus.private('project.delete').retrieve('project', 'database').on((req, project, database) ->
+bus.private('project.delete').retrieve('project', 'database', 'minio', 'tracker').on((req, project, database, minio, tracker) ->
   Promise.all([
+    tracker.wipe()
+    minio.wipe()
     database.wipe()
     ProjectPool.clean(project.id)
     ProjectService.delete(project)

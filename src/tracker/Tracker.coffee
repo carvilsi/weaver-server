@@ -5,22 +5,23 @@ logger     = require('logger')
 
 class Tracker
 
-  constructor: ->
+  constructor: (tracker) ->
     @tries = 10
     @delay = 5000
     @db = mysql()
-    @dbName = config.get('services.tracker.database')
+    @dbName = tracker.database
     @db.configure({
-      host     : config.get('services.tracker.host')
-      port     : config.get('services.tracker.port')
-      user     : config.get('services.tracker.user')
-      password : config.get('services.tracker.password')
+      host     : tracker.host
+      port     : tracker.port
+      user     : tracker.user
+      password : tracker.password
       dateStrings: true # force dates as string, no javascript date
     })
 
 
   checkInitialized: ->
-    logger.code.debug("Trying to connect to trackerdb on #{config.get('services.tracker.host')}")
+    console.log db
+    logger.code.debug("Trying to connect to trackerdb on #{'services.tracker.host'}")
     delay = 5000
     @db.query('USE `'+@dbName+'`;').then(=>
       @db.query('SELECT * FROM `tracker` LIMIT 1;')
@@ -33,7 +34,7 @@ class Tracker
         if @tries-- > 0
           Promise.delay(@delay).then(=>@checkInitialized())
         else
-          Promise.reject("Tracker could not connect to mysql database, #{error.code}. Tried with #{config.get('services.tracker.user')}@#{config.get('services.tracker.host')}:#{config.get('services.tracker.port')} with pass #{config.get('services.tracker.password')}")
+          Promise.reject("Tracker could not connect to mysql database, #{error.code}. Tried with #{'services.tracker.user'}@#{'services.tracker.host'}:#{'services.tracker.port'} with pass #{'services.tracker.password'}")
     )
 
 
@@ -157,10 +158,4 @@ class Tracker
       result[0]
     )
 
-
-
-
-
-
-
-module.exports = new Tracker()
+module.exports = Tracker
