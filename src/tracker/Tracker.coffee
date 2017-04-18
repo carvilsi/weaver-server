@@ -20,7 +20,6 @@ class Tracker
 
 
   checkInitialized: ->
-    console.log db
     logger.code.debug("Trying to connect to trackerdb on #{'services.tracker.host'}")
     delay = 5000
     @db.query('USE `'+@dbName+'`;').then(=>

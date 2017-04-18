@@ -5,6 +5,7 @@ UserService     = require('UserService')
 AclService      = require('AclService')
 RoleService     = require('RoleService')
 ProjectService  = require('ProjectService')
+ProjectPool     = require('ProjectPool')
 DatabaseService = require('DatabaseService')
 Promise         = require('bluebird')
 logger          = require('logger')
@@ -46,7 +47,7 @@ bus.public('application.wipe').enable(config.get('application.wipe')).on((req) -
   ).then(->
     Promise.map(projects, (p) ->
       logger.usage.debug "Destroying project: #{p.id}"
-      p.destroy()
+      ProjectPool.clean(p.id)
     )
   )
 )
