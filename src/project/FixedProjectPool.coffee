@@ -32,7 +32,7 @@ class FixedProjectPool
     Promise.resolve()       # Nothing to clean
 
   isReady: ->
-    Promise.resolve(true)   # Always ready
+    Promise.resolve({ ready: true })   # Always ready
 
 
 module.exports = new FixedProjectPool(config.get('projectPool'))
