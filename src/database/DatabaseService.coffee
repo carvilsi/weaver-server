@@ -8,7 +8,7 @@ module.exports =
     _rp : (method) -> (uri, body) ->
       rp({method, uri, body, json: true, resolveWithFullResponse: true}).then((response) ->
         if response.statusCode is 200
-          response.body
+          Promise.resolve(response.body)
         else
           Promise.reject({code: -1, message: "Server error: #{response.body}"})
       )
