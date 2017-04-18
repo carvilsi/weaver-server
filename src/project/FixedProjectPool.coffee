@@ -11,7 +11,7 @@ class FixedProjectPool
     logger.code.info("Fixed project pool loaded")
 
   create: (id) ->
-    logger.code.info "Creating project with id #{id}"
+    logger.code.info "FixedPool creating project with id #{id}"
     # Get the database endpoints of all projects currently in use]
     usedDatabases = (p.endpoint for p in ProjectService.all())
 
