@@ -36,6 +36,10 @@ class Tracker
           Promise.reject("Tracker could not connect to mysql database, #{error.code}. Tried with #{'services.tracker.user'}@#{'services.tracker.host'}:#{'services.tracker.port'} with pass #{'services.tracker.password'}")
     )
 
+  wipe: ->
+    @checkInitialized().then((done) =>
+      @db.query('TRUNCATE TABLE `tracker`;') if done
+    )
 
   initDb: ->
     @checkInitialized().then((done)=>
