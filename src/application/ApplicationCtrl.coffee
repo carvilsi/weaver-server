@@ -27,7 +27,7 @@ bus.public('application.wipe').enable(config.get('application.wipe')).on((req) -
 
   # Wipe all project data first
   projects = ProjectService.all()
-  endpoints = (p.endpoint for p in projects)
+  endpoints = (p.database for p in projects)
   databases = (new DatabaseService(endpoint) for endpoint in endpoints)
 
   Promise.map(databases, (database) ->
