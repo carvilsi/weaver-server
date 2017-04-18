@@ -58,7 +58,3 @@ bus.private('file.deleteByID')
     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'Project does not exists')
   )
 )
-
-bus.provide('minio').retrieve('project').on((req, project) ->
-  MinioClient.create(project.fileServer)
-)

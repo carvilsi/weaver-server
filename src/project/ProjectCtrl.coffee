@@ -53,3 +53,10 @@ bus.private('project.ready').require('id').on((req, id) ->
   ProjectPool.isReady(id)
 )
 
+bus.internal('getMinioForProject').on((project) ->
+  Promise.resolve(MinioClient.create(ProjectService.get(project).fileServer))
+#  pool = config.get('projectPool')[0]
+#  # Promise.resolve(MinioClient.create(config.get('services.fileSystem')))
+#  Promise.resolve(MinioClient.create(pool.fileServer))
+)
+
