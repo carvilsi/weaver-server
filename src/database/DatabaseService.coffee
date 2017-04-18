@@ -31,7 +31,7 @@ module.exports =
       @_GET("#{@uri}/read/#{id}")
 
     write: (payload) ->
-      @_POST("#{@uri}/write?disable-checking", payload)
+      @_POST("#{@uri}/write", payload)
 
     query: (query) ->
       @_POST("#{@uri}/query", query)
