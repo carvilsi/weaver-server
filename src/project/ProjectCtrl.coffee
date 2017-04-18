@@ -42,7 +42,7 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
 bus.private('project.delete').retrieve('project', 'database', 'minio', 'tracker').on((req, project, database, minio, tracker) ->
   Promise.all([
     tracker.wipe()
-    minio.wipe()
+    #minio.wipe()
     database.wipe()
     ProjectPool.clean(project.id)
     ProjectService.delete(project)
