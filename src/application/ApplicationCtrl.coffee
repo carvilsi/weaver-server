@@ -34,9 +34,11 @@ bus.public('application.wipe').enable(config.get('application.wipe')).on((req) -
   ).then(->
 
     # Wipe all users and projects
-    UserService.wipe()
-    AclService.wipe()
-    RoleService.wipe()
-    ProjectService.wipe()
+    Promise.all([
+      UserService.wipe()
+      AclService.wipe()
+      RoleService.wipe()
+      ProjectService.wipe()
+    ])
   )
 )
