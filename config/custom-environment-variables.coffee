@@ -3,6 +3,9 @@ module.exports =
     username: "ADMIN_USERNAME"
 
   application:
+    wipe:
+      __name: "APPLICATION_WIPE"
+      __format: "json"
     scroll:
       # https://github.com/lorenwest/node-config/issues/272#issuecomment-223146123
       __name: "APPLICATION_SCROLL"
