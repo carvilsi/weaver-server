@@ -11,11 +11,3 @@ module.exports =
 
   server:
     port: 8080
-
-  services:
-    projectController:
-      endpoint: 'http://localhost:9888'
-
-  logging:
-    console: 'error'
-    file:    'warn'
