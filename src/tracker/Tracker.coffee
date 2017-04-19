@@ -44,12 +44,14 @@ class Tracker
   initDb: ->
     @checkInitialized().then((done)=>
       return Promise.resolve() if done
+      logger.code.debug "Initialization not done, creating database"
       @db.query('CREATE DATABASE IF NOT EXISTS `'+@dbName+'`;')
       .then(=>
         @db.query('USE `'+@dbName+'`;')
       ).then(=>
         @db.query('DROP TABLE IF EXISTS `tracker`;')
       ).then(=>
+        logger.code.debug "Creating table"
         @db.query('
           CREATE TABLE `tracker` (
           `seqnr` BIGINT NOT NULL AUTO_INCREMENT,
