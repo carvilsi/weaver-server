@@ -36,14 +36,12 @@ bus.public('application.wipe').enable(config.get('application.wipe')).on((req) -
     database.wipe()
   ).then(->
     # Wipe all users and projects
-    logger.usage.debug "Wiping users"
-    UserService.wipe()
-    logger.usage.debug "Wiping acl"
-    AclService.wipe()
-    logger.usage.debug "Wiping roles"
-    RoleService.wipe()
-    logger.usage.debug "Wiping projects"
-    ProjectService.wipe()
+    Promise.all([
+      UserService.wipe()
+      AclService.wipe()
+      RoleService.wipe()
+      ProjectService.wipe()
+    ])
   ).then(->
     Promise.map(projects, (p) ->
       logger.usage.debug "Destroying project: #{p.id}"
