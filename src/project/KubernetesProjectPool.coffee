@@ -16,12 +16,20 @@ class KubernetesProjectPool
 
   create: (id) ->
     @request("create/#{id}").then((status) ->
+      trackerInfo = status.services.trackerdb.match(/http:\/\/([^:]*)\:([0-9]*)/)
       project =
         database: status.services.service
         fileServer:
           endpoint:  status.services.minio
-          accessKey: status.minio.MINIO_ACCESS_KEY
-          secretKey: status.minio.MINIO_SECRET_KEY
+          accessKey: status.env.minio.MINIO_ACCESS_KEY
+          secretKey: status.env.minio.MINIO_SECRET_KEY
+        tracker:
+          enabled:true
+          host: trackerInfo[1]
+          port: trackerInfo[2]
+          user: "root"
+          password: status.env['tracker-db'].MYSQL_ROOT_PASSWORD
+          database: status.env['tracker-db'].MYSQL_DATABASE
 
       project
     )
