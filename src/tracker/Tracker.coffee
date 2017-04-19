@@ -75,90 +75,89 @@ class Tracker
       )
     )
 
-
-
-
   processWrites: (writes, user, project)->
+    @initDb().then(=>
+      if not writes? or writes.length < 1
+        return Promise.resolve()
 
-    if not writes? or writes.length < 1
-      return Promise.resolve()
+      query = 'INSERT INTO `trackerdb`.`tracker` (`timestamp`, `datetime`, `user`, `action`, `node`, `key`, `to`, `oldTo`, `value`, `payload`) VALUES '
+      quote = '\''
 
-    query = 'INSERT INTO `trackerdb`.`tracker` (`timestamp`, `datetime`, `user`, `action`, `node`, `key`, `to`, `oldTo`, `value`, `payload`) VALUES '
-    quote = '\''
+      for operation in writes
 
-    for operation in writes
+        timestamp = operation.timestamp
+        datetime = Math.round(operation.timestamp / 1000)
+        user_id = quote + user.id + quote
+        action = quote + operation.action + quote
 
-      timestamp = operation.timestamp
-      datetime = Math.round(operation.timestamp / 1000)
-      user_id = quote + user.id + quote
-      action = quote + operation.action + quote
+        node_id = 'NULL'
+        key = 'NULL'
+        to = 'NULL'
+        oldTo = 'NULL'
+        value = 'NULL'
 
-      node_id = 'NULL'
-      key = 'NULL'
-      to = 'NULL'
-      oldTo = 'NULL'
-      value = 'NULL'
+        if operation.id?
+          node_id = quote + operation.id + quote
+        else if operation.from?
+          node_id = quote + operation.from + quote
+        if operation.key?
+          key = quote + operation.key + quote
+        if operation.to?
+          to = quote + operation.to + quote
+        if operation.newTo?
+          to = quote + operation.newTo + quote
+        if operation.oldTo?
+          oldTo = quote + operation.oldTo + quote
+        if operation.value?
+          value = @db.pool.escape(operation.value)
 
-      if operation.id?
-        node_id = quote + operation.id + quote
-      else if operation.from?
-        node_id = quote + operation.from + quote
-      if operation.key?
-        key = quote + operation.key + quote
-      if operation.to?
-        to = quote + operation.to + quote
-      if operation.newTo?
-        to = quote + operation.newTo + quote
-      if operation.oldTo?
-        oldTo = quote + operation.oldTo + quote
-      if operation.value?
-        value = @db.pool.escape(operation.value)
+        payload = @db.pool.escape(JSON.stringify(operation))
 
-      payload = @db.pool.escape(JSON.stringify(operation))
+        query += "(#{timestamp}, FROM_UNIXTIME(#{datetime}), #{user_id}, #{action}, #{node_id}, #{key}, #{to}, #{oldTo}, #{value}, #{payload}),"
 
-      query += "(#{timestamp}, FROM_UNIXTIME(#{datetime}), #{user_id}, #{action}, #{node_id}, #{key}, #{to}, #{oldTo}, #{value}, #{payload}),"
+      query = query.slice(0, -1)+';'
 
-    query = query.slice(0, -1)+';'
-
-    @db.query(query)
+      @db.query(query)
+    )
 
 
 
   getHistoryFor: (req)->
+    @initDb().then( =>
+      quote = '\''
+      conditions = []
+      query = 'SELECT `seqnr`, `datetime`, `user`, `action`, `node`, `key`, `to`, `value` FROM `trackerdb`.`tracker`'
 
-    quote = '\''
-    conditions = []
-    query = 'SELECT `seqnr`, `datetime`, `user`, `action`, `node`, `key`, `to`, `value` FROM `trackerdb`.`tracker`'
+      if req.payload.users?
+        conditions.push('`user` IN (' + quote + req.payload.users.join(quote + ', ' + quote) + quote + ')')
 
-    if req.payload.users?
-      conditions.push('`user` IN (' + quote + req.payload.users.join(quote + ', ' + quote) + quote + ')')
+      if req.payload.ids?
+        conditions.push('`node` IN (' + quote + req.payload.ids.join(quote + ', ' + quote) + quote + ')')
 
-    if req.payload.ids?
-      conditions.push('`node` IN (' + quote + req.payload.ids.join(quote + ', ' + quote) + quote + ')')
+      if req.payload.keys?
+        conditions.push('`key` IN (' + quote + req.payload.keys.join(quote + ', ' + quote) + quote + ')')
 
-    if req.payload.keys?
-      conditions.push('`key` IN (' + quote + req.payload.keys.join(quote + ', ' + quote) + quote + ')')
+      if req.payload.fromDateTime?
+        conditions.push('`datetime` >= ' + quote + req.payload.fromDateTime + quote)
 
-    if req.payload.fromDateTime?
-      conditions.push('`datetime` >= ' + quote + req.payload.fromDateTime + quote)
+      if req.payload.beforeDateTime?
+        conditions.push('`datetime` < ' + quote + req.payload.beforeDateTime + quote)
 
-    if req.payload.beforeDateTime?
-      conditions.push('`datetime` < ' + quote + req.payload.beforeDateTime + quote)
+      if conditions.length > 0
+        query = query.concat(' WHERE ' + conditions.join(' AND '))
 
-    if conditions.length > 0
-      query = query.concat(' WHERE ' + conditions.join(' AND '))
+      query = query.concat(' ORDER BY `seqnr` ASC')
 
-    query = query.concat(' ORDER BY `seqnr` ASC')
+      if req.payload.limit?
+        query = query.concat(" limit #{req.payload.limit}")
 
-    if req.payload.limit?
-      query = query.concat(" limit #{req.payload.limit}")
+      query = query.concat(';')
 
-    query = query.concat(';')
+      logger.code.debug("The query: #{query}")
 
-    logger.code.debug("The query: #{query}")
-
-    @db.query(query).then((result)->
-      result[0]
+      @db.query(query).then((result)->
+        result[0]
+      )
     )
 
 module.exports = Tracker
