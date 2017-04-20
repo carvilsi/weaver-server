@@ -56,6 +56,14 @@ module.exports =
       password: 'K00B88HQB1UV9MZ7YYUP'
       database: 'trackerdb'
 
+    snmp:
+      enabled: true
+      ipMonitor: 'localhost'
+      trapPort: 1116
+      agentPort: 1117
+      heartbeatsInterval: 5000
+      agentAddress: 'localhost'
+
   logging:
     console: 'error'
     file:    'warn'
