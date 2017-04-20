@@ -61,6 +61,6 @@ if config.get('services.snmp.enabled')
   agent.bind
     family: 'udp4'
     port: parseInt(config.get('services.snmp.agentPort'))
-    addr: 'localhost'
+    addr: config.get('services.snmp.agentAddress').toString()
 
   setInterval(sendTrap,config.get('services.snmp.heartbeatsInterval'))
