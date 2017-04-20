@@ -62,6 +62,7 @@ module.exports =
       trapPort: 1116
       agentPort: 1117
       heartbeatsInterval: 5000
+      agentAddress: 'localhost'
 
   logging:
     console: 'error'

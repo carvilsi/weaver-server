@@ -27,6 +27,7 @@ module.exports =
       agentPort: "SNMP_AGENT_PORT"
       trapPort: "SNMP_TRAP_PORT"
       heartbeatsInterval: "SNMP_HEARTBEATS_INTERVAL"
+      agentAddress: "SNMP_AGENT_ADDRESS"
 
   logging:
     console: "LOGGING_CONSOLE"

@@ -22,16 +22,12 @@ sendTrap = ->
       op: 7 # SNMPv2-Trap-PDU
       request_id
       varbinds: varBind
-      agent_addr: 'localhost'
+      agent_addr: config.get('services.snmp.agentAddress').toString()
       time_stamp: new Date().valueOf()
     })
   })
 
-  if request_id is 5000
-    request_id = 0
-  else
-    request_id++
-
+  request_id = (request_id + 1) % 5000
 
   trap.encode()
 
