@@ -62,6 +62,14 @@ module.exports =
     projectController:
       endpoint: 'http://localhost:9888'
 
+    snmp:
+      enabled: true
+      ipMonitor: 'localhost'
+      trapPort: 1116
+      agentPort: 1117
+      heartbeatsInterval: 5000
+      agentAddress: 'localhost'
+
   logging:
     console: 'error'
     file:    'warn'

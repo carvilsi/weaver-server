@@ -31,6 +31,7 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   'plugin'
   'util'
   'tracker'
+  'snmp'
 ]
 
 
@@ -68,6 +69,7 @@ initModules = ->
     'UserCtrl'
     'WeaverQueryCtrl'
     'TrackerCtrl'
+    'snmp'
   ]
 
 servicesToLoad = [
