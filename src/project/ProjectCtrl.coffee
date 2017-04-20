@@ -42,7 +42,6 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
 bus.private('project.delete').retrieve('project', 'database', 'minio', 'tracker').on((req, project, database, minio, tracker) ->
   Promise.all([
     tracker.wipe()
-    #minio.wipe()
     database.wipe()
     ProjectPool.clean(project.id)
     ProjectService.delete(project)
@@ -55,8 +54,5 @@ bus.private('project.ready').require('id').on((req, id) ->
 
 bus.internal('getMinioForProject').on((project) ->
   Promise.resolve(MinioClient.create(ProjectService.get(project).fileServer))
-#  pool = config.get('projectPool')[0]
-#  # Promise.resolve(MinioClient.create(config.get('services.fileSystem')))
-#  Promise.resolve(MinioClient.create(pool.fileServer))
 )
 
