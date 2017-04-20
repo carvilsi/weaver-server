@@ -21,6 +21,12 @@ module.exports =
   services:
     projectController:
       endpoint:  "SERVICES_PROJECT_ENDPOINT"
+    snmp:
+      enabled: "SNMP_ENABLED"
+      ipMonitor: 'SNMP_IP_MONITOR'
+      agentPort: "SNMP_AGENT_PORT"
+      trapPort: "SNMP_TRAP_PORT"
+      heartbeatsInterval: "SNMP_HEARTBEATS_INTERVAL"
 
   logging:
     console: "LOGGING_CONSOLE"
