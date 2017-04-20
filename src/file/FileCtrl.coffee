@@ -13,7 +13,6 @@ WeaverError  = Weaver.Error
 Promise      = require('bluebird')
 logger       = require('logger')
 server       = require('WeaverServer')
-MinioClient  = require('MinioClient')
 multer       = require('multer')
 FileService = require('FileService')
 
