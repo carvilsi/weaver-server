@@ -19,7 +19,6 @@ class KubernetesProjectPool
       trackerInfo = status.services.trackerdb.match(/http:\/\/([^:]*)\:([0-9]*)/)
       logger.code.info "Created new project #{id}"
       logger.code.info status
-      logger.code.info trackerInfo
       project =
         database: status.services.service
         fileServer:
