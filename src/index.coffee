@@ -50,7 +50,7 @@ PluginService   = require('PluginService')
 WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
-tracker         = require('Tracker')
+Tracker         = require('Tracker')
 logger          = require('logger')
 
 
@@ -83,11 +83,6 @@ servicesToLoad = [
 # Initialize services
 Promise.map(servicesToLoad, (service) ->
   service.load()
-
-# Initialize tracker
-).then(->
-  tracker.initDb()
-
 ).then(->
 
   # Run the express and socket server

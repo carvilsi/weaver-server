@@ -19,7 +19,6 @@ module.exports =
 
     checkBucket = (project, minioClient) ->
       new Promise((resolve, reject) =>
-        logger.code.debug "Going to check project: #{project}"
         minioClient.bucketExists("#{project}", (err) ->
           logger.code.debug "bucket #{project} exists: #{err.code if err?}"
           if err and err.code is 'NoSuchBucket'

@@ -5,6 +5,7 @@ UserService     = require('UserService')
 AclService      = require('AclService')
 RoleService     = require('RoleService')
 ProjectService  = require('ProjectService')
+ProjectPool     = require('ProjectPool')
 DatabaseService = require('DatabaseService')
 Promise         = require('bluebird')
 logger          = require('logger')
@@ -26,13 +27,14 @@ bus.public('application.wipe').enable(config.get('application.wipe')).on((req) -
   logger.usage.info "Wiping all the data on the server"
 
   # Wipe all project data first
-  endpoints = (p.endpoint for p in ProjectService.all())
+  projects = ProjectService.all()
+  endpoints = (p.database for p in projects)
   databases = (new DatabaseService(endpoint) for endpoint in endpoints)
 
   Promise.map(databases, (database) ->
+    logger.usage.info "Wiping database: #{database.uri}"
     database.wipe()
   ).then(->
-
     # Wipe all users and projects
     Promise.all([
       UserService.wipe()
@@ -40,5 +42,10 @@ bus.public('application.wipe').enable(config.get('application.wipe')).on((req) -
       RoleService.wipe()
       ProjectService.wipe()
     ])
+  ).then(->
+    Promise.map(projects, (p) ->
+      logger.usage.debug "Destroying project: #{p.id}"
+      ProjectPool.clean(p.id)
+    )
   )
 )

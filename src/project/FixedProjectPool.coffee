@@ -11,9 +11,9 @@ class FixedProjectPool
     logger.code.info("Fixed project pool loaded")
 
   create: (id) ->
-    logger.code.info "Creating project with id #{id}"
+    logger.code.info "FixedPool creating project with id #{id}"
     # Get the database endpoints of all projects currently in use]
-    usedDatabases = (p.endpoint for p in ProjectService.all())
+    usedDatabases = (p.database for p in ProjectService.all())
 
     # See which projects in the pool are still available by matching for unused database endpoints
     availableProjects = @projectPool.filter((p) ->
@@ -32,7 +32,7 @@ class FixedProjectPool
     Promise.resolve()       # Nothing to clean
 
   isReady: ->
-    Promise.resolve(true)   # Always ready
+    Promise.resolve({ ready: true })   # Always ready
 
 
 module.exports = new FixedProjectPool(config.get('projectPool'))
