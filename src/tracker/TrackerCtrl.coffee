@@ -1,11 +1,13 @@
-config     = require('config')
-bus        = require('WeaverBus')
-Tracker    = require('Tracker')
-Promise    = require('bluebird')
-logger     = require('logger')
+config        = require('config')
+bus           = require('WeaverBus')
+Tracker       = require('Tracker')
+Promise       = require('bluebird')
+logger        = require('logger')
+operationSort = require('operationSort')
 
 bus.private('write').retrieve('tracker', 'user', 'project').on((req, tracker, user, project) ->
   if tracker?
+    req.payload.operations.sort(operationSort)
     tracker.processWrites(req.payload.operations, user, project)
   return
 )

@@ -1,19 +1,12 @@
-bus        = require('WeaverBus')
-AclService = require('AclService')
-logger = require('logger')
-
-nodeSort = (a, b) ->
-  res = a.timestamp - b.timestamp
-  if res is 0
-    res += 1 if b.action is 'create-node'
-    res += -1 if a.action is 'create-node'
-  res
+bus           = require('WeaverBus')
+AclService    = require('AclService')
+logger        = require('logger')
+operationSort = require('operationSort')
 
 bus.private('write').retrieve('user', 'project', 'database').on((req, user, project, database) ->
   logger.code.debug("The user stuff: #{JSON.stringify(user)}")
   AclService.assertACLWritePermission(user, project.acl)
-  req.payload.operations.sort(nodeSort)
-  console.log(req.payload.operations)
+  req.payload.operations.sort(operationSort)
   database.write(req.payload.operations)
 )
 
