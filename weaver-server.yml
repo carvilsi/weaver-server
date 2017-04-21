@@ -2,11 +2,11 @@ version: '2.1'
 services:
 
   weaver-server:
-    image: sysunite/weaver-server:2.2.1
+    image: sysunite/weaver-server:2.2.2
     expose:
-    - "8080"
+    - "9487"
     ports:
-    - "8080:8080"
+    - "9487:9487"
     depends_on:
       trackerdb-alpha:
         condition: service_started
@@ -27,5 +27,3 @@ services:
     - trackerdb-beta
     - weaver-database-beta
     - file-system-beta
-    environment:
-    - NODE_ENV=production
