@@ -19,8 +19,6 @@ services:
     - "3306"
     ports:
     - "3306:3306"
-    volumes:
-    - ./trackerdb:/var/lib/mysql
     environment:
     - MYSQL_ROOT_PASSWORD=K00B88HQB1UV9MZ7YYUP
     - MYSQL_DATABASE=trackerdb
@@ -75,8 +73,6 @@ services:
     - "3306"
     ports:
     - "3307:3306"
-    volumes:
-    - ./trackerdb-beta:/var/lib/mysql
     environment:
     - MYSQL_ROOT_PASSWORD=K00B88HQB1UV9MZ7YYUP
     - MYSQL_DATABASE=trackerdb
