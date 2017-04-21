@@ -3,8 +3,9 @@ Promise = require('bluebird')
 class EventListener
   constructor: (@eventName) ->
     @_require  = []
+    @_provide  = []
     @_priority = 0
-    @_enabled = true
+    @_enabled  = true
 
   priority: (value) ->
     @_priority = value
@@ -20,35 +21,49 @@ class EventListener
   on: (func) ->
     @_func = func
 
+  # Retrieve objects returned by the provide bus
+  retrieve: (args...) ->
+    @_provide.push(a) for a in args
+    @
+
   require: (args...) ->
-    @_require.push(r) for r in args
+    @_require.push(a) for a in args
     @
 
   call: (args...) ->
-    return if not @_enabled
+    if not @_enabled
+      return Promise.reject({code: -1, message: "Route #{@eventName} is not enabled"})
 
-    # Check if all fields are set in the request
-    # The first argument must be a request object with payload
-    req = args[0]
-    for require in @_require
-      if not req.payload[require]?
-        return Promise.reject({code: -1, message: "Missing field " + require})
-      else
-        args.push(req.payload[require])
+    # Load all state objects
+    bus = require('WeaverBus')
+    Promise.mapSeries(@_provide, (eventName) ->
+      req = args[0]
+      bus.get('provide').emit(eventName, req)
+    ).then((retrievedObjects) =>
 
-    # All required fields are found
-    new Promise((resolve, reject) =>
+      # Add objects
+      args.push(o) for o in retrievedObjects
+
+      # Check if all fields are set in the request
+      # The first argument must be a request object with payload
+      req = args[0]
+      for require in @_require
+        if not req.payload[require]?
+          return Promise.reject({code: -1, message: "Missing field " + require})
+        else
+          args.push(req.payload[require])
+
+      # All fields found, do the actual call now
       try
-        resolve(@_func(args...))
+        return @_func(args...)
       catch error
         isErrorObject = Object.prototype.toString.call(error) is '[object Error]'
 
         # TODO: Make all errors error objects, or log the error here
         if isErrorObject
-          reject({code: -1, message: error.message})
+          Promise.reject({code: -1, message: error.message})
         else
-          reject(error)
+          Promise.reject(error)
     )
-
 
 module.exports = EventListener

@@ -129,3 +129,19 @@ there are two options
 ] 
 
 ```
+
+# Docker composes
+
+## weaver-server development dependencies
+In order to run all dependencies for the default configuration values of
+a weaver-server running outside of a container:
+```
+docker-compose up
+```
+
+## Usable weaver-server
+Use the following command to run a weaver server within docker, which also
+incudes the dependecies ran an in the previous section.
+```
+docker-compose -f docker-compose.yml -f weaver-server.yml up
+```

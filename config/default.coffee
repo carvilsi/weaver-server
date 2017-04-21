@@ -1,9 +1,46 @@
 module.exports =
   admin:
-    enabled: true
-    password: 'yUU2PNzcs!69GZ4B4'
+    username: 'admin'
+    password: 'admin'
+    generatePassword: false
+
+  auth:
+    secret: 'mysupersecretstring'
+    expire: '7d'
+
+  projectPool: [
+    {
+      database: 'http://localhost:9474'
+      fileServer:
+        endpoint: 'http://localhost:9000'
+        accessKey: 'NYLEXGR6MF2IE99LZ4UE'
+        secretKey: 'CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD'
+      tracker:
+        enabled: true
+        host: 'localhost'
+        port: 3306
+        user: 'root'
+        password: 'K00B88HQB1UV9MZ7YYUP'
+        database: 'trackerdb'
+    },
+    {
+      database: 'http://localhost:9475'
+      fileServer:
+        endpoint: 'http://localhost:9001'
+        accessKey: 'NYLEXGR6MF2IE99LZ4UE'
+        secretKey: 'CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD'
+      tracker:
+        enabled: true
+        host: 'localhost'
+        port: 3307
+        user: 'root'
+        password: 'K00B88HQB1UV9MZ7YYUP'
+        database: 'trackerdb'
+    }
+  ]
 
   application:
+    wipe: true
     scroll: true
     singleDatabase: true
     sounds:
@@ -22,21 +59,21 @@ module.exports =
       enable: true
 
   services:
-    systemDatabase:
-      endpoint: 'http://localhost:9474'
-    projectDatabase:
-      endpoint: 'http://localhost:9474'
     projectController:
       endpoint: 'http://localhost:9888'
-    flock:
-      endpoint: 'http://localhost:4567/api/v1'
-    fileSystem:
-      endpoint: 'http://localhost:9000'
-      region: 'us-east-1' # this must match with the minio config
-      accessKey: 'NYLEXGR6MF2IE99LZ4UE'
-      secretKey: 'CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD'
-      secure: false
+
+    snmp:
+      enabled: true
+      ipMonitor: 'localhost'
+      trapPort: 1116
+      agentPort: 1117
+      heartbeatsInterval: 5000
+      agentAddress: 'localhost'
 
   logging:
     console: 'error'
     file:    'warn'
+    logFilePath:
+      config: './logs/weaver.config'
+      code: './logs/weaver.code'
+      usage: './logs/weaver.usage'

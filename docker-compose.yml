@@ -1,70 +1,112 @@
-version: '2'
+version: '2.1'
 services:
-  system-virtuoso:
+  database-alpha:
     image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
     expose:
-     - "1111"
-     - "8890"
+    - "1111"
+    - "8890"
     ports:
-     - "1111:1111"
-     - "8890:8890"
+    - "1111:1111"
+    - "8890:8890"
     environment:
-     - DBA_PASSWORD=myDbaPassword
-     - SPARQL_UPDATE=true
-     - DEFAULT_GRAPH=http://www.example.com/my-graph
+    - DBA_PASSWORD=myDbaPassword
+    - SPARQL_UPDATE=true
+    - DEFAULT_GRAPH=http://www.example.com/my-graph
 
-  system-weaver-database-virtuoso:
-    image: sysunite/weaver-database-virtuoso:0.0.8
+  trackerdb-alpha:
+    image: mysql:5.7
     expose:
-     - "9474"
+    - "3306"
     ports:
-     - "9474:9474"
+    - "3306:3306"
+    environment:
+    - MYSQL_ROOT_PASSWORD=K00B88HQB1UV9MZ7YYUP
+    - MYSQL_DATABASE=trackerdb
+    - MYSQL_USER=trackerdb
+    - MYSQL_PASSWORD=K00B88HQB1UV9MZ7YYUP
+
+  weaver-database-alpha:
+    image: sysunite/weaver-database-virtuoso:0.1.0
+    expose:
+    - "9474"
+    ports:
+    - "9474:9474"
     depends_on:
-     - system-virtuoso
+    - database-alpha
     links:
-     - system-virtuoso
+    - database-alpha
     environment:
-      - WEAVER_VIRTUOSO_SERVICE_PORT=9474
-      - VIRTUOSO_DB_USER=dba
-      - VIRTUOSO_DB_PASSWORD=myDbaPassword
-      - VIRTUOSO_DB_PATH=jdbc:virtuoso://system-virtuoso:1111
-
-  project-virtuoso:
-    image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
-    expose:
-     - "1112"
-     - "8891"
-    ports:
-     - "1112:1111"
-     - "8891:8890"
-    environment:
-     - DBA_PASSWORD=myDbaPassword
-     - SPARQL_UPDATE=true
-     - DEFAULT_GRAPH=http://www.example.com/my-graph
-
-  project-weaver-database-virtuoso:
-    image: sysunite/weaver-database-virtuoso:0.0.8
-    expose:
-     - "9475"
-    ports:
-     - "9475:9475"
-    depends_on:
-     - project-virtuoso
-    links:
-     - project-virtuoso
-    environment:
-      - WEAVER_VIRTUOSO_SERVICE_PORT=9475
-      - VIRTUOSO_DB_USER=dba
-      - VIRTUOSO_DB_PASSWORD=myDbaPassword
-      - VIRTUOSO_DB_PATH=jdbc:virtuoso://project-virtuoso:1111
-
-  file-system:
+    - WEAVER_VIRTUOSO_SERVICE_PORT=9474
+    - VIRTUOSO_DB_USER=dba
+    - VIRTUOSO_DB_PASSWORD=myDbaPassword
+    - VIRTUOSO_DB_PATH=jdbc:virtuoso://database-alpha:1111
+    healthcheck:
+      test: ["CMD","/usr/health.sh"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+  
+  file-system-alpha:
     image: minio/minio
     expose:
-      - "9000"
+    - "9000"
     ports:
-      - "9000:9000"
+    - "9000:9000"
     environment:
-      - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
-      - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
+    - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
+    - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
+    command: server /data
+
+  database-beta:
+    image: tenforce/virtuoso:1.1.0-virtuoso7.2.4
+    expose:
+    - "1111"
+    - "8890"
+    environment:
+    - DBA_PASSWORD=myDbaPassword
+    - SPARQL_UPDATE=true
+    - DEFAULT_GRAPH=http://www.example.com/my-graph
+
+  trackerdb-beta:
+    image: mysql:5.7
+    expose:
+    - "3306"
+    ports:
+    - "3307:3306"
+    environment:
+    - MYSQL_ROOT_PASSWORD=K00B88HQB1UV9MZ7YYUP
+    - MYSQL_DATABASE=trackerdb
+    - MYSQL_USER=trackerdb
+    - MYSQL_PASSWORD=K00B88HQB1UV9MZ7YYUP
+
+  weaver-database-beta:
+    image: sysunite/weaver-database-virtuoso:0.1.0
+    expose:
+    - "9474"
+    ports:
+    - "9475:9474"
+    depends_on:
+    - database-beta
+    links:
+    - database-beta
+    environment:
+    - WEAVER_VIRTUOSO_SERVICE_PORT=9474
+    - VIRTUOSO_DB_USER=dba
+    - VIRTUOSO_DB_PASSWORD=myDbaPassword
+    - VIRTUOSO_DB_PATH=jdbc:virtuoso://database-beta:1111
+    healthcheck:
+      test: ["CMD","/usr/health.sh"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+  
+  file-system-beta:
+    image: minio/minio
+    expose:
+    - "9000"
+    ports:
+    - "9001:9000"
+    environment:
+    - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
+    - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
     command: server /data

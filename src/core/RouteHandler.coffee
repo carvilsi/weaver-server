@@ -14,9 +14,6 @@ class RouteHandler
     @getRoutes.concat(@postRoutes)
 
   handleRequest: (route, req, res) ->
-    # State object that listeners can enrich with for instance the active user or project
-    req.state = {}
-
     # Init payload on empty
     req.payload = {} if not req.payload?
 

@@ -1,0 +1,11 @@
+{
+  "name": "nodes-counter",
+  "version": "1.0.0",
+  "description": "Plugin demonstrating accessing current project to count the number of nodes",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublish": "coffee -o lib -c src"
+  },
+  "author": "Mohamad Alamili",
+  "license": "MIT"
+}

@@ -21,58 +21,81 @@ console.log(`'\033[36mLoading...'`)  # Loading in cyan
 # Note: This must be the first running code in the application before any require() works
 require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   '.'
-  'admin'
   'application'
   'auth'
-  'schemas'
   'cli'
   'core'
   'database'
+  'file'
   'project'
+  'plugin'
   'util'
-  'fileSystem'
+  'tracker'
+  'snmp'
 ]
 
 
 # Load libs
-Promise       = require('bluebird')
-conf          = require('config')       # Configuration loads files in the root config directory
-WeaverServer  = require('WeaverServer')
-splash        = require('splash')
-sounds        = require('sounds')
-Weaver        = require('weaver-sdk')
-WeaverBus     = require('WeaverBus')
-routes        = require('routes')
-pjson         = require('../package.json')
+Promise         = require('bluebird')
+conf            = require('config')       # Configuration loads files in the root config directory
+splash          = require('splash')
+sounds          = require('sounds')
+Weaver          = require('weaver-sdk')
+UserService     = require('UserService')
+AclService      = require('AclService')
+FclService      = require('FclService')
+RoleService     = require('RoleService')
+ProjectService  = require('ProjectService')
+PluginService   = require('PluginService')
+WeaverBus       = require('WeaverBus')
+routes          = require('routes')
+pjson           = require('../package.json')
+Tracker         = require('Tracker')
+logger          = require('logger')
+
 
 # Init routes and controllers by running once
 initModules = ->
   require(run) for run in [
     'routes'
+    'AclCtrl'
     'ApplicationCtrl'
-    'AuthCtrl'
+    'FileCtrl'
+    'FclCtrl'
     'NodeCtrl'
-    'ProjectAuthCtrl'
-    'ProjectCtrlFactory'
+    'PluginCtrl'
+    'ProjectCtrl'
+    'RoleCtrl'
+    'UserCtrl'
     'WeaverQueryCtrl'
-    'FileSystemCtrl'
+    'TrackerCtrl'
+    'snmp'
   ]
 
+servicesToLoad = [
+  UserService
+  AclService
+  RoleService
+  ProjectService
+  PluginService
+]
 
-# Init servers
-server = new WeaverServer()
+# Initialize services
+Promise.map(servicesToLoad, (service) ->
+  service.load()
+).then(->
 
-
-# Run servers
-Promise.all([
+  # Run the express and socket server
+  server = require('WeaverServer')
   server.run()
-])
-.then(->
+
+).then(->
   # Initialize local Weaver
-  Weaver.local(routes)
+  new Weaver().local(routes)
 ).then(->
   initModules()
 
+  logger.config.info('weaver-server restarted')
   splash.printLoaded()
   sounds.loaded()
 )

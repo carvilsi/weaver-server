@@ -4,9 +4,6 @@ logo   = require('./logo')
 packServer = require('../../package.json')
 packSDK    = require('../../node_modules/weaver-sdk/package.json')
 cursor = require('cursor')
-delay  = require('delay')
-
-getProjectsCtrlType = require('ProjectCtrlFactory')
 
 splash = []
 
@@ -28,20 +25,16 @@ _ "CORS allow: #{BOOL conf.get('server.cors')}"
 _ "Socket.io:  #{BOOL conf.get('comm.socket.enable')}"
 _ ""
 _ "# Services"
-_ "System Database:       #{conf.get('services.systemDatabase.endpoint')}"
-_ "Project Database:      #{conf.get('services.projectDatabase.endpoint')}"
 _ "Project Controller:    #{conf.get('services.projectController.endpoint')}"
-_ "FileSystem Controller: #{conf.get('services.fileSystem.endpoint')}"
-_ "FileSystem Region:     #{conf.get('services.fileSystem.region')}"
 _ ""
 _ "# Logging"
 _ "Console:   #{conf.get('logging.console').toUpperCase()}"
 _ "File:      #{conf.get('logging.file').toUpperCase()}"
 _ ""
 _ "# Settings"
-_ "Projects:         #{getProjectsCtrlType()}"
-_ "Single database:  #{BOOL conf.get('application.singleDatabase')}"
-_ "Admin password:   #{conf.get('admin.password')}"
+_ "Admin credentials: #{conf.get('admin.username')}:#{conf.get('admin.password')}"
+_ "Single database:   #{BOOL conf.get('application.singleDatabase')}"
+_ "System wipe:       #{BOOL conf.get('application.wipe')}"
 _ ""
 _ require('./funnies')()
 
@@ -85,6 +78,6 @@ module.exports =
       console.log(getText(spaceUp).cyan)
       spaceUp--
 
-      delay(30, print) if spaceUp > 0
+      setTimeout(print, 30) if spaceUp > 0
 
     print()

@@ -13,7 +13,7 @@ class Socket
 
       # Error handler
       socket.on('error',  (err) ->
-        logger.log('error', err.stack)
+        logger.config.log('error', err.stack)
       )
 
       # Disconnect
@@ -21,7 +21,7 @@ class Socket
       )
 
       # Wire GET requests
-      @routes.forEach((routeHandler) =>
+      (handler for name, handler of @routes).forEach((routeHandler) =>
         routeHandler.allRoutes().forEach((route) =>
           socket.on(route, (payload, ack) =>
             # Must always give a ack function from client
