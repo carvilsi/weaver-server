@@ -90,10 +90,8 @@ Promise.map(servicesToLoad, (service) ->
   server.run()
 
 ).then(->
-
   # Initialize local Weaver
-  Weaver.local(routes)
-
+  new Weaver().local(routes)
 ).then(->
   initModules()
 
