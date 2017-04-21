@@ -82,7 +82,7 @@ class Tracker
       if not writes? or writes.length < 1
         return Promise.resolve()
 
-      query = 'INSERT INTO `tracker` (`timestamp`, `datetime`, `user`, `action`, `node`, `key`, `to`, `oldTo`, `value`, `payload`) VALUES '
+      query = 'INSERT INTO `trackerdb`.`tracker` (`timestamp`, `datetime`, `user`, `action`, `node`, `key`, `to`, `oldTo`, `value`, `payload`) VALUES '
       quote = '\''
 
       for operation in writes
@@ -128,7 +128,7 @@ class Tracker
     @initDb().then( =>
       quote = '\''
       conditions = []
-      query = 'SELECT `seqnr`, `datetime`, `user`, `action`, `node`, `key`, `to`, `value` FROM `tracker`'
+      query = 'SELECT `seqnr`, `datetime`, `user`, `action`, `node`, `key`, `to`, `value` FROM `trackerdb`.`tracker`'
 
       if req.payload.users?
         conditions.push('`user` IN (' + quote + req.payload.users.join(quote + ', ' + quote) + quote + ')')
