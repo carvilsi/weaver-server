@@ -47,7 +47,7 @@ services:
       retries: 10
 
   file-system:
-    image: minio/minio
+    image: minio/minio:RELEASE.2017-04-25T01-27-49Z
     expose:
     - "9000"
     ports:
