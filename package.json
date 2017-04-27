@@ -60,8 +60,7 @@
     "start": "coffee src/index.coffee",
     "prepublish": "coffee -o lib -c src && echo '#!/usr/bin/env node' | cat - ./lib/index.js > ./lib/index-exe.js && mv ./lib/index-exe.js ./lib/index.js",
     "test": "mocha && istanbul report",
-    "copyPluginsConfig":"coffee plugins/bin/configToWeaver.coffee default",
-    "installSNMP": "wget https://github.com/VoltServer/node-snmpjs/archive/develop.zip && unzip develop.zip && mv node-snmpjs-develop ./node_modules/snmpjs && rm develop.zip && cd ./node_modules/snmpjs && npm install"
+    "copyPluginsConfig":"coffee plugins/bin/configToWeaver.coffee default"
   },
   "config": {
     "blanket": {
