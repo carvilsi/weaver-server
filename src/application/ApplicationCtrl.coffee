@@ -35,9 +35,6 @@ bus.provide("weaver").retrieve('project').on((req, project) ->
   weaver.signInWithUsername(adminUser, adminPass).then( =>
     weaverProject = new Weaver.Project(project.name, project.id)
     weaver.useProject(weaverProject)
-
-    new Weaver.Query().hasRelationOut("type", Weaver.Node.get("SpaceType")).find().then((r) -> console.log(r))
-
     weaver
   ).catch((error)->
     logger.code.error(error)
