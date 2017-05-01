@@ -15,6 +15,7 @@ class Tracker
       port     : tracker.port
       user     : tracker.user
       password : tracker.password
+      database : 'trackerdb'
       dateStrings: true # force dates as string, no javascript date
     })
 
@@ -22,13 +23,15 @@ class Tracker
   checkInitialized: ->
     logger.code.debug("Trying to connect to trackerdb on #{'services.tracker.host'}")
     delay = 5000
-    @db.query('USE `'+@dbName+'`;').then(=>
-      @db.query('SELECT * FROM `tracker` LIMIT 1;')
-    ).then(=>
+    @db.query('SELECT * FROM `tracker` LIMIT 1;')
+    .then(=>
       true
     ).catch((error)=>
-      if error.code in [ 'ER_BAD_DB_ERROR', 'ER_NO_SUCH_TABLE' ]
+      if error.code is 'ER_NO_SUCH_TABLE'
         false
+      else if error.code is 'ER_BAD_DB_ERROR'
+        logger.WARN "Database trackerdb was not valid: #{error}"
+        Promise.reject("Tracker could not connect to trackerdb database")
       else
         if @tries-- > 0
           Promise.delay(@delay).then(=>@checkInitialized())
@@ -44,13 +47,9 @@ class Tracker
   initDb: ->
     @checkInitialized().then((done)=>
       return Promise.resolve() if done
-      logger.code.debug "Initialization not done, creating database"
-      @db.query('CREATE DATABASE IF NOT EXISTS `'+@dbName+'`;')
+      logger.code.debug "Dropping and creating table"
+      @db.query('DROP TABLE IF EXISTS `tracker`;')
       .then(=>
-        @db.query('USE `'+@dbName+'`;')
-      ).then(=>
-        @db.query('DROP TABLE IF EXISTS `tracker`;')
-      ).then(=>
         logger.code.debug "Creating table"
         @db.query('
           CREATE TABLE `tracker` (
