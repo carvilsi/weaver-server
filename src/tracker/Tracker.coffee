@@ -29,9 +29,6 @@ class Tracker
     ).catch((error)=>
       if error.code is 'ER_NO_SUCH_TABLE'
         false
-      else if error.code is 'ER_BAD_DB_ERROR'
-        logger.WARN "Database trackerdb was not valid: #{error}"
-        Promise.reject("Tracker could not connect to trackerdb database")
       else
         if @tries-- > 0
           Promise.delay(@delay).then(=>@checkInitialized())
