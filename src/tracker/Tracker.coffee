@@ -9,7 +9,7 @@ class Tracker
     @tries = 10
     @delay = 5000
     @db = mysql()
-    @dbName = tracker.database
+    @initConfirmed = false
     @db.configure({
       host     : tracker.host
       port     : tracker.port
@@ -21,6 +21,7 @@ class Tracker
 
 
   checkInitialized: ->
+    Promise.resolve(true) if @initConfirmed
     logger.code.debug("Trying to connect to trackerdb on #{'services.tracker.host'}")
     delay = 5000
     @db.query('SELECT * FROM `tracker` LIMIT 1;')
@@ -70,6 +71,8 @@ class Tracker
           INDEX `to_index` (`to` ASC)
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8;'
         )
+      ).then(=>
+        @initConfirmed = true
       )
     )
 
