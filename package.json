@@ -1,6 +1,6 @@
 {
   "name": "weaver-server",
-  "version": "2.2.3",
+  "version": "2.2.4-beta1",
   "description": "Module providing a Weaver-compatible API server",
   "author": {
     "name": "Mohamad Alamili",
