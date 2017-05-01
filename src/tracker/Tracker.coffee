@@ -9,25 +9,26 @@ class Tracker
     @tries = 10
     @delay = 5000
     @db = mysql()
-    @dbName = tracker.database
+    @initConfirmed = false
     @db.configure({
       host     : tracker.host
       port     : tracker.port
       user     : tracker.user
       password : tracker.password
+      database : 'trackerdb'
       dateStrings: true # force dates as string, no javascript date
     })
 
 
   checkInitialized: ->
+    return Promise.resolve(true) if @initConfirmed
     logger.code.debug("Trying to connect to trackerdb on #{'services.tracker.host'}")
     delay = 5000
-    @db.query('USE `'+@dbName+'`;').then(=>
-      @db.query('SELECT * FROM `tracker` LIMIT 1;')
-    ).then(=>
-      true
+    @db.query('SELECT * FROM `tracker` LIMIT 1;')
+    .then(=>
+      @initConfirmed = true
     ).catch((error)=>
-      if error.code in [ 'ER_BAD_DB_ERROR', 'ER_NO_SUCH_TABLE' ]
+      if error.code is 'ER_NO_SUCH_TABLE'
         false
       else
         if @tries-- > 0
@@ -44,13 +45,9 @@ class Tracker
   initDb: ->
     @checkInitialized().then((done)=>
       return Promise.resolve() if done
-      logger.code.debug "Initialization not done, creating database"
-      @db.query('CREATE DATABASE IF NOT EXISTS `'+@dbName+'`;')
+      logger.code.debug "Dropping and creating table"
+      @db.query('DROP TABLE IF EXISTS `tracker`;')
       .then(=>
-        @db.query('USE `'+@dbName+'`;')
-      ).then(=>
-        @db.query('DROP TABLE IF EXISTS `tracker`;')
-      ).then(=>
         logger.code.debug "Creating table"
         @db.query('
           CREATE TABLE `tracker` (
@@ -74,6 +71,8 @@ class Tracker
           INDEX `to_index` (`to` ASC)
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8;'
         )
+      ).then(=>
+        @initConfirmed = true
       )
     )
 
