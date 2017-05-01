@@ -21,12 +21,12 @@ class Tracker
 
 
   checkInitialized: ->
-    Promise.resolve(true) if @initConfirmed
+    return Promise.resolve(true) if @initConfirmed
     logger.code.debug("Trying to connect to trackerdb on #{'services.tracker.host'}")
     delay = 5000
     @db.query('SELECT * FROM `tracker` LIMIT 1;')
     .then(=>
-      true
+      @initConfirmed = true
     ).catch((error)=>
       if error.code is 'ER_NO_SUCH_TABLE'
         false
