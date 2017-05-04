@@ -21,3 +21,7 @@ describe 'The version checker', ->
     expect(checker.checkSDKVersion('2.0.0')).to.be.true
     expect(checker.checkSDKVersion('1.1.0')).to.be.true
 
+  it 'should use the embedded SDK version to compare against', ->
+    checker = new SDKVersionChecker()
+    expect(checker.serverVersion).to.be.defined
+
