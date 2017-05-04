@@ -20,7 +20,7 @@ class Socket
       socket.on('disconnect', ->
       )
 
-      # Wire GET requests
+      # Wire GET and POST requests
       (handler for name, handler of @routes).forEach((routeHandler) =>
         routeHandler.allRoutes().forEach((route) =>
           socket.on(route, (payload, ack) =>

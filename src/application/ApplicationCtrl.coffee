@@ -9,6 +9,8 @@ ProjectPool     = require('ProjectPool')
 DatabaseService = require('DatabaseService')
 Promise         = require('bluebird')
 logger          = require('logger')
+conf            = require('config')
+
 
 # Version
 bus.public('application.version').on(->
@@ -20,6 +22,25 @@ bus.public('application.time').on(->
   servertime = new Date().getTime()
   servertime
 )
+
+# Provide Weaver SKD
+bus.provide("weaver").retrieve('project').on((req, project) ->
+
+  Weaver = require('weaver-sdk')
+  weaver = Weaver.getWeaver()
+
+  adminUser = conf.get('admin.username')
+  adminPass = conf.get('admin.password')
+
+  weaver.signInWithUsername(adminUser, adminPass).then( =>
+    weaverProject = new Weaver.Project(project.name, project.id)
+    weaver.useProject(weaverProject)
+    weaver
+  ).catch((error)->
+    logger.code.error(error)
+  )
+)
+
 
 # Complete system wipe of all data
 bus.public('application.wipe').enable(config.get('application.wipe')).on((req) ->
