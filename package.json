@@ -1,6 +1,6 @@
 {
   "name": "weaver-server",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Module providing a Weaver-compatible API server",
   "author": {
     "name": "Mohamad Alamili",
@@ -33,7 +33,7 @@
     "request-promise": "^4.1.1",
     "socket.io": "1.4.5",
     "tmp": "0.0.28",
-    "weaver-sdk": "2.2.2",
+    "weaver-sdk": "2.2.4",
     "winston": "^2.2.0",
     "winston-daily-rotate-file": "^1.4.6"
   },
