@@ -12,5 +12,5 @@ class SDKVersionChecker
 
     logger.code.info "Version checker instantiated with version #{@serverVersion} to check against"
 
-  checkSDKVersion: (sdkVersion) ->
+  isValidSDKVersion: (sdkVersion) ->
     semver.gt(sdkVersion, @serverVersion)

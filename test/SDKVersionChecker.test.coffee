@@ -13,13 +13,13 @@ describe 'The version checker', ->
 
   it 'should reject lower SDK versions', ->
     checker = new SDKVersionChecker('1.0.0')
-    expect(checker.checkSDKVersion('0.9.0')).to.be.false
+    expect(checker.isValidSDKVersion('0.9.0')).to.be.false
 
   it 'should accept higher SDK versions', ->
     checker = new SDKVersionChecker('1.0.0')
-    expect(checker.checkSDKVersion('1.0.1')).to.be.true
-    expect(checker.checkSDKVersion('2.0.0')).to.be.true
-    expect(checker.checkSDKVersion('1.1.0')).to.be.true
+    expect(checker.isValidSDKVersion('1.0.1')).to.be.true
+    expect(checker.isValidSDKVersion('2.0.0')).to.be.true
+    expect(checker.isValidSDKVersion('1.1.0')).to.be.true
 
   it 'should use the embedded SDK version to compare against', ->
     checker = new SDKVersionChecker()

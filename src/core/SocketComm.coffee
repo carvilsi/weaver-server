@@ -13,7 +13,7 @@ class Socket
 
     io = socketIO(http)
     io.use((socket, next) =>
-      if not @versionChecker.checkSDKVersion(socket.handshake.query.sdkVersion)
+      if not @versionChecker.isValidSDKVersion(socket.handshake.query.sdkVersion)
         next(new Error("Invalid SDK Version, should be #{@versionChecker.serverVersion} minimum"))
       else
         next()
