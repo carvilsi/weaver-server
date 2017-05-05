@@ -14,6 +14,7 @@ route.public.POST  "application.wipe"        # Complete system wipe of all data 
 # Database operations
 route.private.GET  "read"                    # Reads a single entity
 route.private.POST "write"                   # Execute Create, Update and Delete operations in bulk
+route.private.POST "write.quick"             # Execute Create, Update and Delete operations in bulk without checks
 route.private.POST "wipe"                    # Wipe entire database
 route.private.POST "nodes"                   # Lists all nodes on the database
 route.private.GET  "relations"               # Lists all relations on the database
