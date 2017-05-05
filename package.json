@@ -62,7 +62,7 @@
     "prepublish": "coffee -o lib -c src && echo '#!/usr/bin/env node' | cat - ./lib/index.js > ./lib/index-exe.js && mv ./lib/index-exe.js ./lib/index.js",
     "test": "mocha 'test/*.test.coffee' && istanbul report",
     "copyPluginsConfig": "coffee plugins/bin/configToWeaver.coffee default",
-    "installSNMP": "wget https://github.com/VoltServer/node-snmpjs/archive/develop.zip && unzip develop.zip && mv node-snmpjs-develop ./node_modules/snmpjs && rm develop.zip && cd ./node_modules/snmpjs && npm install"
+    "installSNMP": "curl -L https://github.com/VoltServer/node-snmpjs/archive/develop.zip -o develop.zip && unzip develop.zip && mv node-snmpjs-develop ./node_modules/snmpjs && rm develop.zip && cd ./node_modules/snmpjs && npm install"
   },
   "config": {
     "blanket": {
