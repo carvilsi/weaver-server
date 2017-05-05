@@ -24,4 +24,9 @@ describe 'The version checker', ->
   it 'should use the embedded SDK version to compare against', ->
     checker = new SDKVersionChecker()
     expect(checker.serverVersion).to.be.defined
+  
+  it 'should return false when checking undefined', ->
+    checker = new SDKVersionChecker()
+    expect(checker.isValidSDKVersion(undefined)).to.be.false
+
 

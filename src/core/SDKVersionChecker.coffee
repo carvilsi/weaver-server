@@ -10,4 +10,7 @@ class SDKVersionChecker
       @serverVersion = packSDK.version
 
   isValidSDKVersion: (sdkVersion) ->
-    semver.gt(sdkVersion, @serverVersion)
+    try
+      semver.gt(sdkVersion, @serverVersion)
+    catch
+      false
