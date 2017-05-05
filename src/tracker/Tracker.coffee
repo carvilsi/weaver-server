@@ -58,6 +58,7 @@ class Tracker
           `action` varchar(128) NOT NULL,
           `node` varchar(128) NOT NULL,
           `key` varchar(128) NULL,
+          `from` varchar(128) NULL,
           `to` varchar(128) NULL,
           `oldTo` varchar(128) NULL,
           `value` text NULL,
@@ -81,45 +82,73 @@ class Tracker
       if not writes? or writes.length < 1
         return Promise.resolve()
 
-      query = 'INSERT INTO `tracker` (`timestamp`, `datetime`, `user`, `action`, `node`, `key`, `to`, `oldTo`, `value`, `payload`) VALUES '
-      quote = '\''
+      query = 'INSERT INTO `tracker` (`timestamp`, `datetime`, `user`, `action`, `node`, `key`, `from`, `to`, `oldTo`, `value`, `payload`) VALUES '
 
       for operation in writes
-
-        timestamp = operation.timestamp
-        datetime = Math.round(operation.timestamp / 1000)
-        user_id = quote + user.id + quote
-        action = quote + operation.action + quote
-
-        node_id = 'NULL'
-        key = 'NULL'
-        to = 'NULL'
-        oldTo = 'NULL'
-        value = 'NULL'
-
-        if operation.id?
-          node_id = quote + operation.id + quote
-        else if operation.from?
-          node_id = quote + operation.from + quote
-        if operation.key?
-          key = quote + operation.key + quote
-        if operation.to?
-          to = quote + operation.to + quote
-        if operation.newTo?
-          to = quote + operation.newTo + quote
-        if operation.oldTo?
-          oldTo = quote + operation.oldTo + quote
-        if operation.value?
-          value = @db.pool.escape(operation.value)
-
-        payload = @db.pool.escape(JSON.stringify(operation))
-
-        query += "(#{timestamp}, FROM_UNIXTIME(#{datetime}), #{user_id}, #{action}, #{node_id}, #{key}, #{to}, #{oldTo}, #{value}, #{payload}),"
+        insert = @trackerize(operation, user)
+        query += "(#{insert.timestamp}, FROM_UNIXTIME(#{insert.datetime}), #{insert.user_id}, #{insert.action}, #{insert.node_id}, #{insert.key}, #{insert.from}, #{insert.to}, #{insert.old_to}, #{insert.value}, #{insert.payload}),"
 
       query = query.slice(0, -1)+';'
 
       @db.query(query)
     )
+
+  trackerize: (operation, user)->
+
+    quote = '\''
+    insert = {}
+
+    insert.timestamp = operation.timestamp
+    insert.datetime = Math.round(operation.timestamp / 1000)
+    insert.user_id = quote + user.id + quote
+    insert.action = quote + operation.action + quote
+    insert.payload = @db.pool.escape(JSON.stringify(operation))
+
+    insert.node_id = 'NULL'
+    insert.key = 'NULL'
+    insert.from = 'NULL'
+    insert.to = 'NULL'
+    insert.old_to = 'NULL'
+    insert.value = 'NULL'
+
+    if operation.action is 'create-node'
+      insert.node_id = quote + operation.id + quote
+
+    if operation.action is 'remove-node'
+      insert.node_id = quote + operation.id + quote
+
+    if operation.action is 'create-attribute'
+      insert.node_id = quote + operation.id + quote
+      insert.key     = quote + operation.key + quote
+      insert.value   = @db.pool.escape(operation.value)
+
+    if operation.action is 'update-attribute'
+      insert.node_id = quote + operation.id + quote
+      insert.key     = quote + operation.key + quote
+      insert.value = @db.pool.escape(operation.value)
+
+    if operation.action is 'remove-attribute'
+      insert.node_id = quote + operation.id + quote
+      insert.key     = quote + operation.key + quote
+
+    if operation.action is 'create-relation'
+      insert.node_id = quote + operation.id + quote
+      insert.from    = quote + operation.from + quote
+      insert.key     = quote + operation.key + quote
+      insert.to      = quote + operation.to + quote
+
+    if operation.action is 'update-relation'
+      insert.from    = quote + operation.from + quote
+      insert.key     = quote + operation.key + quote
+      insert.old_to  = quote + operation.oldTo + quote
+      insert.to      = quote + operation.newTo + quote
+
+    if operation.action is 'remove-relation'
+      insert.from    = quote + operation.from + quote
+      insert.key     = quote + operation.key + quote
+      insert.to      = quote + operation.to + quote
+
+    insert
 
 
 
