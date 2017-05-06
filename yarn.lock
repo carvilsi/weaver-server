@@ -2156,9 +2156,9 @@ verror@1.3.6:
   dependencies:
     extsprintf "1.0.2"
 
-weaver-sdk@2.2.4:
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/weaver-sdk/-/weaver-sdk-2.2.4.tgz#f256f5b39181852061b11c41e248381c14dff1aa"
+weaver-sdk@:
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/weaver-sdk/-/weaver-sdk-2.2.5.tgz#30cbce66bd302808502285f810dca0ce5006d0de"
   dependencies:
     bluebird "~3.4.1"
     chirql "^1.0.16"
