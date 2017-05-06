@@ -15,6 +15,10 @@ describe 'The version checker', ->
     checker = new SDKVersionChecker('1.0.0')
     expect(checker.isValidSDKVersion('0.9.0')).to.be.false
 
+  it 'should accept equal SDK versions', ->
+    checker = new SDKVersionChecker('1.0.0')
+    expect(checker.isValidSDKVersion('1.0.0')).to.be.true
+
   it 'should accept higher SDK versions', ->
     checker = new SDKVersionChecker('1.0.0')
     expect(checker.isValidSDKVersion('1.0.1')).to.be.true
