@@ -5,6 +5,8 @@ Promise       = require('bluebird')
 logger        = require('logger')
 operationSort = require('operationSort')
 
+trackers = {}
+
 bus.private('write').retrieve('tracker', 'user', 'project').on((req, tracker, user, project) ->
   if tracker?
     req.payload.operations.sort(operationSort)
@@ -16,5 +18,7 @@ bus.private('history').retrieve('tracker').on((req, tracker) ->
   tracker.getHistoryFor(req)
 
 bus.provide('tracker').retrieve('project').on((req, project) ->
-  Promise.resolve(new Tracker(project.tracker))
+  if not trackers[project.id]?
+    trackers[project.id] = new Tracker(project.tracker)
+  trackers[project.id]
 ))

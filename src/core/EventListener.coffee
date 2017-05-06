@@ -6,6 +6,7 @@ class EventListener
     @_provide  = []
     @_priority = 0
     @_enabled  = true
+    @_final = false
 
   priority: (value) ->
     @_priority = value
@@ -29,6 +30,13 @@ class EventListener
   require: (args...) ->
     @_require.push(a) for a in args
     @
+
+  final: (final) ->
+    @_final = final
+    @
+
+  isFinal: ->
+    @_final
 
   call: (args...) ->
     if not @_enabled

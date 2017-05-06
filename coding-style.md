@@ -5,6 +5,8 @@ The intent of this guide is to reduce cognitive friction when scanning code
 from different authors. It does so by enumerating a shared set of rules and
 expectations about how to format the Weaver Server CoffeeScript code.
 
+Remember, when you write software, you write for your audience. Your audience is the maintenance developer, which may be you after 3 years after you have forgotten the details of how it all works.
+
 1. Overview
 -----------
 
