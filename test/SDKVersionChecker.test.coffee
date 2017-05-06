@@ -33,4 +33,8 @@ describe 'The version checker', ->
     checker = new SDKVersionChecker()
     expect(checker.isValidSDKVersion(undefined)).to.be.false
 
+  it 'should work for rc versions', ->
+    checker = new SDKVersionChecker('2.2.5-rc.1')
+    expect(checker.isValidSDKVersion('2.2.5-rc.1')).to.be.true
+
 
