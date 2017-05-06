@@ -33,6 +33,9 @@ module.exports =
     write: (payload) ->
       @_POST("#{@uri}/write", payload)
 
+    writeQuick: (payload) ->
+      @_POST("#{@uri}/write?disable-checking", payload)
+
     query: (query) ->
       @_POST("#{@uri}/query", query)
 

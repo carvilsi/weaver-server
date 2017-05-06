@@ -18,8 +18,14 @@ class EventBus
     # Sort based on priority
     sorted = notify.sort((a,b) -> a.after(b))
 
+    tillFinal = []
+    for l in sorted
+      tillFinal.push(l)
+      if l.isFinal()
+        break
+
     # Promise.mapSeries runs promises sequentially (as opposed to Promise.map)
-    Promise.mapSeries(sorted, (listener) ->
+    Promise.mapSeries(tillFinal, (listener) ->
       listener.call(args...)
     ).then((result) ->
 

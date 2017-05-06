@@ -1,6 +1,6 @@
 {
   "name": "weaver-server",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "Module providing a Weaver-compatible API server",
   "author": {
     "name": "Mohamad Alamili",
@@ -31,9 +31,11 @@
     "play-sound": "^1.1.1",
     "request": "^2.74.0",
     "request-promise": "^4.1.1",
+    "semver": "^5.3.0",
+    "snmpjs": "git://github.com/VoltServer/node-snmpjs.git#65cadf5",
     "socket.io": "1.4.5",
     "tmp": "0.0.28",
-    "weaver-sdk": "2.2.4",
+    "weaver-sdk": "2.2.5",
     "winston": "^2.2.0",
     "winston-daily-rotate-file": "^1.4.6"
   },
@@ -59,9 +61,8 @@
   "scripts": {
     "start": "coffee src/index.coffee",
     "prepublish": "coffee -o lib -c src && echo '#!/usr/bin/env node' | cat - ./lib/index.js > ./lib/index-exe.js && mv ./lib/index-exe.js ./lib/index.js",
-    "test": "mocha && istanbul report",
-    "copyPluginsConfig":"coffee plugins/bin/configToWeaver.coffee default",
-    "installSNMP": "wget https://github.com/VoltServer/node-snmpjs/archive/develop.zip && unzip develop.zip && mv node-snmpjs-develop ./node_modules/snmpjs && rm develop.zip && cd ./node_modules/snmpjs && npm install"
+    "test": "mocha 'test/*.test.coffee' && istanbul report",
+    "copyPluginsConfig": "coffee plugins/bin/configToWeaver.coffee default"
   },
   "config": {
     "blanket": {
