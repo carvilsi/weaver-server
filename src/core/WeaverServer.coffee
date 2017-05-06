@@ -19,8 +19,6 @@ class Server
         file: 'weaver/index.html'
         vars:
           server :   pjson.version
-          adminUser: config.get('admin.username')
-          adminPass: config.get('admin.password')
       }]
 
       port: config.get('server.port')

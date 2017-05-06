@@ -1,7 +1,7 @@
 /lib
 .DS_Store
 .idea
-node_modules/*
+node_modules
 coverage.html
 coverage/
 *.iml
