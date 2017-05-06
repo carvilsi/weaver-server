@@ -6,27 +6,24 @@
         <link rel="icon" type="image/png" href="img/favicon.png">
         <script type="application/javascript" src="sdk/weaver-sdk.full.js"></script>
         <script>
-            projects = null
-            weaver   = new Weaver()
+            var projects = null
+            var weaver   = new Weaver()
 
             // Connect on load
             weaver.connect(window.location.href)
             .then(function(){
               console.log('Weaver SDK ' + weaver.version() + ' connected')
               console.log('Use signIn(user,pass)')
-            }).catch(function(e){
-              console.log(e)
-            })
+            }).catch(console.error)
 
             // Sign in
-            signIn = function(username, password) {
+            var signIn = function(username, password) {
               weaver.signInWithUsername(username, password)
               .then(function(){
                 return Weaver.Project.list()
               })
-              .catch(function(e){
-                console.log(e)
-              }).then(function(p){
+              .catch(console.error)
+              .then(function(p){
                 projects = p
                 console.log('Succesfully signed in as ' +username+ '.')
                 console.log('Available projects under variable `projects`:')
