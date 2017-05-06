@@ -19,6 +19,3 @@ trackerdb
 trackerdb-beta
 plugins/*
 !plugins/bin/
-
-# Included node modules that are not available on npm
-!node_modules/snmpjs
