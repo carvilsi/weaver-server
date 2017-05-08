@@ -12,11 +12,13 @@ pjson           = require('../../package.json')
 class Server
 
   constructor: () ->
-
     @options =
-      views:[
-        {path: '/', file: 'weaver/index.html', vars: {server : pjson.version}}
-      ]
+      views:[{
+        path: '/'
+        file: 'weaver/index.html'
+        vars:
+          server :   pjson.version
+      }]
 
       port: config.get('server.port')
       cors: config.get('server.cors')
