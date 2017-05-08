@@ -15,6 +15,17 @@ class UserService extends LokiService
       sessions: ['authToken']
     )
 
+  all: ->
+    users = []
+    for u in @users.find()
+      users.push({
+        username: u.username
+        email: u.email
+        userId: u.userId
+        })
+        
+    users
+
   signUp: (userId, username, email, password) ->
     userExists = @users.findOne({username})?
 

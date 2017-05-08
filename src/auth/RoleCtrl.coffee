@@ -21,3 +21,10 @@ bus.private('role.delete').retrieve('user').require('id').on((req, user, id) ->
   AclService.assertACLWritePermission(user, id)
   RoleService.deleteRole(id)
 )
+
+bus.private("roles").retrieve('user').on((req, user)->
+  if not user.isAdmin()
+    throw {code:-1, message: "Only admin user is allowed get all roles."}
+
+  RoleService.all()
+)

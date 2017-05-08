@@ -12,7 +12,6 @@ pjson           = require('../../package.json')
 class Server
 
   constructor: () ->
-
     @options =
       views:[{
         path: '/'

@@ -25,14 +25,17 @@ route.private.POST "query"                   # Execute a WeaverQuery
 route.private.POST "query.native"            # Execute a native query
 
 # Authentication
+route.private.GET  "users"                   # Gets all users
 route.public.POST  "user.signUp"             # Sign up a new user
-route.public.POST  "user.signInUsername"             # Sign in using username and password
+route.public.POST  "user.signInUsername"     # Sign in using username and password
 route.public.POST  "user.signInToken"        # Sign in using a token
 route.private.POST "user.signOut"            # Sign out session identified by authToken
 route.private.POST "user.read"               # Gets user object using authToken
 route.private.POST "user.delete"             # Destroys user
 
 # CRUD: Access Control List (ACL)
+route.private.GET  "acl.all"
+route.private.GET  "acl.objects"
 route.private.POST "acl.create"
 route.private.POST "acl.read"
 route.private.POST "acl.read.byObject"       # Gets the ACL by the object id that it applies to
@@ -40,6 +43,7 @@ route.private.POST "acl.update"
 route.private.GET  "acl.delete"
 
 # CRUD: Roles used for authentication
+route.private.GET  "roles"
 route.private.POST "role.create"
 route.private.GET  "role.read"
 route.private.POST "role.update"
