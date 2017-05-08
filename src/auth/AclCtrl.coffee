@@ -25,3 +25,17 @@ bus.private('acl.delete').retrieve('user').require('id').on((req, user, id) ->
   AclService.assertACLWritePermission(user, id)
   AclService.deleteACL(id)
 )
+
+bus.private("acl.all").retrieve('user').on((req, user)->
+  if not user.isAdmin()
+    throw {code:-1, message: "Only admin user is allowed get all ACL's."}
+
+  AclService.allACL()
+)
+
+bus.private("acl.objects").retrieve('user').on((req, user)->
+  if not user.isAdmin()
+    throw {code:-1, message: "Only admin user is allowed to get all ACL objects."}
+
+  AclService.allObjects()
+)

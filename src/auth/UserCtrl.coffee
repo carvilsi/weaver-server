@@ -19,6 +19,14 @@ bus.provide("user").require('authToken').on((req, authToken) ->
 )
 
 
+# Get all users
+bus.private("users").retrieve('user').on((req, user)->
+  if not user.isAdmin()
+    throw {code:-1, message: "Only admin user is allowed to get all users."}
+
+  UserService.all()
+)
+
 # Sign up a new user.
 bus.public("user.signUp").require('userId', 'username', 'password', 'email').on((req, userId, username, password, email)->
 

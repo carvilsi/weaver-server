@@ -97,5 +97,10 @@ class AclService extends LokiService
   assertACLWritePermission: (user, aclId) ->
     @assertACLPermission(user, aclId, false)
 
+  allACL: ->
+    @acl.find()
+
+  allObjects: ->
+    @objects.find()
 
 module.exports = new AclService()

@@ -43,4 +43,7 @@ class RoleService extends LokiService
     # Return unique users
     (user for user of users)
 
+  all: ->
+    @roles.find()
+
 module.exports = new RoleService()
