@@ -15,6 +15,7 @@ logger       = require('logger')
 server       = require('WeaverServer')
 multer       = require('multer')
 FileService = require('FileService')
+AclService    = require('AclService')
 
 upload = multer({
   dest: 'uploads/'
@@ -41,8 +42,12 @@ server
 )
 
 bus.private('file.downloadByID')
-.require('target', 'id', 'authToken')
-.on((req, target, id) ->
+.retrieve('project', 'user')
+.require('target', 'id')
+.on((req, project, user, target, id) ->
+
+  AclService.assertACLReadPermission(user, project.acl)
+
   FileService.downloadFileByID(id, target)
   .catch((err) ->
     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
@@ -50,8 +55,12 @@ bus.private('file.downloadByID')
 )
 
 bus.private('file.deleteByID')
-.require('target', 'id', 'authToken')
-.on((req, target, id) ->
+.retrieve('project', 'user')
+.require('target', 'id')
+.on((req, project, user, target, id) ->
+
+  AclService.assertACLWritePermission(user, project.acl)
+
   FileService.deleteFileByID(id, target)
   .catch((err) ->
     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'Project does not exists')

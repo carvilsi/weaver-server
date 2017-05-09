@@ -56,7 +56,7 @@ class Tracker
           `datetime` datetime  NOT NULL,
           `user` varchar(128) NOT NULL,
           `action` varchar(128) NOT NULL,
-          `node` varchar(128) NOT NULL,
+          `node` varchar(128) NULL,
           `key` varchar(128) NULL,
           `from` varchar(128) NULL,
           `to` varchar(128) NULL,
