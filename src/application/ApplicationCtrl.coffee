@@ -27,7 +27,7 @@ bus.public('application.time').on(->
 bus.provide("weaver").retrieve('project').on((req, project) ->
 
   Weaver = require('weaver-sdk')
-  weaver = Weaver.getWeaver()
+  weaver = Weaver.getInstance()
 
   adminUser = conf.get('admin.username')
   adminPass = conf.get('admin.password')
