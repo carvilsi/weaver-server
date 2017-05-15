@@ -1,16 +1,19 @@
-semver  = require('semver')
-packSDK = require('../../node_modules/weaver-sdk/package.json')
+semver = require('semver')
+pack   = require('../../package.json')
+logger = require('logger')
 
 module.exports =
-class SDKVersionChecker
+class ClientVersionChecker
   constructor: (@serverVersion) ->
     if @serverVersion?
       throw new Error("Invalid server version: #{@serverVersion}") if not semver.valid(@serverVersion)
     else
-      @serverVersion = packSDK.version
+      @serverVersion = pack.version
 
   isValidSDKVersion: (sdkVersion) ->
-    try
-      semver.gte(sdkVersion, @serverVersion)
-    catch
+    if !sdkVersion?
+      logger.usage.warn "Client without a sdkVersion connected, rejecting"
       false
+    else
+      logger.usage.debug "Client connected with version #{sdkVersion}"
+      true
