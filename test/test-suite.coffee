@@ -1,3 +1,4 @@
+require('../src/module-path')
 module.exports = ->
 
   beforeEach( ->
