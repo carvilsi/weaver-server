@@ -17,3 +17,11 @@ class ClientVersionChecker
     else
       logger.usage.debug "Client connected with version #{sdkVersion}"
       true
+
+  serverSatisfies: (versionRequirement) ->
+    if !versionRequirement? or semver.satisfies(@serverVersion, versionRequirement)
+      logger.usage.debug "Client with required server version #{versionRequirement}"
+      true
+    else
+      logger.usage.warn "Server does not satisfy required version #{versionRequirement}"
+      false
