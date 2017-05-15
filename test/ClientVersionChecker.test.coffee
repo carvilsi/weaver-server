@@ -1,5 +1,5 @@
 test = require('./test-suite')()
-ClientVersionChecker = require('../src/core/SDKVersionChecker')
+ClientVersionChecker = require('../src/core/ClientVersionChecker')
 
 describe 'The version checker', ->
   it 'should instantiate', ->
