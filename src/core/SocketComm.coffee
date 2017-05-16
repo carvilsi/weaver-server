@@ -15,8 +15,8 @@ class Socket
     io.use((socket, next) =>
       if not @versionChecker.isValidSDKVersion(socket.handshake.query.sdkVersion)
         next(new Error("Invalid SDK Version '#{socket.handshake.query.sdkVersion}'"))
-      else if not @versionChecker.serverSatisfies(socket.handshake.query.serverVersionRequired)
-        next(new Error("Server version #{@versionChecker.serverVersion} does not satisfy '#{socket.handshake.query.serverVersionRequirement}'"))
+      else if not @versionChecker.serverSatisfies(socket.handshake.query.requiredServerVersion)
+        next(new Error("Server version #{@versionChecker.serverVersion} does not satisfy '#{socket.handshake.query.requiredServerVersion}'"))
       else
         next()
     )
