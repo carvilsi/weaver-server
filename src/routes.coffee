@@ -9,7 +9,6 @@ route =
 # Application
 route.public.GET   "application.version"     # Application version
 route.public.GET   "application.time"        # Server system time
-route.public.POST  "application.wipe"        # Complete system wipe of all data (users, projects, etc)
 
 # Database operations
 route.private.GET  "read"                    # Reads a single entity
@@ -33,6 +32,7 @@ route.private.POST "user.signOut"            # Sign out session identified by au
 route.private.POST "user.read"               # Gets user object using authToken
 route.private.POST "user.delete"             # Destroys user
 route.private.POST "user.update"             # Updates a user profile
+route.public.POST  "users.wipe"              # Wipes all users
 
 # CRUD: Access Control List (ACL)
 route.private.GET  "acl.all"
@@ -55,6 +55,9 @@ route.private.GET  "project"                 # Get a list of projects
 route.private.POST "project.create"          # Create a project
 route.private.POST "project.delete"          # Delete a project
 route.private.POST "project.ready"           # Checks if a project is setup and ready
+route.public.POST  "project.wipe"            # Wipe a single project
+route.public.POST  "projects.wipe"           # Wipe all projects
+route.public.POST  "projects.destroy"        # Destroy all projects
 
 # Plugins
 route.private.GET  "plugins"                 # Get a list of plugins

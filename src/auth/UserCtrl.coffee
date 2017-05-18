@@ -1,8 +1,10 @@
 bus             = require('WeaverBus')
 UserService     = require('UserService')
 AclService      = require('AclService')
+RoleService     = require('RoleService')
 AdminUser       = require('AdminUser')
-
+logger          = require('logger')
+config          = require('config')
 
 # All private routes require a signed in user that is loaded in this handler based on authToken
 bus.private("*").priority(1000).retrieve('user').on((req, user) ->
@@ -89,8 +91,18 @@ bus.private("user.delete").retrieve('user').require('username').on((req, user, u
   return
 )
 
-
-
 bus.private('user.update').retrieve('user').require('update').on((req, user, update) ->
   UserService.update(update)
+)
+
+# Wipe of all users
+bus.public('users.wipe').enable(config.get('application.wipe')).on((req) ->
+
+  logger.usage.info "Wiping all users on weaver server"
+
+  Promise.all([
+    UserService.wipe()
+    AclService.wipe()
+    RoleService.wipe()
+  ])
 )

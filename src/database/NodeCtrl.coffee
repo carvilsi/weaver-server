@@ -24,7 +24,3 @@ bus.private('nodes').retrieve('database').on((req, database) ->
 bus.private('relations').retrieve('database').on((req, database) ->
   database.listAllRelations()
 )
-
-bus.private('wipe').retrieve('database').on((req, database) ->
-  database.wipe()
-)
