@@ -139,9 +139,7 @@ a weaver-server running outside of a container:
 docker-compose up
 ```
 
-## Usable weaver-server
-Use the following command to run a weaver server within docker, which also
-incudes the dependecies ran an in the previous section.
-```
-docker-compose -f docker-compose.yml -f weaver-server.yml up
-```
+## usable weaver-server 
+For a fully functional weaver-server for non-development purposes, check out
+the test-server setup in the weaver-sdk-js repo, which contains a automatically
+tested docker composition for client usage.

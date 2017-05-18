@@ -15,25 +15,7 @@ console.log(`'\033[2J'`)             # Clear terminal
 console.log(`'\033[0;0H'`)           # To top
 console.log(`'\033[36mLoading...'`)  # Loading in cyan
 
-
-# Path resolving local directories, making it non-relative accessible from any location.
-# In other words, require('../../../../util/logger') becomes require('logger')
-# Note: This must be the first running code in the application before any require() works
-require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
-  '.'
-  'application'
-  'auth'
-  'cli'
-  'core'
-  'database'
-  'file'
-  'project'
-  'plugin'
-  'util'
-  'tracker'
-  'snmp'
-]
-
+require('./module-path') # Contains module paths
 
 # Load libs
 Promise         = require('bluebird')

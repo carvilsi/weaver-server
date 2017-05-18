@@ -2,19 +2,21 @@ Promise  = require('bluebird')
 socketIO = require('socket.io')
 logger   = require('logger')
 
-SDKVersionChecker = require('SDKVersionChecker')
+ClientVersionChecker = require('ClientVersionChecker')
 
 module.exports =
 class Socket
   constructor: (@routes) ->
-    @versionChecker = new SDKVersionChecker()
+    @versionChecker = new ClientVersionChecker()
 
   wire: (http) ->
 
     io = socketIO(http)
     io.use((socket, next) =>
       if not @versionChecker.isValidSDKVersion(socket.handshake.query.sdkVersion)
-        next(new Error("Invalid SDK Version #{socket.handshake.query.sdkVersion}, should be #{@versionChecker.serverVersion} minimum"))
+        next(new Error("Invalid SDK Version '#{socket.handshake.query.sdkVersion}'"))
+      else if not @versionChecker.serverSatisfies(socket.handshake.query.requiredServerVersion)
+        next(new Error("Server version #{@versionChecker.serverVersion} does not satisfy '#{socket.handshake.query.requiredServerVersion}'"))
       else
         next()
     )

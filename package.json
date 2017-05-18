@@ -1,6 +1,6 @@
 {
   "name": "weaver-server",
-  "version": "2.2.9-beta.0",
+  "version": "2.2.10-beta.0",
   "description": "Module providing a Weaver-compatible API server",
   "author": {
     "name": "Mohamad Alamili",
@@ -35,7 +35,7 @@
     "snmpjs": "git://github.com/VoltServer/node-snmpjs.git#65cadf5",
     "socket.io": "1.4.5",
     "tmp": "0.0.28",
-    "weaver-sdk": "2.2.5",
+    "weaver-sdk": "2.2.12",
     "winston": "^2.2.0",
     "winston-daily-rotate-file": "^1.4.6"
   },
@@ -52,7 +52,8 @@
     "should": "^11.2.0",
     "sinon": "^1.15.4",
     "socket.io-client": "~1.4.6",
-    "supertest": "^3.0.0"
+    "supertest": "^3.0.0",
+    "npm-watch": "^0.1.8"
   },
   "engines": {
     "node": ">=6.9",
@@ -62,7 +63,8 @@
     "start": "coffee src/index.coffee",
     "prepublish": "coffee -o lib -c src && echo '#!/usr/bin/env node' | cat - ./lib/index.js > ./lib/index-exe.js && mv ./lib/index-exe.js ./lib/index.js",
     "test": "mocha 'test/*.test.coffee' && istanbul report",
-    "copyPluginsConfig": "coffee plugins/bin/configToWeaver.coffee default"
+    "copyPluginsConfig": "coffee plugins/bin/configToWeaver.coffee default",
+    "watch": "npm-watch"
   },
   "config": {
     "blanket": {
@@ -72,5 +74,11 @@
   },
   "bin": {
     "weaver-server": "./lib/index.js"
+  },
+  "watch": {
+    "test": {
+      "patterns": [ "src", "test" ],
+      "extensions": "coffee"
+    }
   }
 }
