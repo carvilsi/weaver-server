@@ -32,6 +32,7 @@ route.public.POST  "user.signInToken"        # Sign in using a token
 route.private.POST "user.signOut"            # Sign out session identified by authToken
 route.private.POST "user.read"               # Gets user object using authToken
 route.private.POST "user.delete"             # Destroys user
+route.private.POST "user.update"             # Updates a user profile
 
 # CRUD: Access Control List (ACL)
 route.private.GET  "acl.all"

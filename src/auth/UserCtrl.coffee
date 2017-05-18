@@ -33,6 +33,15 @@ bus.public("user.signUp").require('userId', 'username', 'password', 'email').on(
   if AdminUser.hasUsername(username)
     throw {code:-1, message: "Admin user is not allowed to signup."}
 
+  if username.length < 2
+    throw {code:-1, message: "Username must be 2 characters minimum"}
+
+  if username.indexOf(' ') >= 0
+    throw {code:-1, message: "Username may not contain spaces"}
+
+  if password.length < 6
+    throw {code:-1, message: "Password must be 6 characters minimum"}
+
   UserService.signUp(userId, username, email, password)
 )
 
@@ -71,11 +80,17 @@ bus.private("user.read").retrieve('user').on((req, user) ->
 
 
 # Destroy user
-bus.private("user.delete").retrieve('user').on((req, user) ->
+bus.private("user.delete").retrieve('user').require('username').on((req, user, username) ->
 
-  if AdminUser.hasUsername(user.username)
+  if AdminUser.hasUsername(username)
     throw {code:-1, message: "Admin user can not be deleted."}
 
-  UserService.destroy(user)
+  UserService.destroy(username)
   return
+)
+
+
+
+bus.private('user.update').retrieve('user').require('update').on((req, user, update) ->
+  UserService.update(update)
 )
