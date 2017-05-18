@@ -23,7 +23,7 @@ class UserService extends LokiService
         email: u.email
         userId: u.userId
         })
-        
+
     users
 
   signUp: (userId, username, email, password) ->
@@ -76,8 +76,17 @@ class UserService extends LokiService
     session = @sessions.findOne({authToken})
     @sessions.remove(session)
 
-  destroy: (user) ->
+  destroy: (username) ->
+    user = @users.findOne({username})
     @users.remove(user)
+
+  update: (update) ->
+    # TODO Lots of checking (is the username/email correct?, does the user exist? etc)
+    user = @users.findOne({userId: update.userId})
+    user.username = update.username
+    user.email    = update.email
+    @users.update(user)
+    return
 
   # Verify if the token is valid and not expired. if not -> throw error
   verifyToken: (authToken) ->

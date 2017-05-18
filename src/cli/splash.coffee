@@ -54,10 +54,8 @@ compile = (line, index) ->
   else
     line + Array(max - logo[0].length - line.length + 2).join(' ') + logo[index] + '│\n'
 
-getText = (spaceUp) ->
+getText = ->
   logo = JSON.parse(JSON.stringify(require('./logo')))
-  for i in [0..spaceUp]
-    logo.unshift("                                     ")
 
   text  = '┌'  + Array(max + 3).join('─') + '┐\n'
   text += '│ ' + compile(line, index) for line, index in splash
@@ -67,17 +65,7 @@ getText = (spaceUp) ->
 module.exports =
 
   printLoaded: ->
-    if conf.get('application.scroll')
-      spaceUp = splash.length
-    else
-      spaceUp = 1
-
-    print = ->
-      cursor.clear()
-      cursor.toTop()
-      console.log(getText(spaceUp).cyan)
-      spaceUp--
-
-      setTimeout(print, 30) if spaceUp > 0
-
-    print()
+    cursor.clear()
+    cursor.toTop()
+    console.log(getText().cyan)
+    
