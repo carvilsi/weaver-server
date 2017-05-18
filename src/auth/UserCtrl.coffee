@@ -80,6 +80,12 @@ bus.private("user.read").retrieve('user').on((req, user) ->
   user
 )
 
+# Gives back user object that is currently signed in
+bus.private("user.roles").require('id').on((req, id) ->
+  # TODO: Check permissions
+  RoleService.getRolesForUser(id)
+)
+
 
 # Destroy user
 bus.private("user.delete").retrieve('user').require('username').on((req, user, username) ->

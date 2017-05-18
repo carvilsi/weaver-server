@@ -30,6 +30,7 @@ route.public.POST  "user.signInUsername"     # Sign in using username and passwo
 route.public.POST  "user.signInToken"        # Sign in using a token
 route.private.POST "user.signOut"            # Sign out session identified by authToken
 route.private.POST "user.read"               # Gets user object using authToken
+route.private.POST "user.roles"              # Gets roles for user
 route.private.POST "user.delete"             # Destroys user
 route.private.POST "user.update"             # Updates a user profile
 route.public.POST  "users.wipe"              # Wipes all users
