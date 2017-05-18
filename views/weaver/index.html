@@ -9,11 +9,21 @@
             var projects = null
             var weaver   = new Weaver()
 
+            adminUser = '{{adminUser}}'
+            adminPass = '{{adminPass}}'
+
             // Connect on load
             weaver.connect(window.location.href)
             .then(function(){
               console.log('Weaver SDK ' + weaver.version() + ' connected')
-              console.log('Use signIn(user,pass)')
+
+              // Auto sign in if in development
+              if(adminUser !== '' && adminPass !== '') {
+                return signIn(adminUser, adminPass)
+              }
+              else {
+                console.log('Use signIn(user,pass)')
+              }
             }).catch(console.error)
 
             // Sign in

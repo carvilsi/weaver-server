@@ -6,6 +6,7 @@ ProjectService  = require('ProjectService')
 ProjectPool     = require('ProjectPool')
 AclService      = require('AclService')
 DatabaseService = require('DatabaseService')
+logger          = require('logger')
 
 
 
@@ -56,3 +57,37 @@ bus.internal('getMinioForProject').on((project) ->
   Promise.resolve(MinioClient.create(ProjectService.get(project).fileServer))
 )
 
+# Wipe single project
+bus.public('project.wipe').retrieve('project').on((req, project) ->
+  database = new DatabaseService(project.database)
+  database.wipe()
+)
+
+
+# Wipe all projects
+bus.public('projects.wipe').enable(config.get('application.wipe')).on((req) ->
+
+  logger.usage.info "Wiping all projects"
+
+  endpoints = (p.database for p in ProjectService.all())
+  databases = (new DatabaseService(endpoint) for endpoint in endpoints)
+
+  Promise.map(databases, (database) ->
+    logger.usage.info "Wiping database: #{database.uri}"
+    database.wipe()
+  )
+)
+
+
+# Destroy all projects
+bus.public('projects.destroy').enable(config.get('application.wipe')).on((req) ->
+
+  logger.usage.info "Destroying all projects"
+
+  Promise.map(ProjectService.all(), (p) ->
+    logger.usage.debug "Destroying project: #{p.id}"
+    ProjectPool.clean(p.id)
+  ).then(->
+    ProjectService.wipe()
+  )
+)

@@ -1,8 +1,10 @@
 bus             = require('WeaverBus')
 UserService     = require('UserService')
 AclService      = require('AclService')
+RoleService     = require('RoleService')
 AdminUser       = require('AdminUser')
-
+logger          = require('logger')
+config          = require('config')
 
 # All private routes require a signed in user that is loaded in this handler based on authToken
 bus.private("*").priority(1000).retrieve('user').on((req, user) ->
@@ -32,6 +34,15 @@ bus.public("user.signUp").require('userId', 'username', 'password', 'email').on(
 
   if AdminUser.hasUsername(username)
     throw {code:-1, message: "Admin user is not allowed to signup."}
+
+  if username.length < 2
+    throw {code:-1, message: "Username must be 2 characters minimum"}
+
+  if username.indexOf(' ') >= 0
+    throw {code:-1, message: "Username may not contain spaces"}
+
+  if password.length < 6
+    throw {code:-1, message: "Password must be 6 characters minimum"}
 
   UserService.signUp(userId, username, email, password)
 )
@@ -69,13 +80,35 @@ bus.private("user.read").retrieve('user').on((req, user) ->
   user
 )
 
+# Gives back user object that is currently signed in
+bus.private("user.roles").require('id').on((req, id) ->
+  # TODO: Check permissions
+  RoleService.getRolesForUser(id)
+)
+
 
 # Destroy user
-bus.private("user.delete").retrieve('user').on((req, user) ->
+bus.private("user.delete").retrieve('user').require('username').on((req, user, username) ->
 
-  if AdminUser.hasUsername(user.username)
+  if AdminUser.hasUsername(username)
     throw {code:-1, message: "Admin user can not be deleted."}
 
-  UserService.destroy(user)
+  UserService.destroy(username)
   return
+)
+
+bus.private('user.update').retrieve('user').require('update').on((req, user, update) ->
+  UserService.update(update)
+)
+
+# Wipe of all users
+bus.public('users.wipe').enable(config.get('application.wipe')).on((req) ->
+
+  logger.usage.info "Wiping all users on weaver server"
+
+  Promise.all([
+    UserService.wipe()
+    AclService.wipe()
+    RoleService.wipe()
+  ])
 )
