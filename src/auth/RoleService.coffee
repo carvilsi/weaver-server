@@ -28,6 +28,11 @@ class RoleService extends LokiService
   getRole: (roleId) ->
     @roles.findOne({roleId})
 
+  getRolesForUser: (userId) ->
+    # TODO: It is not recursive now respecting the role inheritance
+    (role for role in @all() when role.users.indexOf(userId) >= 0)
+
+
   # Expects role id's
   # Recursively go down all roles and add the users
   getUsersFromRoles: (roles, users) ->
