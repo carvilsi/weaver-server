@@ -30,6 +30,9 @@ module.exports =
     read: (id) ->
       @_GET("#{@uri}/read/#{id}")
 
+    snapshot: () ->
+      @_POST("#{@uri}/snapshot")
+
     write: (payload) ->
       @_POST("#{@uri}/write", payload)
 

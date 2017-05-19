@@ -57,6 +57,12 @@ bus.internal('getMinioForProject').on((project) ->
   Promise.resolve(MinioClient.create(ProjectService.get(project).fileServer))
 )
 
+# Create a snapshot with write operations for the project
+bus.private('snapshot').retrieve('project').on((req, project) ->
+  database = new DatabaseService(project.database)
+  database.snapshot()
+)
+
 # Wipe single project
 bus.public('project.wipe').retrieve('project').on((req, project) ->
   database = new DatabaseService(project.database)
