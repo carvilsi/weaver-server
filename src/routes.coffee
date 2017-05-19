@@ -18,6 +18,7 @@ route.private.POST "wipe"                    # Wipe entire database
 route.private.POST "nodes"                   # Lists all nodes on the database
 route.private.GET  "relations"               # Lists all relations on the database
 route.private.GET  "history"                 # Change history by element
+route.private.GET  "snapshot"                # Download snapshot write operations
 
 # Querying
 route.private.POST "query"                   # Execute a WeaverQuery
