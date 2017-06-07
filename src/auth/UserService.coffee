@@ -6,6 +6,7 @@ jwt         = require('jsonwebtoken')
 
 secret = conf.get('auth.secret')
 expiresIn = conf.get('auth.expire')
+bcrypt = require('bcrypt')
 
 class UserService extends LokiService
 
@@ -32,8 +33,13 @@ class UserService extends LokiService
     if userExists
       throw {code:-1, message: "User with username #{username} already exists"}
 
-    @users.insert({userId, username, email, password})
-    @signInUsername(username, password)
+    bcrypt.hash(password,conf.get('auth.salt'))
+    .then((hash) =>
+      @users.insert({userId, username, email, hash})
+      @signInUsername(username, password)
+    )
+
+
 
   insertSession: (authToken, username) ->
     sessionId = cuid()
@@ -44,14 +50,20 @@ class UserService extends LokiService
     if not user?
       throw {code: -1, message: "User not found"}
 
-    if user.password isnt password
-      throw {code: -1, message: "Password incorrect"}
+    # if user.password isnt password
+    bcrypt.compare(password, user.hash)
+    .then((res) =>
+      if !res
+        throw {code: -1, message: "Password incorrect"}
+      else
+        # Sign token with secret set in config and add username to payload
+        authToken = jwt.sign({ username }, secret, { expiresIn })
+        @insertSession(authToken, username)
 
-    # Sign token with secret set in config and add username to payload
-    authToken = jwt.sign({ username }, secret, { expiresIn })
-    @insertSession(authToken, username)
+        authToken
+    )
 
-    authToken
+
 
   # Sign user in using a token.
   signInToken: (authToken) ->

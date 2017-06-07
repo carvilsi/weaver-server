@@ -7,6 +7,7 @@ module.exports =
   auth:
     secret: 'mysupersecretstring'
     expire: '7d'
+    salt: 10
 
   projectPool: [
     {
