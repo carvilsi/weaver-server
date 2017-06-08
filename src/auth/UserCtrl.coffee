@@ -50,10 +50,13 @@ bus.public("user.signUp").require('userId', 'username', 'password', 'email').on(
 
 # Sign in existing user
 bus.public("user.signInUsername").require('username', 'password').on((req, username, password) ->
-  if AdminUser.signInUsername(username, password)
-    return AdminUser.getAuthToken()
+  if typeof username isnt 'string'
+    throw {code:-1, message: "Username not valid"}
   else
-    UserService.signInUsername(username, password)
+    if AdminUser.signInUsername(username, password)
+      return AdminUser.getAuthToken()
+    else
+      UserService.signInUsername(username, password)
 )
 
 bus.public("user.signInToken").require('authToken').on((req, authToken) ->
