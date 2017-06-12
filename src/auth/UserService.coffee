@@ -34,8 +34,8 @@ class UserService extends LokiService
       throw {code:-1, message: "User with username #{username} already exists"}
 
     bcrypt.hash(password,conf.get('auth.salt'))
-    .then((hash) =>
-      @users.insert({userId, username, email, hash})
+    .then((passwordHash) =>
+      @users.insert({userId, username, email, passwordHash})
       @signInUsername(username, password)
     )
 
@@ -51,7 +51,7 @@ class UserService extends LokiService
       throw {code: -1, message: "User not found"}
 
     # if user.password isnt password
-    bcrypt.compare(password, user.hash)
+    bcrypt.compare(password, user.passwordHash)
     .then((res) =>
       if !res
         throw {code: -1, message: "Password incorrect"}
