@@ -17,20 +17,9 @@ bus.public('application.time').on(->
   servertime
 )
 
-# Provide Weaver SKD
+# Provide Weaver SKD the plugin must take care about the sigIn (with authToken better)
 bus.provide("weaver").retrieve('project').on((req, project) ->
-
   Weaver = require('weaver-sdk')
   weaver = Weaver.getInstance()
-
-  adminUser = conf.get('admin.username')
-  adminPass = conf.get('admin.password')
-
-  weaver.signInWithUsername(adminUser, adminPass).then( =>
-    weaverProject = new Weaver.Project(project.name, project.id)
-    weaver.useProject(weaverProject)
-    weaver
-  ).catch((error)->
-    logger.code.error(error)
-  )
+  weaver
 )
