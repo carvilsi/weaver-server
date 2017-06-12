@@ -1,7 +1,7 @@
 module.exports =
   admin:
     username: 'admin'
-    password: '$2a$10$6HBjPrCt8wNIrAkjh3PhQ.Bs9NW/3rOrZNg.I4FdTYdvi2baQIQ3K'
+    password: '$2a$10$CnY1NFwHHo1v0qiF/rKgIOWAxUOA5Znh7kMPoh.Ru98uX9CZ7MPqC'
     generatePassword: false
 
   auth:
