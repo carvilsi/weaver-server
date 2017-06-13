@@ -1,7 +1,7 @@
 config  = require('config')
 rp      = require('request-promise')
 logger  = require('logger')
-
+Promise = require('bluebird')
 
 class KubernetesProjectPool
 
@@ -12,7 +12,10 @@ class KubernetesProjectPool
     rp({
       uri: "#{@endpoint}/#{path}"
       json: true
-    })
+    }).then((response) ->
+      logger.code.silly "Called #{path}, reponse: #{response}"
+      response
+    )
 
   create: (id) ->
     @request("create/#{id}").then((status) ->
@@ -37,7 +40,13 @@ class KubernetesProjectPool
     )
 
   clean: (id) ->
-    @request("delete/#{id}")
+    logger.code.info "Deleting project with id #{id}"
+    @request("delete/#{id}").then( ->
+      logger.code.info "Delete of project with id #{id} successful"
+    ).catch((err) ->
+      logger.code.warn "Error on clean: #{err}"
+      Promise.reject(err)
+    )
 
   isReady: (id) ->
     @request("status/#{id}").then((status) ->
