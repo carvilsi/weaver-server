@@ -57,6 +57,12 @@ bus.internal('getMinioForProject').on((project) ->
   Promise.resolve(MinioClient.create(ProjectService.get(project).fileServer))
 )
 
+# Create a snapshot with write operations for the project
+bus.private('snapshot').retrieve('project').on((req, project) ->
+  database = new DatabaseService(project.database)
+  database.snapshot()
+)
+
 # Wipe single project
 bus.public('project.wipe').retrieve('project').on((req, project) ->
   database = new DatabaseService(project.database)
@@ -86,8 +92,14 @@ bus.public('projects.destroy').enable(config.get('application.wipe')).on((req) -
 
   Promise.map(ProjectService.all(), (p) ->
     logger.usage.debug "Destroying project: #{p.id}"
-    ProjectPool.clean(p.id)
+    ProjectPool.clean(p.id).catch((err) ->
+      logger.usage.warn "Error cleaning project id #{p.id}"
+      Promise.resolve()
+    )
   ).then(->
-    ProjectService.wipe()
+    logger.code.debug "Calling wipe on the project service"
+    ProjectService.wipe().then( ->
+      logger.code.debug "ProjectService promise completed"
+    )
   )
 )

@@ -156,7 +156,7 @@ class Tracker
     @initDb().then( =>
       quote = '\''
       conditions = []
-      query = 'SELECT `seqnr`, `datetime`, `user`, `action`, `node`, `key`, `to`, `value` FROM `tracker`'
+      query = 'SELECT `seqnr`, `datetime`, `user`, `action`, `node`, `key`, `from`, `to`, `oldTo`, `value` FROM `tracker`'
 
       if req.payload.users?
         conditions.push('`user` IN (' + quote + req.payload.users.join(quote + ', ' + quote) + quote + ')')
