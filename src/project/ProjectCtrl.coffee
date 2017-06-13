@@ -92,8 +92,14 @@ bus.public('projects.destroy').enable(config.get('application.wipe')).on((req) -
 
   Promise.map(ProjectService.all(), (p) ->
     logger.usage.debug "Destroying project: #{p.id}"
-    ProjectPool.clean(p.id)
+    ProjectPool.clean(p.id).catch((err) ->
+      logger.usage.warn "Error cleaning project id #{p.id}"
+      Promise.resolve()
+    )
   ).then(->
-    ProjectService.wipe()
+    logger.code.debug "Calling wipe on the project service"
+    ProjectService.wipe().then( ->
+      logger.code.debug "ProjectService promise completed"
+    )
   )
 )
