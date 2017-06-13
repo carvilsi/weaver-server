@@ -50,7 +50,7 @@ bus.public("user.signUp").require('userId', 'username', 'password', 'email').on(
 
 # Sign in existing user
 bus.public("user.signInUsername").require('username', 'password').on((req, username, password) ->
-  if typeof username isnt 'string'
+  if typeof username isnt 'string' || not /^[a-zA-Z0-9_-]*$/.test(username) ||  not username
     throw {code:-1, message: "Username not valid"}
   else
     if AdminUser.signInUsername(username, password)
