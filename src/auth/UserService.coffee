@@ -3,6 +3,7 @@ LokiService = require('LokiService')
 cuid        = require('cuid')
 _           = require('lodash')
 jwt         = require('jsonwebtoken')
+logger     = require('logger')
 
 secret = conf.get('auth.secret')
 expiresIn = conf.get('auth.expire')

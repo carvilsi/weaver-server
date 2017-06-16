@@ -62,3 +62,4 @@ module.exports =
       config: './logs/weaver.config'
       code: './logs/weaver.code'
       usage: './logs/weaver.usage'
+      auth: './logs/weaver.auth'
