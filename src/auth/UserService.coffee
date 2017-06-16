@@ -1,8 +1,9 @@
-conf        = require('config')
-LokiService = require('LokiService')
-cuid        = require('cuid')
-_           = require('lodash')
-jwt         = require('jsonwebtoken')
+conf         = require('config')
+LokiService  = require('LokiService')
+cuid         = require('cuid')
+_            = require('lodash')
+jwt          = require('jsonwebtoken')
+HashPassInit = require('HashPassInit')
 
 secret = conf.get('auth.secret')
 expiresIn = conf.get('auth.expire')
@@ -15,6 +16,7 @@ class UserService extends LokiService
       users:    ['username', 'email']
       sessions: ['authToken']
     )
+    checkPasswords()
 
   all: ->
     users = []
@@ -112,5 +114,9 @@ class UserService extends LokiService
       jwt.verify(authToken, secret)
     catch error
       throw {code: -1, message: "Invalid token supplied #{authToken}"}
+
+  # Checking if there is any password stored in plain text
+  checkPasswords = ->
+    hashPassInit = new HashPassInit()
 
 module.exports = new UserService()
