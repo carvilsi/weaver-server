@@ -39,7 +39,11 @@ class UserService extends LokiService
       @signInUsername(username, password)
     )
 
-
+  comparePassword =  (plainPassword, passwordHash) ->
+    bcrypt.compare(plainPassword,passwordHash)
+    .then((res) ->
+      res
+    )
 
   insertSession: (authToken, username) ->
     sessionId = cuid()
@@ -48,20 +52,22 @@ class UserService extends LokiService
   signInUsername: (username, password) ->
     user = @users.find({username})[0]
     if not user?
-      throw {code: -1, message: "User not found"}
+      comparePassword(username,password)
+      .then( ->
+        throw {code: -1, message: "Invalid Username or Password"}
+      )
+    else
+      comparePassword(password, user.passwordHash)
+      .then((res) =>
+        if !res
+          throw {code: -1, message: "Invalid Username or Password"}
+        else
+          # Sign token with secret set in config and add username to payload
+          authToken = jwt.sign({ username }, secret, { expiresIn })
+          @insertSession(authToken, username)
 
-    # if user.password isnt password
-    bcrypt.compare(password, user.passwordHash)
-    .then((res) =>
-      if !res
-        throw {code: -1, message: "Password incorrect"}
-      else
-        # Sign token with secret set in config and add username to payload
-        authToken = jwt.sign({ username }, secret, { expiresIn })
-        @insertSession(authToken, username)
-
-        authToken
-    )
+          authToken
+      )
 
 
 
