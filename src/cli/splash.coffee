@@ -32,7 +32,7 @@ _ "Console:   #{conf.get('logging.console').toUpperCase()}"
 _ "File:      #{conf.get('logging.file').toUpperCase()}"
 _ ""
 _ "# Settings"
-_ "Admin credentials: #{conf.get('admin.username')}:#{conf.get('admin.password')}"
+_ "Admin userName: #{conf.get('admin.username')}"
 _ "Single database:   #{BOOL conf.get('application.singleDatabase')}"
 _ "System wipe:       #{BOOL conf.get('application.wipe')}"
 _ ""
@@ -68,4 +68,3 @@ module.exports =
     cursor.clear()
     cursor.toTop()
     console.log(getText().cyan)
-    
