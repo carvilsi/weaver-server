@@ -56,6 +56,7 @@ class AclService extends LokiService
 
     @objects.insert({id: objectId, acl: acl.id})
     aclDoc = @acl.insert(acl)
+    logger.code.silly "Created ACL with id #{acl.id} for object #{objectId}"
     aclDoc
 
   createACLFromServer: (aclServerObject) ->
@@ -68,6 +69,7 @@ class AclService extends LokiService
       roleRead    : aclServerObject._roleRead
       roleWrite   : aclServerObject._roleWrite
 
+    logger.code.silly "Created ACL with id #{acl.id} from aclServerObject"
     @acl.insert(acl)
 
 
@@ -78,6 +80,7 @@ class AclService extends LokiService
 
   getACLByObject: (objectId) ->
     object = @objects.findOne({id: objectId})
+    logger.code.debug "getACLByObject(#{objectId}): #{object}"
     @getACL(object.acl)
 
 

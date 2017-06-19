@@ -42,6 +42,7 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
 )
 
 bus.private('project.delete').retrieve('project', 'database', 'minio', 'tracker').on((req, project, database, minio, tracker) ->
+  logger.usage.info "Deleting project with id #{project.id}"
   Promise.all([
     tracker.wipe()
     database.wipe()
@@ -60,12 +61,14 @@ bus.internal('getMinioForProject').on((project) ->
 
 # Create a snapshot with write operations for the project
 bus.private('snapshot').retrieve('project').on((req, project) ->
+  logger.usage.info "Generating snapshot for project with id #{project.id}"
   database = new DatabaseService(project.database)
   database.snapshot()
 )
 
 # Wipe single project
 bus.public('project.wipe').retrieve('project').on((req, project) ->
+  logger.usage.info "Wiping project with id #{project.id}"
   database = new DatabaseService(project.database)
   database.wipe()
 )
@@ -73,7 +76,6 @@ bus.public('project.wipe').retrieve('project').on((req, project) ->
 
 # Wipe all projects
 bus.public('projects.wipe').enable(config.get('application.wipe')).on((req) ->
-
   logger.usage.info "Wiping all projects"
 
   endpoints = (p.database for p in ProjectService.all())
