@@ -29,7 +29,7 @@ bus.private('project').on((req) ->
 )
 
 bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
-  user.isAdmin() or AclService.assertACLWritePermission(user, 'create-projects')
+  AclService.assertACLWritePermission(user, 'create-projects')
 
   ProjectPool.create(id).then((project) ->
 

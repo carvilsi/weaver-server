@@ -83,6 +83,8 @@ class AclService extends LokiService
 
   updateACL: (aclServerObject) ->
     acl = @acl.findOne({id: aclServerObject._id})
+    logger.usage.debug "Updating acl #{acl.id}"
+
     acl.publicRead  = aclServerObject._publicRead
     acl.publicWrite = aclServerObject._publicWrite
     acl.userRead    = aclServerObject._userRead
@@ -111,6 +113,7 @@ class AclService extends LokiService
 
   assertACLPermission: (user, aclId, readOnly) ->
     return if user.isAdmin()
+    logger.usage.silly "Checking acl access for user #{user.username} on #{aclId}"
 
     acl = @getACL(aclId)
     allowedUsers = @getAllowedUsers(acl, readOnly)
