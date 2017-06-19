@@ -3,9 +3,17 @@ LokiService = require('LokiService')
 RoleService = require('RoleService')
 cuid        = require('cuid')
 _           = require('lodash')
+logger      = require('logger')
 
 
 class AclService extends LokiService
+  serverFunctionACLs: [
+    'create-projects'
+  ]
+
+  projectFunctionACLs: [
+    'delete-project'
+  ]
 
   constructor: ->
     super('acl',
@@ -13,6 +21,28 @@ class AclService extends LokiService
       objects:  ['acl']
     )
 
+  load: ->
+    super().then(=>
+      @createServerFunctionACLs()
+    )
+
+  createServerFunctionACLs: ->
+    logger.code.debug "Initializing server function ACLs"
+    for functionACL in @serverFunctionACLs
+      @createServerFunctionACL(functionACL) if !@getACL(functionACL)?
+
+  createServerFunctionACL: (serverFunctionACL) ->
+    logger.code.debug "Creating server function ACL: #{serverFunctionACL}"
+    acl =
+      id: serverFunctionACL
+      userRead: []
+      userWrite: []
+      roleRead: []
+      roleWrite: []
+      publicRead: false
+      publicWrite: false
+
+    @acl.insert(acl)
 
   createACL: (objectId, user) ->
     acl =
@@ -28,7 +58,6 @@ class AclService extends LokiService
     aclDoc = @acl.insert(acl)
     aclDoc
 
-
   createACLFromServer: (aclServerObject) ->
     acl =
       id          : aclServerObject._id
@@ -43,8 +72,9 @@ class AclService extends LokiService
 
 
   getACL: (aclId) ->
-    @acl.findOne({id: aclId})
-
+    result = @acl.findOne({id: aclId})
+    logger.code.debug "getACL(#{aclId}) result: #{result}"
+    result
 
   getACLByObject: (objectId) ->
     object = @objects.findOne({id: objectId})
@@ -102,5 +132,10 @@ class AclService extends LokiService
 
   allObjects: ->
     @objects.find()
+
+  wipe: ->
+    logger.usage.warn "Wiping ACL Service"
+    super()
+    @createServerFunctionACLs()
 
 module.exports = new AclService()
