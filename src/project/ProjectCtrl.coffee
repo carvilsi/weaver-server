@@ -20,12 +20,21 @@ bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
 )
 
 # Move to FileController
-bus.provide('minio').retrieve('project').on((req, project) ->
+bus.provide('minio').retrieve('project', 'user').on((req, project, user) ->
+  AclService.assertACLReadPermission(user, project.acl)
   MinioClient.create(project.fileServer)
 )
 
-bus.private('project').on((req) ->
-  ProjectService.all()
+bus.private('project').retrieve('user').on((req, user) ->
+  projects = ProjectService.all()
+  result = []
+  for p in projects
+    try
+      AclService.assertACLReadPermission(user, p.acl)
+      result.push(p)
+    catch error
+      # User has no access to this project
+  result
 )
 
 bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
@@ -37,7 +46,7 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
     acl = AclService.createACL(id, user)
     ProjectService.create(id, name, project.database, acl.id, project.fileServer, project.tracker)
 
-    return
+    return acl
   )
 )
 
