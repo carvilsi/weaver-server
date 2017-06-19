@@ -8,7 +8,9 @@ logger      = require('logger')
 
 class AclService extends LokiService
   serverFunctionACLs: [
-    'create-projects'
+    'create-projects',
+    'modify-acl',
+    'create-users'
   ]
 
   projectFunctionACLs: [
