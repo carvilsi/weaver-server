@@ -50,7 +50,7 @@ class AclService extends LokiService
     acl =
       id:          cuid()
       userRead:    []
-      userWrite:   [user.username]
+      userWrite:   [user.userId]
       roleRead:    []
       roleWrite:   []
       publicRead:  false
@@ -77,7 +77,7 @@ class AclService extends LokiService
 
   getACL: (aclId) ->
     result = @acl.findOne({id: aclId})
-    logger.code.debug "getACL(#{aclId}) result: #{result}"
+    logger.code.debug "getACL(#{aclId}) result: #{JSON.stringify(result)}"
     result
 
   getACLByObject: (objectId) ->
