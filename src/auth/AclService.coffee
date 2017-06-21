@@ -46,6 +46,12 @@ class AclService extends LokiService
 
     @acl.insert(acl)
 
+  createProjectACLs: (projectId, user) ->
+    logger.usage.info "Creating ACLs for project #{projectId}"
+    acl = @createACL(projectId, user)
+
+    acl
+
   createACL: (objectId, user) ->
     acl =
       id:          cuid()

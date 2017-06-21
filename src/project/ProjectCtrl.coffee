@@ -43,7 +43,7 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
   ProjectPool.create(id).then((project) ->
 
     # Create an ACL for this user to set on the project
-    acl = AclService.createACL(id, user)
+    acl = AclService.createProjectACLs(id, user)
     ProjectService.create(id, name, project.database, acl.id, project.fileServer, project.tracker)
 
     return acl
