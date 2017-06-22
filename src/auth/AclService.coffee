@@ -52,8 +52,10 @@ class AclService extends LokiService
   createProjectACLs: (projectId, user) ->
     logger.usage.info "Creating ACLs for project #{projectId}"
     acl = @createACL(projectId, user)
-    delAcl = @createFunctionACL(@getProjectFunctionAclId(projectId, 'delete-project'))
-    delAcl.userWrite.push(user.userId)
+    for projectFunctionAcl in @projectFunctionACLs
+      delAcl = @createFunctionACL(@getProjectFunctionAclId(projectId, projectFunctionAcl))
+      delAcl.userWrite.push(user.userId)
+      @acl.update(delAcl)
     acl
 
   createACL: (objectId, user) ->
