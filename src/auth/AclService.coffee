@@ -31,12 +31,12 @@ class AclService extends LokiService
   createServerFunctionACLs: ->
     logger.code.debug "Initializing server function ACLs"
     for functionACL in @serverFunctionACLs
-      @createServerFunctionACL(functionACL) if !@getACL(functionACL)?
+      @createFunctionACL(functionACL) if !@getACL(functionACL)?
 
-  createServerFunctionACL: (serverFunctionACL) ->
-    logger.code.debug "Creating server function ACL: #{serverFunctionACL}"
+  createFunctionACL: (functionACL) ->
+    logger.code.debug "Creating server function ACL: #{functionACL}"
     acl =
-      id: serverFunctionACL
+      id: functionACL
       userRead: []
       userWrite: []
       roleRead: []
@@ -46,10 +46,14 @@ class AclService extends LokiService
 
     @acl.insert(acl)
 
+  getProjectFunctionAclId: (projectId, functionname) ->
+    "project-#{projectId}-function-#{functionname}"
+
   createProjectACLs: (projectId, user) ->
     logger.usage.info "Creating ACLs for project #{projectId}"
     acl = @createACL(projectId, user)
-
+    delAcl = @createFunctionACL(@getProjectFunctionAclId(projectId, 'delete-project'))
+    delAcl.userWrite.push(user.userId)
     acl
 
   createACL: (objectId, user) ->

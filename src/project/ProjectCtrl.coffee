@@ -50,7 +50,9 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
   )
 )
 
-bus.private('project.delete').retrieve('project', 'database', 'minio', 'tracker').on((req, project, database, minio, tracker) ->
+bus.private('project.delete').retrieve('user', 'project', 'database', 'minio', 'tracker').on((req, user, project, database, minio, tracker) ->
+  AclService.assertACLWritePermission(user, AclService.getProjectFunctionAclId(project.id, 'delete-project'))
+
   logger.usage.info "Deleting project with id #{project.id}"
   Promise.all([
     tracker.wipe()
