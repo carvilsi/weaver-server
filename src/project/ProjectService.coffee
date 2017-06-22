@@ -2,6 +2,7 @@ LokiService = require('LokiService')
 cuid        = require('cuid')
 _           = require('lodash')
 logger      = require('logger')
+AclService  = require('AclService')
 
 class ProjectService extends LokiService
 
@@ -31,5 +32,13 @@ class ProjectService extends LokiService
   all: ->
     @projects.find()
 
+  load: ->
+    super().then(=>
+      @checkProjectAcls()
+    )
+
+  checkProjectAcls: ->
+    for project in @all
+      AclService.checkProjectAcl(project.id)
 
 module.exports = new ProjectService()

@@ -1,12 +1,15 @@
 bus         = require('WeaverBus')
 AclService  = require('AclService')
+logger      = require('logger')
 
 bus.private('acl.create').retrieve('user').require('acl').on((req, user, acl) ->
   AclService.createACLFromServer(acl, user)
 )
 
 bus.private('acl.read').retrieve('user').require('id').on((req, user, id) ->
+  logger.code.silly "Reading ACL with id #{id}"
   AclService.assertACLReadPermission(user, id)
+  logger.code.silly "Reading ACL with id #{id} read check passed"
   AclService.getACL(id)
 )
 

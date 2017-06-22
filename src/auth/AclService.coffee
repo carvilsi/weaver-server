@@ -3,9 +3,19 @@ LokiService = require('LokiService')
 RoleService = require('RoleService')
 cuid        = require('cuid')
 _           = require('lodash')
+logger      = require('logger')
 
 
 class AclService extends LokiService
+  serverFunctionACLs: [
+    'create-projects',
+    'modify-acl',
+    'create-users'
+  ]
+
+  projectFunctionACLs: [
+    'delete-project'
+  ]
 
   constructor: ->
     super('acl',
@@ -13,12 +23,52 @@ class AclService extends LokiService
       objects:  ['acl']
     )
 
+  load: ->
+    super().then(=>
+      @createServerFunctionACLs()
+    )
+
+  createServerFunctionACLs: ->
+    logger.code.debug "Initializing server function ACLs"
+    for functionACL in @serverFunctionACLs
+      @createFunctionACL(functionACL) if !@getACL(functionACL)?
+
+  createFunctionACL: (functionACL) ->
+    logger.code.debug "Creating server function ACL: #{functionACL}"
+    acl =
+      id: functionACL
+      userRead: []
+      userWrite: []
+      roleRead: []
+      roleWrite: []
+      publicRead: false
+      publicWrite: false
+
+    @acl.insert(acl)
+
+  getProjectFunctionAclId: (projectId, functionname) ->
+    "project-#{projectId}-function-#{functionname}"
+
+  createProjectACLs: (projectId, user) ->
+    logger.usage.info "Creating ACLs for project #{projectId}"
+    acl = @createACL(projectId, user)
+    for projectFunctionAcl in @projectFunctionACLs
+      delAcl = @createFunctionACL(@getProjectFunctionAclId(projectId, projectFunctionAcl))
+      delAcl.userWrite.push(user.userId)
+      @acl.update(delAcl)
+    acl
+
+  checkProjectAcl: (projectId) ->
+    logger.code.info "Checking existence of function ACLs for project: #{projectId}"
+    for f in @projectFunctionACLs
+      id = @getProjectFunctionAclId(projectId, f)
+      @createFunctionACL(id) if !getACL(id)?
 
   createACL: (objectId, user) ->
     acl =
       id:          cuid()
       userRead:    []
-      userWrite:   [user.username]
+      userWrite:   [user.userId]
       roleRead:    []
       roleWrite:   []
       publicRead:  false
@@ -26,8 +76,8 @@ class AclService extends LokiService
 
     @objects.insert({id: objectId, acl: acl.id})
     aclDoc = @acl.insert(acl)
+    logger.code.silly "Created ACL with id #{acl.id} for object #{objectId}"
     aclDoc
-
 
   createACLFromServer: (aclServerObject) ->
     acl =
@@ -39,20 +89,25 @@ class AclService extends LokiService
       roleRead    : aclServerObject._roleRead
       roleWrite   : aclServerObject._roleWrite
 
+    logger.code.silly "Created ACL with id #{acl.id} from aclServerObject"
     @acl.insert(acl)
 
 
   getACL: (aclId) ->
-    @acl.findOne({id: aclId})
-
+    result = @acl.findOne({id: aclId})
+    logger.code.debug "getACL(#{aclId}) result: #{JSON.stringify(result)}"
+    result
 
   getACLByObject: (objectId) ->
     object = @objects.findOne({id: objectId})
+    logger.code.debug "getACLByObject(#{objectId}): #{object}"
     @getACL(object.acl)
 
 
   updateACL: (aclServerObject) ->
     acl = @acl.findOne({id: aclServerObject._id})
+    logger.usage.debug "Updating acl #{acl.id}"
+
     acl.publicRead  = aclServerObject._publicRead
     acl.publicWrite = aclServerObject._publicWrite
     acl.userRead    = aclServerObject._userRead
@@ -81,6 +136,7 @@ class AclService extends LokiService
 
   assertACLPermission: (user, aclId, readOnly) ->
     return if user.isAdmin()
+    logger.usage.silly "Checking acl access for user #{user.username} on #{aclId}"
 
     acl = @getACL(aclId)
     allowedUsers = @getAllowedUsers(acl, readOnly)
@@ -102,5 +158,10 @@ class AclService extends LokiService
 
   allObjects: ->
     @objects.find()
+
+  wipe: ->
+    logger.usage.warn "Wiping ACL Service"
+    super()
+    @createServerFunctionACLs()
 
 module.exports = new AclService()
