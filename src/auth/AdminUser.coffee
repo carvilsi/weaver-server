@@ -5,6 +5,7 @@ adminUser = conf.get('admin.username')
 adminPass = conf.get('admin.password')
 secret = conf.get('auth.secret')
 expiresIn = conf.get('auth.expire')
+bcrypt = require('bcrypt')
 
 authTokens = {}
 
@@ -17,7 +18,10 @@ class AdminUser
     @username is username
 
   signInUsername: (username, password) ->
-    username is @username and password is adminPass
+    bcrypt.compare(password,adminPass)
+    .then((res) =>
+      username is @username and res
+    )
 
   signInToken: (authToken) ->
     payload = @verifyToken(authToken)

@@ -1,11 +1,13 @@
-conf        = require('config')
-LokiService = require('LokiService')
-cuid        = require('cuid')
-_           = require('lodash')
-jwt         = require('jsonwebtoken')
+conf         = require('config')
+LokiService  = require('LokiService')
+cuid         = require('cuid')
+_            = require('lodash')
+jwt          = require('jsonwebtoken')
+HashPassInit = require('HashPassInit')
 
 secret = conf.get('auth.secret')
 expiresIn = conf.get('auth.expire')
+bcrypt = require('bcrypt')
 
 class UserService extends LokiService
 
@@ -14,6 +16,7 @@ class UserService extends LokiService
       users:    ['username', 'email']
       sessions: ['authToken']
     )
+    checkPasswords()
 
   all: ->
     users = []
@@ -32,8 +35,17 @@ class UserService extends LokiService
     if userExists
       throw {code:-1, message: "User with username #{username} already exists"}
 
-    @users.insert({userId, username, email, password})
-    @signInUsername(username, password)
+    bcrypt.hash(password,conf.get('auth.salt'))
+    .then((passwordHash) =>
+      @users.insert({userId, username, email, passwordHash})
+      @signInUsername(username, password)
+    )
+
+  comparePassword =  (plainPassword, passwordHash) ->
+    bcrypt.compare(plainPassword,passwordHash)
+    .then((res) ->
+      res
+    )
 
   insertSession: (authToken, username) ->
     sessionId = cuid()
@@ -42,16 +54,24 @@ class UserService extends LokiService
   signInUsername: (username, password) ->
     user = @users.find({username})[0]
     if not user?
-      throw {code: -1, message: "User not found"}
+      comparePassword(username,password)
+      .then( ->
+        throw {code: -1, message: "Invalid Username or Password"}
+      )
+    else
+      comparePassword(password, user.passwordHash)
+      .then((res) =>
+        if !res
+          throw {code: -1, message: "Invalid Username or Password"}
+        else
+          # Sign token with secret set in config and add username to payload
+          authToken = jwt.sign({ username }, secret, { expiresIn })
+          @insertSession(authToken, username)
 
-    if user.password isnt password
-      throw {code: -1, message: "Password incorrect"}
+          authToken
+      )
 
-    # Sign token with secret set in config and add username to payload
-    authToken = jwt.sign({ username }, secret, { expiresIn })
-    @insertSession(authToken, username)
 
-    authToken
 
   # Sign user in using a token.
   signInToken: (authToken) ->
@@ -94,5 +114,9 @@ class UserService extends LokiService
       jwt.verify(authToken, secret)
     catch error
       throw {code: -1, message: "Invalid token supplied #{authToken}"}
+
+  # Checking if there is any password stored in plain text
+  checkPasswords = ->
+    hashPassInit = new HashPassInit()
 
 module.exports = new UserService()

@@ -53,10 +53,13 @@ bus.public("user.signInUsername").require('username', 'password').on((req, usern
   if typeof username isnt 'string' || not /^[a-zA-Z0-9_-]*$/.test(username) ||  not username
     throw {code:-1, message: "Username not valid"}
   else
-    if AdminUser.signInUsername(username, password)
-      return AdminUser.getAuthToken()
-    else
-      UserService.signInUsername(username, password)
+    AdminUser.signInUsername(username, password)
+    .then((res) =>
+      if res
+        return AdminUser.getAuthToken()
+      else
+        UserService.signInUsername(username, password)
+    )
 )
 
 bus.public("user.signInToken").require('authToken').on((req, authToken) ->
