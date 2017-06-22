@@ -20,5 +20,5 @@ RUN mkdir -p /usr/src/app/loki
 #HEALTHCHECK CMD /usr/health.sh
 
 WORKDIR /usr/src/app
-CMD npm install bcrypt@1.0.2
+RUN npm install bcrypt@1.0.2
 CMD node lib/index.js
