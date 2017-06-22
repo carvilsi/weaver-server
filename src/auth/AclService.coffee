@@ -58,6 +58,12 @@ class AclService extends LokiService
       @acl.update(delAcl)
     acl
 
+  checkProjectAcl: (projectId) ->
+    logger.code.info "Checking existence of function ACLs for project: #{projectId}"
+    for f in @projectFunctionACLs
+      id = @getProjectFunctionAclId(projectId, f)
+      @createFunctionACL(id) if !getACL(id)?
+
   createACL: (objectId, user) ->
     acl =
       id:          cuid()
