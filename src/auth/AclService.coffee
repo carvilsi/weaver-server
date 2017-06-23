@@ -16,7 +16,8 @@ class AclService extends LokiService
   projectFunctionACLs: [
     'delete-project',
     'history',
-    'snapshot'
+    'snapshot',
+    'wipe'
   ]
 
   constructor: ->
@@ -64,7 +65,7 @@ class AclService extends LokiService
     logger.code.info "Checking existence of function ACLs for project: #{projectId}"
     for f in @projectFunctionACLs
       id = @getProjectFunctionAclId(projectId, f)
-      @createFunctionACL(id) if !getACL(id)?
+      @createFunctionACL(id) if !@getACL(id)?
 
   createACL: (objectId, user) ->
     acl =
@@ -97,12 +98,12 @@ class AclService extends LokiService
 
   getACL: (aclId) ->
     result = @acl.findOne({id: aclId})
-    logger.code.debug "getACL(#{aclId}) result: #{JSON.stringify(result)}"
+    logger.code.silly "getACL(#{aclId}) result: #{JSON.stringify(result)}"
     result
 
   getACLByObject: (objectId) ->
     object = @objects.findOne({id: objectId})
-    logger.code.debug "getACLByObject(#{objectId}): #{object}"
+    logger.code.silly "getACLByObject(#{objectId}): #{object}"
     @getACL(object.acl)
 
 

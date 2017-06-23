@@ -77,17 +77,21 @@ bus.internal('getMinioForProject').on((project) ->
 )
 
 # Create a snapshot with write operations for the project
-bus.private('snapshot').retrieve('project').on((req, project) ->
+bus.private('snapshot').retrieve('project', 'user').on((req, project, user) ->
+  AclService.assertProjectFunctionPermission(user, project, 'snapshot')
   logger.usage.info "Generating snapshot for project with id #{project.id}"
   database = new DatabaseService(project.database)
   database.snapshot()
 )
 
 # Wipe single project
-bus.public('project.wipe').retrieve('project').on((req, project) ->
+bus.public('project.wipe').retrieve('project', 'user').on((req, project, user) ->
+  AclService.assertProjectFunctionPermission(user, project, 'wipe')
   logger.usage.info "Wiping project with id #{project.id}"
   database = new DatabaseService(project.database)
-  database.wipe()
+  database.wipe().then(->
+    AclService.checkProjectAcl(project.id)
+  )
 )
 
 
