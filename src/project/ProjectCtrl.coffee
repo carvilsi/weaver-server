@@ -26,12 +26,18 @@ bus.provide('minio').retrieve('project', 'user').on((req, project, user) ->
 )
 
 bus.private('project').retrieve('user').on((req, user) ->
+  stripProject = (project) ->
+    {
+      id: project.id
+      acl: project.acl
+      name: project.name
+    }
   projects = ProjectService.all()
   result = []
   for p in projects
     try
       AclService.assertACLReadPermission(user, p.acl)
-      result.push(p)
+      result.push(stripProject(p))
     catch error
       # User has no access to this project
   result
