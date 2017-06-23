@@ -14,7 +14,9 @@ class AclService extends LokiService
   ]
 
   projectFunctionACLs: [
-    'delete-project'
+    'delete-project',
+    'history',
+    'snapshot'
   ]
 
   constructor: ->
@@ -133,10 +135,12 @@ class AclService extends LokiService
 
     (user for user of users)
 
+  assertProjectFunctionPermission: (user, project, projectFunction) ->
+    @assertACLWritePermission(user, @getProjectFunctionAclId(project.id, projectFunction))
 
   assertACLPermission: (user, aclId, readOnly) ->
-    return if user.isAdmin()
     logger.usage.silly "Checking acl access for user #{user.username} on #{aclId}"
+    return if user.isAdmin()
 
     acl = @getACL(aclId)
     allowedUsers = @getAllowedUsers(acl, readOnly)
