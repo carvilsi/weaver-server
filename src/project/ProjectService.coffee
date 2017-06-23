@@ -15,7 +15,7 @@ class ProjectService extends LokiService
     if @projects.find({id}).length isnt 0
       throw {code:-1, message: "Project with id #{id} already exists"}
 
-    logger.code.info "ProjectService creating project with id #{id}"
+    logger.code.info "ProjectService storing project with id #{id}"
     @projects.insert({id, name, database, acl, fileServer, tracker })
 
   get: (id) ->

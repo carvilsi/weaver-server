@@ -52,12 +52,14 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
     acl = AclService.createProjectACLs(id, user)
     ProjectService.create(id, name, project.database, acl.id, project.fileServer, project.tracker)
 
+    logger.code.debug "Project #{id} created, acl: #{acl}"
+
     return acl
   )
 )
 
 bus.private('project.delete').retrieve('user', 'project', 'database', 'minio', 'tracker').on((req, user, project, database, minio, tracker) ->
-  AclService.assertACLWritePermission(user, AclService.getProjectFunctionAclId(project.id, 'delete-project'))
+  AclService.assertProjectFunctionPermission(user, project, 'delete-project')
 
   logger.usage.info "Deleting project with id #{project.id}"
   Promise.all([
@@ -68,7 +70,10 @@ bus.private('project.delete').retrieve('user', 'project', 'database', 'minio', '
   ])
 )
 
-bus.private('project.ready').require('id').on((req, id) ->
+bus.private('project.ready').retrieve('user').require('id').on((req, user, id) ->
+  logger.usage.silly "Checking acl for ready for project #{id}"
+  AclService.assertACLReadPermission(user, AclService.getACLByObject(id).id)
+  logger.usage.silly "Checking ready for project #{id}"
   ProjectPool.isReady(id)
 )
 

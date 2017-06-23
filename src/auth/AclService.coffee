@@ -63,6 +63,9 @@ class AclService extends LokiService
 
   checkProjectAcl: (projectId) ->
     logger.code.info "Checking existence of function ACLs for project: #{projectId}"
+    if !@getACLByObject(projectId)?
+      logger.code.debug "No main project acl found, creating..."
+      @createACL(projectId)
     for f in @projectFunctionACLs
       id = @getProjectFunctionAclId(projectId, f)
       @createFunctionACL(id) if !@getACL(id)?
@@ -71,11 +74,14 @@ class AclService extends LokiService
     acl =
       id:          cuid()
       userRead:    []
-      userWrite:   [user.userId]
+      userWrite:   []
       roleRead:    []
       roleWrite:   []
       publicRead:  false
       publicWrite: false
+
+    logger.code.silly "User: #{JSON.stringify(user)}" if user?
+    acl.userWrite = [ user.userId ] if user?
 
     @objects.insert({id: objectId, acl: acl.id})
     aclDoc = @acl.insert(acl)
@@ -104,8 +110,7 @@ class AclService extends LokiService
   getACLByObject: (objectId) ->
     object = @objects.findOne({id: objectId})
     logger.code.silly "getACLByObject(#{objectId}): #{object}"
-    @getACL(object.acl)
-
+    @getACL(object.acl) if object?
 
   updateACL: (aclServerObject) ->
     acl = @acl.findOne({id: aclServerObject._id})
