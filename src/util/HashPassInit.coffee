@@ -29,6 +29,9 @@ class HashPassInit
   loaded = ->
     promises = []
     users = db.getCollection('users')
+
+    return Promise.resolve() if !users?
+
     results = users.find()
     for user in results
       if user.password?
