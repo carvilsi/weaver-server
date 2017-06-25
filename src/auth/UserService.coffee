@@ -45,6 +45,13 @@ class UserService extends LokiService
     bcrypt.compare(plainPassword,passwordHash)
     .then((res) ->
       res
+
+  changePassword: (userId, password) ->
+    user = @users.findOne({userId})
+    bcrypt.hash(password, conf.get('auth.salt'))
+    .then((passwordHash) =>
+      user.passwordHash = passwordHash
+      @users.update(user)
     )
 
   insertSession: (authToken, username) ->

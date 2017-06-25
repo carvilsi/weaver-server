@@ -34,6 +34,7 @@ route.private.POST "user.read"               # Gets user object using authToken
 route.private.POST "user.roles"              # Gets roles for user
 route.private.POST "user.delete"             # Destroys user
 route.private.POST "user.update"             # Updates a user profile
+route.private.POST "user.changePassword"     # Changes password
 route.public.POST  "users.wipe"              # Wipes all users
 
 # CRUD: Access Control List (ACL)

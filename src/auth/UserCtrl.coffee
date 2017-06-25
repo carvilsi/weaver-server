@@ -111,6 +111,13 @@ bus.private('user.update').retrieve('user').require('update').on((req, user, upd
   UserService.update(update)
 )
 
+bus.private('user.changePassword').retrieve('user').require('userId', 'password').on((req, user, userId, password) ->
+  if not user.isAdmin() and userId isnt user.userId
+    throw {code: -1, message: 'Permission denied'}
+
+  UserService.changePassword(userId, password)
+)
+
 # Wipe of all users
 bus.public('users.wipe').enable(config.get('application.wipe')).on((req) ->
 
