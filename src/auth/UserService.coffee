@@ -29,6 +29,7 @@ class UserService extends LokiService
 
     users
   signUp: (userId, username, email, password, firstname, lastname) ->
+    (_.omit(user, ['passwordHash']) for user in @users.find())
 
     userExists = @users.findOne({username})?
 
@@ -97,7 +98,7 @@ class UserService extends LokiService
     @verifyToken(authToken)
 
     user = @users.findOne({username: session.username})
-    _.omit(user, ['password'])
+    _.omit(user, ['passwordHash'])
 
   signOut: (authToken) ->
     session = @sessions.findOne({authToken})
