@@ -31,7 +31,10 @@ bus.private("users").retrieve('user').on((req, user)->
 )
 
 # Sign up a new user.
-bus.public("user.signUp").require('userId', 'username', 'password', 'email').on((req, userId, username, password, email)->
+bus.public("user.signUp")
+.require('userId', 'username', 'password')
+.optional('email', 'firstname', 'lastname')
+.on((req, userId, username, password, email, firstname, lastname)->
 
   if AdminUser.hasUsername(username)
     throw {code:-1, message: "Admin user is not allowed to signup."}
@@ -45,7 +48,7 @@ bus.public("user.signUp").require('userId', 'username', 'password', 'email').on(
   if password.length < 6
     throw {code:-1, message: "Password must be 6 characters minimum"}
 
-  UserService.signUp(userId, username, email, password)
+  UserService.signUp(userId, username, email, password, firstname, lastname)
 )
 
 

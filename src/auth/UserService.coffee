@@ -28,8 +28,8 @@ class UserService extends LokiService
         })
 
     users
+  signUp: (userId, username, email, password, firstname, lastname) ->
 
-  signUp: (userId, username, email, password) ->
     userExists = @users.findOne({username})?
 
     if userExists
