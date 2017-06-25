@@ -14,7 +14,10 @@ class AclService extends LokiService
   ]
 
   projectFunctionACLs: [
-    'delete-project'
+    'delete-project',
+    'history',
+    'snapshot',
+    'wipe'
   ]
 
   constructor: ->
@@ -60,19 +63,25 @@ class AclService extends LokiService
 
   checkProjectAcl: (projectId) ->
     logger.code.info "Checking existence of function ACLs for project: #{projectId}"
+    if !@getACLByObject(projectId)?
+      logger.code.debug "No main project acl found, creating..."
+      @createACL(projectId)
     for f in @projectFunctionACLs
       id = @getProjectFunctionAclId(projectId, f)
-      @createFunctionACL(id) if !getACL(id)?
+      @createFunctionACL(id) if !@getACL(id)?
 
   createACL: (objectId, user) ->
     acl =
       id:          cuid()
       userRead:    []
-      userWrite:   [user.userId]
+      userWrite:   []
       roleRead:    []
       roleWrite:   []
       publicRead:  false
       publicWrite: false
+
+    logger.code.silly "User: #{JSON.stringify(user)}" if user?
+    acl.userWrite = [ user.userId ] if user?
 
     @objects.insert({id: objectId, acl: acl.id})
     aclDoc = @acl.insert(acl)
@@ -95,14 +104,13 @@ class AclService extends LokiService
 
   getACL: (aclId) ->
     result = @acl.findOne({id: aclId})
-    logger.code.debug "getACL(#{aclId}) result: #{JSON.stringify(result)}"
+    logger.code.silly "getACL(#{aclId}) result: #{JSON.stringify(result)}"
     result
 
   getACLByObject: (objectId) ->
     object = @objects.findOne({id: objectId})
-    logger.code.debug "getACLByObject(#{objectId}): #{object}"
-    @getACL(object.acl)
-
+    logger.code.silly "getACLByObject(#{objectId}): #{object}"
+    @getACL(object.acl) if object?
 
   updateACL: (aclServerObject) ->
     acl = @acl.findOne({id: aclServerObject._id})
@@ -133,10 +141,12 @@ class AclService extends LokiService
 
     (user for user of users)
 
+  assertProjectFunctionPermission: (user, project, projectFunction) ->
+    @assertACLWritePermission(user, @getProjectFunctionAclId(project.id, projectFunction))
 
   assertACLPermission: (user, aclId, readOnly) ->
-    return if user.isAdmin()
     logger.usage.silly "Checking acl access for user #{user.username} on #{aclId}"
+    return if user.isAdmin()
 
     acl = @getACL(aclId)
     allowedUsers = @getAllowedUsers(acl, readOnly)

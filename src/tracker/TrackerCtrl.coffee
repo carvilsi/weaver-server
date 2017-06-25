@@ -4,6 +4,7 @@ Tracker       = require('Tracker')
 Promise       = require('bluebird')
 logger        = require('logger')
 operationSort = require('operationSort')
+AclService    = require('AclService')
 
 trackers = {}
 
@@ -14,7 +15,9 @@ bus.private('write').retrieve('tracker', 'user', 'project').on((req, tracker, us
   return
 )
 
-bus.private('history').retrieve('tracker').on((req, tracker) ->
+bus.private('history').retrieve('tracker', 'user', 'project').on((req, tracker, user, project) ->
+  AclService.assertProjectFunctionPermission(user, project, 'history')
+  logger.usage.info "History requested for project #{project.projectId} by user #{user.username}"
   tracker.getHistoryFor(req)
 
 bus.provide('tracker').retrieve('project').on((req, project) ->

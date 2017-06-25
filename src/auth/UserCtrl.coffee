@@ -15,6 +15,7 @@ bus.provide("user").require('authToken').on((req, authToken) ->
   if AdminUser.hasAuthToken(authToken)
     AdminUser
   else
+    logger.code.silly "Getting user for authToken #{authToken}"
     user = UserService.getUser(authToken)
     user.isAdmin = -> false
     user
