@@ -108,6 +108,9 @@ bus.private("user.delete").retrieve('user').require('username').on((req, user, u
 )
 
 bus.private('user.update').retrieve('user').require('update').on((req, user, update) ->
+  if not user.isAdmin() and update.userId isnt user.userId
+    throw {code: -1, message: 'Permission denied'}
+
   UserService.update(update)
 )
 
