@@ -115,7 +115,6 @@ bus.public('users.wipe').enable(config.get('application.wipe')).on((req) ->
 
   Promise.all([
     UserService.wipe()
-    AclService.wipe()
     RoleService.wipe()
   ])
 )
