@@ -90,18 +90,28 @@ bus.private('snapshot').retrieve('project', 'user').on((req, project, user) ->
 )
 
 # Wipe single project
-bus.public('project.wipe').retrieve('project', 'user').on((req, project, user) ->
-  AclService.assertProjectFunctionPermission(user, project, 'wipe')
+bus.private('project.wipe')
+.retrieve('project', 'user')
+.enable(config.get('application.wipe'))
+.on((req, project, user) ->
+  if not user.isAdmin()
+    throw {code: -1, message: 'Permission denied'}
+
   logger.usage.info "Wiping project with id #{project.id}"
   database = new DatabaseService(project.database)
-  database.wipe().then(->
-    AclService.checkProjectAcl(project.id)
-  )
+  database.wipe()
 )
 
 
 # Wipe all projects
-bus.public('projects.wipe').enable(config.get('application.wipe')).on((req) ->
+bus.private('projects.wipe')
+.retrieve('user')
+.enable(config.get('application.wipe'))
+.on((req, user) ->
+
+  if not user.isAdmin()
+    throw {code: -1, message: 'Permission denied'}
+
   logger.usage.info "Wiping all projects"
 
   endpoints = (p.database for p in ProjectService.all())
@@ -115,7 +125,13 @@ bus.public('projects.wipe').enable(config.get('application.wipe')).on((req) ->
 
 
 # Destroy all projects
-bus.public('projects.destroy').enable(config.get('application.wipe')).on((req) ->
+bus.private('projects.destroy')
+.retrieve('user')
+.enable(config.get('application.wipe'))
+.on((req, user) ->
+
+  if not user.isAdmin()
+    throw {code: -1, message: 'Permission denied'}
 
   logger.usage.info "Destroying all projects"
 

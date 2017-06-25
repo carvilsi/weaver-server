@@ -109,7 +109,13 @@ bus.private('user.update').retrieve('user').require('update').on((req, user, upd
 )
 
 # Wipe of all users
-bus.public('users.wipe').enable(config.get('application.wipe')).on((req) ->
+bus.private('users.wipe')
+.retrieve('user')
+.enable(config.get('application.wipe'))
+.on((req, user) ->
+
+  if not user.isAdmin()
+    throw {code: -1, message: 'Permission denied'}
 
   logger.usage.info "Wiping all users on weaver server"
 
