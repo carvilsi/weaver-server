@@ -9,6 +9,12 @@ bus.private('query').retrieve('user', 'database').on((req, user, database) ->
   )
 )
 
-bus.private('query.native').retrieve('database').on((req, database) ->
+bus.private('query.native')
+.retrieve('user', 'database')
+.on((req, user, database) ->
+  
+  if not user.isAdmin()
+    throw {code: -1, message: 'Permission denied'}
+
   database.nativeQuery(req.payload.query)
 )

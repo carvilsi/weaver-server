@@ -2,6 +2,7 @@ conf        = require('config')
 LokiService = require('LokiService')
 cuid        = require('cuid')
 _           = require('lodash')
+logger      = require('logger')
 
 class RoleService extends LokiService
 
@@ -49,10 +50,13 @@ class RoleService extends LokiService
     for roleId in roles
       role = @getRole(roleId)
 
-      users[u] = null for u in role.users
+      if role?
+        users[u] = null for u in role.users
 
-      # TODO: Fix that this breaks due to circular dependency
-      @getUsersFromRole(r, users) for r in role.roles
+        # TODO: Fix that this breaks due to circular dependency
+        @getUsersFromRole(r, users) for r in role.roles
+      else
+        logger.usage.warn "Role #{roleId} users requested, but no longer present in the RoleService"
 
     # Return unique users
     (user for user of users)
