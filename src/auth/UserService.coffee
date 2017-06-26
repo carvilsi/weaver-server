@@ -1,11 +1,14 @@
-conf        = require('config')
-LokiService = require('LokiService')
-cuid        = require('cuid')
-_           = require('lodash')
-jwt         = require('jsonwebtoken')
+conf         = require('config')
+LokiService  = require('LokiService')
+cuid         = require('cuid')
+_            = require('lodash')
+jwt          = require('jsonwebtoken')
+HashPassInit = require('HashPassInit')
 
 secret = conf.get('auth.secret')
 expiresIn = conf.get('auth.expire')
+bcrypt = require('bcrypt')
+logger = require('logger')
 
 class UserService extends LokiService
 
@@ -14,49 +17,81 @@ class UserService extends LokiService
       users:    ['username', 'email']
       sessions: ['authToken']
     )
+    checkPasswords()
 
   all: ->
-    users = []
-    for u in @users.find()
-      users.push({
-        username: u.username
-        email: u.email
-        userId: u.userId
-        })
+    (_.omit(user, ['passwordHash']) for user in @users.find())
 
-    users
+  signUp: (userId, username, email, password, firstname, lastname) ->
 
-  signUp: (userId, username, email, password) ->
-    userExists = @users.findOne({username})?
-
-    if userExists
+    if @users.findOne({username})?
+      logger.auth.warn("User with username #{username} already exists")
       throw {code:-1, message: "User with username #{username} already exists"}
 
-    @users.insert({userId, username, email, password})
-    @signInUsername(username, password)
+    if @users.findOne({userId})?
+      logger.auth.warn("User with userId #{userId} already exists")
+      throw {code:-1, message: "User with userId #{userId} already exists"}
+
+    bcrypt.hash(password,conf.get('auth.salt'))
+    .then((passwordHash) =>
+      @users.insert({userId, username, email, passwordHash, firstname, lastname, active: true})
+      @signInUsername(username, password)
+    )
+
+  comparePassword =  (plainPassword, passwordHash) ->
+    bcrypt.compare(plainPassword,passwordHash)
+
+  changePassword: (userId, password) ->
+    user = @users.findOne({userId})
+    bcrypt.hash(password, conf.get('auth.salt'))
+    .then((passwordHash) =>
+      logger.auth.warn("Password changed for #{userId}")
+      user.passwordHash = passwordHash
+      @users.update(user)
+    )
 
   insertSession: (authToken, username) ->
+    logger.auth.warn("Correct sigIn for #{username}")
     sessionId = cuid()
     @sessions.insert({sessionId, authToken, username})
 
   signInUsername: (username, password) ->
     user = @users.find({username})[0]
     if not user?
-      throw {code: -1, message: "User not found"}
+      comparePassword(username,password)
+      .then( ->
+        logger.auth.warn("Invalid attempt sigInUsername for #{username} wrong user")
+        throw {code: -1, message: "Invalid Username or Password"}
+      )
+    else
+      if not user.active
+        logger.auth.warn("User #{username} not active")
+        throw {code: -1, message: "User not active"}
 
-    if user.password isnt password
-      throw {code: -1, message: "Password incorrect"}
+      comparePassword(password, user.passwordHash)
+      .then((res) =>
+        if !res
+          logger.auth.warn("Invalid attempt sigInUsername for #{username} wrong password")
+          throw {code: -1, message: "Invalid Username or Password"}
+        else
+          # Sign token with secret set in config and add username to payload
+          authToken = jwt.sign({ username }, secret, { expiresIn })
+          @insertSession(authToken, username)
 
-    # Sign token with secret set in config and add username to payload
-    authToken = jwt.sign({ username }, secret, { expiresIn })
-    @insertSession(authToken, username)
+          authToken
+      )
 
-    authToken
+
 
   # Sign user in using a token.
   signInToken: (authToken) ->
     payload = @verifyToken(authToken)
     username = payload.username
+
+    user = @users.find({username})[0]
+    if not user?.active
+        throw {code: -1, message: "User not active"}
+
     @insertSession(authToken, username)
 
     authToken
@@ -64,27 +99,32 @@ class UserService extends LokiService
   getUser: (authToken) ->
     session = @sessions.find({authToken})[0]
     if not session?
+      logger.auth.error("No session found for authToken #{authToken}")
       throw {code: -1, message: "No session found for authToken #{authToken}"}
 
     # Check if the token is still valid. If not -> throw error
     @verifyToken(authToken)
 
     user = @users.findOne({username: session.username})
-    _.omit(user, ['password'])
+    _.omit(user, ['passwordHash'])
 
   signOut: (authToken) ->
     session = @sessions.findOne({authToken})
     @sessions.remove(session)
 
-  destroy: (username) ->
-    user = @users.findOne({username})
+  destroy: (id) ->
+    user = @users.findOne({userId:id})
     @users.remove(user)
 
   update: (update) ->
     # TODO Lots of checking (is the username/email correct?, does the user exist? etc)
     user = @users.findOne({userId: update.userId})
-    user.username = update.username
-    user.email    = update.email
+    user.username  = update.username
+    user.email     = update.email
+    user.firstname = update.firstname
+    user.lastname  = update.lastname
+    user.active    = update.active
+    logger.auth.warn("Updating user #{user.username}")
     @users.update(user)
     return
 
@@ -93,6 +133,11 @@ class UserService extends LokiService
     try
       jwt.verify(authToken, secret)
     catch error
+      logger.auth.warn("Invalid token supplied #{authToken}")
       throw {code: -1, message: "Invalid token supplied #{authToken}"}
+
+  # Checking if there is any password stored in plain text
+  checkPasswords = ->
+    hashPassInit = new HashPassInit()
 
 module.exports = new UserService()

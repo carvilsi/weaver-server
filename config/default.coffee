@@ -1,12 +1,12 @@
 module.exports =
   admin:
     username: 'admin'
-    password: 'admin'
-    generatePassword: false
+    password: '$2a$10$CnY1NFwHHo1v0qiF/rKgIOWAxUOA5Znh7kMPoh.Ru98uX9CZ7MPqC'
 
   auth:
     secret: 'mysupersecretstring'
     expire: '7d'
+    salt: 10
 
   projectPool: [
     {
@@ -26,6 +26,7 @@ module.exports =
   ]
 
   application:
+    openUserCreation: true
     wipe: true
     singleDatabase: true
     sounds:
@@ -56,9 +57,10 @@ module.exports =
       agentAddress: 'localhost'
 
   logging:
-    console: 'error'
-    file:    'warn'
+    console: 'warn'
+    file:    'info'
     logFilePath:
       config: './logs/weaver.config'
       code: './logs/weaver.code'
       usage: './logs/weaver.usage'
+      auth: './logs/weaver.auth'

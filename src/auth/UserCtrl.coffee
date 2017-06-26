@@ -2,6 +2,7 @@ bus             = require('WeaverBus')
 UserService     = require('UserService')
 AclService      = require('AclService')
 RoleService     = require('RoleService')
+ProjectService  = require('ProjectService')
 AdminUser       = require('AdminUser')
 logger          = require('logger')
 config          = require('config')
@@ -12,10 +13,13 @@ bus.private("*").priority(1000).retrieve('user').on((req, user) ->
 
 
 bus.provide("user").require('authToken').on((req, authToken) ->
+  logger.usage.silly "Getting user for authtoken #{authToken}"
   if AdminUser.hasAuthToken(authToken)
+    logger.usage.silly "Getting user for authtoken #{authToken}: admin"
     AdminUser
   else
     user = UserService.getUser(authToken)
+    logger.code.silly "Getting user for authToken #{authToken}: #{user.username}"
     user.isAdmin = -> false
     user
 )
@@ -24,36 +28,69 @@ bus.provide("user").require('authToken').on((req, authToken) ->
 # Get all users
 bus.private("users").retrieve('user').on((req, user)->
   if not user.isAdmin()
+    logger.auth.error("Only admin user is allowed to get all users.")
     throw {code:-1, message: "Only admin user is allowed to get all users."}
 
   UserService.all()
 )
 
-# Sign up a new user.
-bus.public("user.signUp").require('userId', 'username', 'password', 'email').on((req, userId, username, password, email)->
-
-  if AdminUser.hasUsername(username)
+registerUser = (userId, username, password, email, firstname, lastname)->
+  logger.usage.info "User signup for #{username}"
+  if AdminUser.hasUsername(username) or AdminUser.hasUserId(userId)
+    logger.auth.warn("Attempt to sign up with Admin.")
     throw {code:-1, message: "Admin user is not allowed to signup."}
 
   if username.length < 2
+    logger.auth.warn("Sign up attempt username must be 2 characters minimum: #{username}")
     throw {code:-1, message: "Username must be 2 characters minimum"}
 
   if username.indexOf(' ') >= 0
+    logger.auth.warn("Sign up attempt username may not contain spaces: #{username}")
     throw {code:-1, message: "Username may not contain spaces"}
 
   if password.length < 6
+    logger.auth.warn("Sign up attempt Password must be 6 characters minimum")
     throw {code:-1, message: "Password must be 6 characters minimum"}
 
-  UserService.signUp(userId, username, email, password)
-)
+  logger.usage.info "User signup for #{username} - passed checks"
 
+  UserService.signUp(userId, username, email, password, firstname, lastname)
+
+# Sign up a new user.
+if config.get('application.openUserCreation')
+  logger.config.warn "User account creation is open to all"
+  bus.public("user.signUp")
+  .require('userId', 'username', 'password')
+  .optional('email', 'firstname', 'lastname')
+  .on((req, userId, username, password, email, firstname, lastname)->
+    registerUser(userId, username, password, email, firstname, lastname)
+  )
+else
+  logger.config.warn "User account creation is only available to those with permission"
+  bus.private("user.signUp")
+  .retrieve('user')
+  .require('userId', 'username', 'password')
+  .optional('email', 'firstname', 'lastname')
+  .on((req, user, userId, username, password, email, firstname, lastname)->
+    logger.usage.info "User #{user.username} is trying to create account for #{username}"
+    AclService.assertServerFunctionPermission(user, 'create-users')
+    registerUser(userId, username, password, email, firstname, lastname)
+  )
 
 # Sign in existing user
 bus.public("user.signInUsername").require('username', 'password').on((req, username, password) ->
-  if AdminUser.signInUsername(username, password)
-    return AdminUser.getAuthToken()
+  if typeof username isnt 'string' || not /^[a-zA-Z0-9_-]*$/.test(username) ||  not username
+    logger.auth.error("Invalid Sign up attempt with invalid username: #{username}")
+    throw {code:-1, message: "Username not valid"}
   else
-    UserService.signInUsername(username, password)
+    AdminUser.signInUsername(username, password)
+    .then((res) =>
+      if res
+        logger.auth.warn("Correct sigInUsername for Admin")
+        return AdminUser.getAuthToken()
+      else
+        UserService.signInUsername(username, password)
+    )
 )
 
 bus.public("user.signInToken").require('authToken').on((req, authToken) ->
@@ -86,29 +123,59 @@ bus.private("user.roles").require('id').on((req, id) ->
   RoleService.getRolesForUser(id)
 )
 
+bus.private("user.projects").retrieve('user').require('id').on((req, user, id) ->
+  if not user.isAdmin() and user.userId isnt id
+    throw {code: -1, message: 'Permission denied'}
+
+  if user.userId is id
+    return ProjectService.getProjectsForUser(user)
+  else
+    proxyUser =
+      userId: id
+      isAdmin: -> false
+
+    return ProjectService.getProjectsForUser(proxyUser)
+)
+
+
 
 # Destroy user
-bus.private("user.delete").retrieve('user').require('username').on((req, user, username) ->
+bus.private("user.delete").retrieve('user').require('id').on((req, user, id) ->
 
-  if AdminUser.hasUsername(username)
+  if AdminUser.id is id
     throw {code:-1, message: "Admin user can not be deleted."}
 
-  UserService.destroy(username)
+  UserService.destroy(id)
   return
 )
 
 bus.private('user.update').retrieve('user').require('update').on((req, user, update) ->
+  if not user.isAdmin() and update.userId isnt user.userId
+    throw {code: -1, message: 'Permission denied'}
+
   UserService.update(update)
 )
 
+bus.private('user.changePassword').retrieve('user').require('userId', 'password').on((req, user, userId, password) ->
+  if not user.isAdmin() and userId isnt user.userId
+    throw {code: -1, message: 'Permission denied'}
+
+  UserService.changePassword(userId, password)
+)
+
 # Wipe of all users
-bus.public('users.wipe').enable(config.get('application.wipe')).on((req) ->
+bus.private('users.wipe')
+.retrieve('user')
+.enable(config.get('application.wipe'))
+.on((req, user) ->
+
+  if not user.isAdmin()
+    throw {code: -1, message: 'Permission denied'}
 
   logger.usage.info "Wiping all users on weaver server"
 
   Promise.all([
     UserService.wipe()
-    AclService.wipe()
     RoleService.wipe()
   ])
 )

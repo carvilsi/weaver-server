@@ -7,6 +7,7 @@ ProjectPool     = require('ProjectPool')
 AclService      = require('AclService')
 DatabaseService = require('DatabaseService')
 logger          = require('logger')
+Tracker         = require('Tracker')
 
 
 
@@ -20,27 +21,48 @@ bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
 )
 
 # Move to FileController
-bus.provide('minio').retrieve('project').on((req, project) ->
+bus.provide('minio').retrieve('project', 'user').on((req, project, user) ->
+  AclService.assertACLReadPermission(user, project.acl)
   MinioClient.create(project.fileServer)
 )
 
-bus.private('project').on((req) ->
-  ProjectService.all()
+bus.private('project').retrieve('user').on((req, user) ->
+  stripProject = (project) ->
+    {
+      id: project.id
+      acl: project.acl
+      name: project.name
+    }
+  projects = ProjectService.all()
+  result = []
+  for p in projects
+    try
+      AclService.assertACLReadPermission(user, p.acl)
+      result.push(stripProject(p))
+    catch error
+      # User has no access to this project
+  result
 )
 
 bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
+  AclService.assertACLWritePermission(user, 'create-projects')
 
   ProjectPool.create(id).then((project) ->
 
     # Create an ACL for this user to set on the project
-    acl = AclService.createACL(id, user)
+    acl = AclService.createProjectACLs(id, user)
     ProjectService.create(id, name, project.database, acl.id, project.fileServer, project.tracker)
 
-    return
+    logger.code.debug "Project #{id} created, acl: #{acl}"
+
+    return acl
   )
 )
 
-bus.private('project.delete').retrieve('project', 'database', 'minio', 'tracker').on((req, project, database, minio, tracker) ->
+bus.private('project.delete').retrieve('user', 'project', 'database', 'minio', 'tracker').on((req, user, project, database, minio, tracker) ->
+  AclService.assertProjectFunctionPermission(user, project, 'delete-project')
+
+  logger.usage.info "Deleting project with id #{project.id}"
   Promise.all([
     tracker.wipe()
     database.wipe()
@@ -49,7 +71,10 @@ bus.private('project.delete').retrieve('project', 'database', 'minio', 'tracker'
   ])
 )
 
-bus.private('project.ready').require('id').on((req, id) ->
+bus.private('project.ready').retrieve('user').require('id').on((req, user, id) ->
+  logger.usage.silly "Checking acl for ready for project #{id}"
+  AclService.assertACLReadPermission(user, AclService.getACLByObject(id).id)
+  logger.usage.silly "Checking ready for project #{id}"
   ProjectPool.isReady(id)
 )
 
@@ -58,35 +83,67 @@ bus.internal('getMinioForProject').on((project) ->
 )
 
 # Create a snapshot with write operations for the project
-bus.private('snapshot').retrieve('project').on((req, project) ->
+bus.private('snapshot').retrieve('project', 'user').on((req, project, user) ->
+  AclService.assertProjectFunctionPermission(user, project, 'snapshot')
+  logger.usage.info "Generating snapshot for project with id #{project.id}"
   database = new DatabaseService(project.database)
   database.snapshot()
 )
 
 # Wipe single project
-bus.public('project.wipe').retrieve('project').on((req, project) ->
-  database = new DatabaseService(project.database)
-  database.wipe()
+bus.private('project.wipe')
+.retrieve('project', 'user', 'database', 'tracker')
+.enable(config.get('application.wipe'))
+.on((req, project, user, database, tracker) ->
+  if not user.isAdmin()
+    throw {code: -1, message: 'Permission denied'}
+
+  logger.usage.info "Wiping project with id #{project.id}"
+  Promise.all([
+    database.wipe()
+    tracker.wipe()
+  ])
+
 )
 
 
 # Wipe all projects
-bus.public('projects.wipe').enable(config.get('application.wipe')).on((req) ->
+bus.private('projects.wipe')
+.retrieve('user')
+.enable(config.get('application.wipe'))
+.on((req, user) ->
+
+  if not user.isAdmin()
+    throw {code: -1, message: 'Permission denied'}
 
   logger.usage.info "Wiping all projects"
 
   endpoints = (p.database for p in ProjectService.all())
   databases = (new DatabaseService(endpoint) for endpoint in endpoints)
 
-  Promise.map(databases, (database) ->
-    logger.usage.info "Wiping database: #{database.uri}"
-    database.wipe()
-  )
+  trackers = (new Tracker(p.tracker) for p in ProjectService.all())
+
+  Promise.all([
+    Promise.map(databases, (database) ->
+      logger.usage.info "Wiping database: #{database.uri}"
+      database.wipe()
+    )
+    Promise.map(trackers, (tracker) ->
+      logger.usage.info "Wiping tracker"
+      tracker.wipe()
+    )
+  ])
 )
 
 
 # Destroy all projects
-bus.public('projects.destroy').enable(config.get('application.wipe')).on((req) ->
+bus.private('projects.destroy')
+.retrieve('user')
+.enable(config.get('application.wipe'))
+.on((req, user) ->
+
+  if not user.isAdmin()
+    throw {code: -1, message: 'Permission denied'}
 
   logger.usage.info "Destroying all projects"
 

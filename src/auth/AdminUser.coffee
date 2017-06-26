@@ -5,19 +5,27 @@ adminUser = conf.get('admin.username')
 adminPass = conf.get('admin.password')
 secret = conf.get('auth.secret')
 expiresIn = conf.get('auth.expire')
+bcrypt = require('bcrypt')
+logger = require('logger')
 
 authTokens = {}
 
 class AdminUser
 
   constructor: (@username) ->
-    @id = @username
+    @id = 'root'
 
   hasUsername: (username) ->
     @username is username
 
+  hasUserId: (id) ->
+    @id is id
+
   signInUsername: (username, password) ->
-    username is @username and password is adminPass
+    bcrypt.compare(password,adminPass)
+    .then((res) =>
+      username is @username and res
+    )
 
   signInToken: (authToken) ->
     payload = @verifyToken(authToken)
@@ -49,6 +57,7 @@ class AdminUser
     try
       jwt.verify(authToken, secret)
     catch error
+      logger.auth.error("Invalid token supplied #{authToken}")
       throw {code: -1, message: "Invalid token supplied #{authToken}"}
 
 module.exports = new AdminUser(adminUser)

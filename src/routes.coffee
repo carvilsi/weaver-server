@@ -1,5 +1,6 @@
 RouteHandler = require('RouteHandler')
 bus          = require('WeaverBus')
+config       = require('config')
 
 route =
   public  : new RouteHandler(bus.get("public"))
@@ -14,7 +15,6 @@ route.public.GET   "application.time"        # Server system time
 route.private.GET  "read"                    # Reads a single entity
 route.private.POST "write"                   # Execute Create, Update and Delete operations in bulk
 route.private.POST "write.quick"             # Execute Create, Update and Delete operations in bulk without checks
-route.private.POST "wipe"                    # Wipe entire database
 route.private.POST "nodes"                   # Lists all nodes on the database
 route.private.GET  "relations"               # Lists all relations on the database
 route.private.GET  "history"                 # Change history by element
@@ -26,15 +26,22 @@ route.private.POST "query.native"            # Execute a native query
 
 # Authentication
 route.private.GET  "users"                   # Gets all users
-route.public.POST  "user.signUp"             # Sign up a new user
+
+if config.get('application.openUserCreation')
+  route.public.POST  "user.signUp"             # Sign up a new user
+else
+  route.private.POST  "user.signUp"             # Sign up a new user
+
 route.public.POST  "user.signInUsername"     # Sign in using username and password
 route.public.POST  "user.signInToken"        # Sign in using a token
 route.private.POST "user.signOut"            # Sign out session identified by authToken
 route.private.POST "user.read"               # Gets user object using authToken
 route.private.POST "user.roles"              # Gets roles for user
+route.private.POST "user.projects"           # Gets projects for user
 route.private.POST "user.delete"             # Destroys user
 route.private.POST "user.update"             # Updates a user profile
-route.public.POST  "users.wipe"              # Wipes all users
+route.private.POST "user.changePassword"     # Changes password
+route.private.POST "users.wipe"              # Wipes all users
 
 # CRUD: Access Control List (ACL)
 route.private.GET  "acl.all"
@@ -57,9 +64,9 @@ route.private.GET  "project"                 # Get a list of projects
 route.private.POST "project.create"          # Create a project
 route.private.POST "project.delete"          # Delete a project
 route.private.POST "project.ready"           # Checks if a project is setup and ready
-route.public.POST  "project.wipe"            # Wipe a single project
-route.public.POST  "projects.wipe"           # Wipe all projects
-route.public.POST  "projects.destroy"        # Destroy all projects
+route.private.POST "project.wipe"            # Wipe a single project
+route.private.POST "projects.wipe"           # Wipe all projects
+route.private.POST "projects.destroy"        # Destroy all projects
 
 # Plugins
 route.private.GET  "plugins"                 # Get a list of plugins

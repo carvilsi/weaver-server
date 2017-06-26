@@ -2,6 +2,7 @@ LokiService = require('LokiService')
 cuid        = require('cuid')
 _           = require('lodash')
 logger      = require('logger')
+AclService  = require('AclService')
 
 class ProjectService extends LokiService
 
@@ -14,7 +15,7 @@ class ProjectService extends LokiService
     if @projects.find({id}).length isnt 0
       throw {code:-1, message: "Project with id #{id} already exists"}
 
-    logger.code.info "ProjectService creating project with id #{id}"
+    logger.code.info "ProjectService storing project with id #{id}"
     @projects.insert({id, name, database, acl, fileServer, tracker })
 
   get: (id) ->
@@ -31,5 +32,25 @@ class ProjectService extends LokiService
   all: ->
     @projects.find()
 
+  load: ->
+    super().then(=>
+      @checkProjectAcls()
+    )
+
+  getProjectsForUser: (user) ->
+    projects = []
+
+    for p in @projects.find()
+      try
+        AclService.assertACLReadPermission(user, p.acl)
+        projects.push(p)
+      catch err
+        continue
+
+    projects
+
+  checkProjectAcls: ->
+    for project in @all
+      AclService.checkProjectAcl(project.id)
 
 module.exports = new ProjectService()
