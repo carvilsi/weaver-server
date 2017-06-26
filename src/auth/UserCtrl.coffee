@@ -25,6 +25,7 @@ bus.provide("user").require('authToken').on((req, authToken) ->
 # Get all users
 bus.private("users").retrieve('user').on((req, user)->
   if not user.isAdmin()
+    logger.auth.error("Only admin user is allowed to get all users.")
     throw {code:-1, message: "Only admin user is allowed to get all users."}
 
   UserService.all()
@@ -37,15 +38,19 @@ bus.public("user.signUp")
 .on((req, userId, username, password, email, firstname, lastname)->
 
   if AdminUser.hasUsername(username) or AdminUser.hasUserId(userId)
+    logger.auth.warn("Attempt to sign up with Admin.")
     throw {code:-1, message: "Admin user is not allowed to signup."}
 
   if username.length < 2
+    logger.auth.warn("Sign up attempt username must be 2 characters minimum: #{username}")
     throw {code:-1, message: "Username must be 2 characters minimum"}
 
   if username.indexOf(' ') >= 0
+    logger.auth.warn("Sign up attempt username may not contain spaces: #{username}")
     throw {code:-1, message: "Username may not contain spaces"}
 
   if password.length < 6
+    logger.auth.warn("Sign up attempt Password must be 6 characters minimum")
     throw {code:-1, message: "Password must be 6 characters minimum"}
 
   UserService.signUp(userId, username, email, password, firstname, lastname)
@@ -55,11 +60,13 @@ bus.public("user.signUp")
 # Sign in existing user
 bus.public("user.signInUsername").require('username', 'password').on((req, username, password) ->
   if typeof username isnt 'string' || not /^[a-zA-Z0-9_-]*$/.test(username) ||  not username
+    logger.auth.error("Invalid Sign up attempt with invalid username: #{username}")
     throw {code:-1, message: "Username not valid"}
   else
     AdminUser.signInUsername(username, password)
     .then((res) =>
       if res
+        logger.auth.warn("Correct sigInUsername for Admin")
         return AdminUser.getAuthToken()
       else
         UserService.signInUsername(username, password)

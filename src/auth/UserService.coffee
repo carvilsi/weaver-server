@@ -8,6 +8,7 @@ HashPassInit = require('HashPassInit')
 secret = conf.get('auth.secret')
 expiresIn = conf.get('auth.expire')
 bcrypt = require('bcrypt')
+logger = require('logger')
 
 class UserService extends LokiService
 
@@ -24,9 +25,11 @@ class UserService extends LokiService
   signUp: (userId, username, email, password, firstname, lastname) ->
 
     if @users.findOne({username})?
+      logger.auth.warn("User with username #{username} already exists")
       throw {code:-1, message: "User with username #{username} already exists"}
 
     if @users.findOne({userId})?
+      logger.auth.warn("User with userId #{userId} already exists")
       throw {code:-1, message: "User with userId #{userId} already exists"}
 
     bcrypt.hash(password,conf.get('auth.salt'))
@@ -42,11 +45,13 @@ class UserService extends LokiService
     user = @users.findOne({userId})
     bcrypt.hash(password, conf.get('auth.salt'))
     .then((passwordHash) =>
+      logger.auth.warn("Password changed for #{userId}")
       user.passwordHash = passwordHash
       @users.update(user)
     )
 
   insertSession: (authToken, username) ->
+    logger.auth.warn("Correct sigIn for #{username}")
     sessionId = cuid()
     @sessions.insert({sessionId, authToken, username})
 
@@ -55,15 +60,18 @@ class UserService extends LokiService
     if not user?
       comparePassword(username,password)
       .then( ->
+        logger.auth.warn("Invalid attempt sigInUsername for #{username} wrong user")
         throw {code: -1, message: "Invalid Username or Password"}
       )
     else
       if not user.active
+        logger.auth.warn("User #{username} not active")
         throw {code: -1, message: "User not active"}
 
       comparePassword(password, user.passwordHash)
       .then((res) =>
         if !res
+          logger.auth.warn("Invalid attempt sigInUsername for #{username} wrong password")
           throw {code: -1, message: "Invalid Username or Password"}
         else
           # Sign token with secret set in config and add username to payload
@@ -91,6 +99,7 @@ class UserService extends LokiService
   getUser: (authToken) ->
     session = @sessions.find({authToken})[0]
     if not session?
+      logger.auth.error("No session found for authToken #{authToken}")
       throw {code: -1, message: "No session found for authToken #{authToken}"}
 
     # Check if the token is still valid. If not -> throw error
@@ -115,6 +124,7 @@ class UserService extends LokiService
     user.firstname = update.firstname
     user.lastname  = update.lastname
     user.active    = update.active
+    logger.auth.warn("Updating user #{user.username}")
     @users.update(user)
     return
 
@@ -123,6 +133,7 @@ class UserService extends LokiService
     try
       jwt.verify(authToken, secret)
     catch error
+      logger.auth.warn("Invalid token supplied #{authToken}")
       throw {code: -1, message: "Invalid token supplied #{authToken}"}
 
   # Checking if there is any password stored in plain text

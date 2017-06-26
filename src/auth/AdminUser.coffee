@@ -6,6 +6,7 @@ adminPass = conf.get('admin.password')
 secret = conf.get('auth.secret')
 expiresIn = conf.get('auth.expire')
 bcrypt = require('bcrypt')
+logger = require('logger')
 
 authTokens = {}
 
@@ -56,6 +57,7 @@ class AdminUser
     try
       jwt.verify(authToken, secret)
     catch error
+      logger.auth.error("Invalid token supplied #{authToken}")
       throw {code: -1, message: "Invalid token supplied #{authToken}"}
 
 module.exports = new AdminUser(adminUser)
