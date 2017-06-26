@@ -87,9 +87,12 @@ class Tracker
 
       for operation in writes
         insert = @trackerize(operation, user)
-        query += "(#{my.escape(insert.timestamp)}, FROM_UNIXTIME(#{my.escape(insert.datetime)}), #{my.escape(insert.user_id)}, #{my.escape(insert.action)}, #{my.escape(insert.node_id)}, #{my.escape(insert.key)}, #{my.escape(insert.from)}, #{my.escape(insert.to)}, #{my.escape(insert.old_to)}, #{my.escape(insert.value)}, #{my.escape(insert.payload)}),"
+        logger.code.silly "The user id: #{insert.user_id}"
+        query += "(#{my.escape(insert.timestamp)}, FROM_UNIXTIME(#{my.escape(insert.datetime)}), #{my.escape(insert.user_id)}, #{my.escape(insert.action)}, #{my.escape(insert.node_id)}, #{my.escape(insert.key)}, #{my.escape(insert.from)}, #{my.escape(insert.to)}, #{my.escape(insert.old_to)}, #{my.escape(insert.value)}, #{insert.payload}),"
 
       query = query.slice(0, -1)+';'
+
+      logger.code.silly "The query: #{query}"
 
       @db.query(query)
     )
@@ -101,8 +104,8 @@ class Tracker
 
     insert.timestamp = operation.timestamp
     insert.datetime = Math.round(operation.timestamp / 1000)
-    insert.user_id = quote + user.id + quote
-    insert.action = quote + operation.action + quote
+    insert.user_id = user.id
+    insert.action = operation.action
     insert.payload = @db.pool.escape(JSON.stringify(operation))
 
     insert.node_id = 'NULL'
@@ -113,41 +116,41 @@ class Tracker
     insert.value = 'NULL'
 
     if operation.action is 'create-node'
-      insert.node_id = quote + operation.id + quote
+      insert.node_id = operation.id
 
     if operation.action is 'remove-node'
-      insert.node_id = quote + operation.id + quote
+      insert.node_id = operation.id
 
     if operation.action is 'create-attribute'
-      insert.node_id = quote + operation.id + quote
-      insert.key     = quote + operation.key + quote
-      insert.value   = @db.pool.escape(operation.value)
+      insert.node_id = operation.id
+      insert.key     = operation.key
+      insert.value   = operation.value
 
     if operation.action is 'update-attribute'
-      insert.node_id = quote + operation.id + quote
-      insert.key     = quote + operation.key + quote
-      insert.value = @db.pool.escape(operation.value)
+      insert.node_id = operation.id
+      insert.key     = operation.key
+      insert.value = operation.value
 
     if operation.action is 'remove-attribute'
-      insert.node_id = quote + operation.id + quote
-      insert.key     = quote + operation.key + quote
+      insert.node_id = operation.id
+      insert.key     = operation.key
 
     if operation.action is 'create-relation'
-      insert.node_id = quote + operation.id + quote
-      insert.from    = quote + operation.from + quote
-      insert.key     = quote + operation.key + quote
-      insert.to      = quote + operation.to + quote
+      insert.node_id = operation.id
+      insert.from    = operation.from
+      insert.key     = operation.key
+      insert.to      = operation.to
 
     if operation.action is 'update-relation'
-      insert.from    = quote + operation.from + quote
-      insert.key     = quote + operation.key + quote
-      insert.old_to  = quote + operation.oldTo + quote
-      insert.to      = quote + operation.newTo + quote
+      insert.from    = operation.from
+      insert.key     = operation.key
+      insert.old_to  = operation.oldTo
+      insert.to      = operation.newTo
 
     if operation.action is 'remove-relation'
-      insert.from    = quote + operation.from + quote
-      insert.key     = quote + operation.key + quote
-      insert.to      = quote + operation.to + quote
+      insert.from    = operation.from
+      insert.key     = operation.key
+      insert.to      = operation.to
 
     insert
 
@@ -160,19 +163,19 @@ class Tracker
       query = 'SELECT `seqnr`, `datetime`, `user`, `action`, `node`, `key`, `from`, `to`, `oldTo`, `value` FROM `tracker`'
 
       if req.payload.users?
-        conditions.push('`user` IN (' + quote + (my.escape(u) for u in req.payload.users).join(quote + ', ' + quote) + quote + ')')
+        conditions.push('`user` IN (' + (my.escape(u) for u in req.payload.users).join(', ') + ')')
 
       if req.payload.ids?
-        conditions.push('`node` IN (' + quote + (my.escape(i) for i in req.payload.ids).join(quote + ', ' + quote) + quote + ')')
+        conditions.push('`node` IN (' + (my.escape(i) for i in req.payload.ids).join(', ') + ')')
 
       if req.payload.keys?
-        conditions.push('`key` IN (' + quote + (my.escape(i) for i in req.payload.keys).join(quote + ', ' + quote) + quote + ')')
+        conditions.push('`key` IN (' + (my.escape(i) for i in req.payload.keys).join(', ') + ')')
 
       if req.payload.fromDateTime?
-        conditions.push('`datetime` >= ' + quote + my.escape(req.payload.fromDateTime) + quote)
+        conditions.push('`datetime` >= ' + my.escape(req.payload.fromDateTime))
 
       if req.payload.beforeDateTime?
-        conditions.push('`datetime` < ' + quote + my.escape(req.payload.beforeDateTime) + quote)
+        conditions.push('`datetime` < ' + my.escape(req.payload.beforeDateTime))
 
       if conditions.length > 0
         query = query.concat(' WHERE ' + conditions.join(' AND '))
