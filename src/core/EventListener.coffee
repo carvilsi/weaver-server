@@ -3,6 +3,7 @@ Promise = require('bluebird')
 class EventListener
   constructor: (@eventName) ->
     @_require  = []
+    @_optional = []
     @_provide  = []
     @_priority = 0
     @_enabled  = true
@@ -29,6 +30,10 @@ class EventListener
 
   require: (args...) ->
     @_require.push(a) for a in args
+    @
+
+  optional: (args...) ->
+    @_optional.push(a) for a in args
     @
 
   final: (final) ->
@@ -60,6 +65,13 @@ class EventListener
           return Promise.reject({code: -1, message: "Missing field " + require})
         else
           args.push(req.payload[require])
+
+      # Add all optional fields, otherwise inject null
+      for optional in @_optional
+        if req.payload[optional]?
+          args.push(req.payload[optional])
+        else
+          args.push(null)
 
       # All fields found, do the actual call now
       try

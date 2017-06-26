@@ -31,7 +31,10 @@ bus.private("users").retrieve('user').on((req, user)->
 )
 
 # Sign up a new user.
-bus.public("user.signUp").require('userId', 'username', 'password', 'email').on((req, userId, username, password, email)->
+bus.public("user.signUp")
+.require('userId', 'username', 'password')
+.optional('email', 'firstname', 'lastname')
+.on((req, userId, username, password, email, firstname, lastname)->
 
   if AdminUser.hasUsername(username) or AdminUser.hasUserId(userId)
     throw {code:-1, message: "Admin user is not allowed to signup."}
@@ -45,7 +48,7 @@ bus.public("user.signUp").require('userId', 'username', 'password', 'email').on(
   if password.length < 6
     throw {code:-1, message: "Password must be 6 characters minimum"}
 
-  UserService.signUp(userId, username, email, password)
+  UserService.signUp(userId, username, email, password, firstname, lastname)
 )
 
 
@@ -105,7 +108,17 @@ bus.private("user.delete").retrieve('user').require('username').on((req, user, u
 )
 
 bus.private('user.update').retrieve('user').require('update').on((req, user, update) ->
+  if not user.isAdmin() and update.userId isnt user.userId
+    throw {code: -1, message: 'Permission denied'}
+
   UserService.update(update)
+)
+
+bus.private('user.changePassword').retrieve('user').require('userId', 'password').on((req, user, userId, password) ->
+  if not user.isAdmin() and userId isnt user.userId
+    throw {code: -1, message: 'Permission denied'}
+
+  UserService.changePassword(userId, password)
 )
 
 # Wipe of all users
