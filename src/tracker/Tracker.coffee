@@ -2,6 +2,7 @@ config     = require('config')
 mysql      = require('mysql-promise')
 Promise    = require('bluebird')
 logger     = require('logger')
+my         = require('mysql')
 
 class Tracker
 
@@ -86,7 +87,7 @@ class Tracker
 
       for operation in writes
         insert = @trackerize(operation, user)
-        query += "(#{@db.escape(insert.timestamp)}, FROM_UNIXTIME(#{@db.escape(insert.datetime)}), #{@db.escape(insert.user_id)}, #{@db.escape(insert.action)}, #{@db.escape(insert.node_id)}, #{@db.escape(insert.key)}, #{@db.escape(insert.from)}, #{@db.escape(insert.to)}, #{@db.escape(insert.old_to)}, #{@db.escape(insert.value)}, #{@db.escape(insert.payload)}),"
+        query += "(#{my.escape(insert.timestamp)}, FROM_UNIXTIME(#{my.escape(insert.datetime)}), #{my.escape(insert.user_id)}, #{my.escape(insert.action)}, #{my.escape(insert.node_id)}, #{my.escape(insert.key)}, #{my.escape(insert.from)}, #{my.escape(insert.to)}, #{my.escape(insert.old_to)}, #{my.escape(insert.value)}, #{my.escape(insert.payload)}),"
 
       query = query.slice(0, -1)+';'
 
@@ -159,19 +160,19 @@ class Tracker
       query = 'SELECT `seqnr`, `datetime`, `user`, `action`, `node`, `key`, `from`, `to`, `oldTo`, `value` FROM `tracker`'
 
       if req.payload.users?
-        conditions.push('`user` IN (' + quote + (@db.escape(u) for u in req.payload.users).join(quote + ', ' + quote) + quote + ')')
+        conditions.push('`user` IN (' + quote + (my.escape(u) for u in req.payload.users).join(quote + ', ' + quote) + quote + ')')
 
       if req.payload.ids?
-        conditions.push('`node` IN (' + quote + (@db.escape(i) for i in req.payload.ids).join(quote + ', ' + quote) + quote + ')')
+        conditions.push('`node` IN (' + quote + (my.escape(i) for i in req.payload.ids).join(quote + ', ' + quote) + quote + ')')
 
       if req.payload.keys?
-        conditions.push('`key` IN (' + quote + (@db.escape(i) for i in req.payload.keys).join(quote + ', ' + quote) + quote + ')')
+        conditions.push('`key` IN (' + quote + (my.escape(i) for i in req.payload.keys).join(quote + ', ' + quote) + quote + ')')
 
       if req.payload.fromDateTime?
-        conditions.push('`datetime` >= ' + quote + @db.escape(req.payload.fromDateTime) + quote)
+        conditions.push('`datetime` >= ' + quote + my.escape(req.payload.fromDateTime) + quote)
 
       if req.payload.beforeDateTime?
-        conditions.push('`datetime` < ' + quote + @db.escape(req.payload.beforeDateTime) + quote)
+        conditions.push('`datetime` < ' + quote + my.escape(req.payload.beforeDateTime) + quote)
 
       if conditions.length > 0
         query = query.concat(' WHERE ' + conditions.join(' AND '))
@@ -179,7 +180,7 @@ class Tracker
       query = query.concat(' ORDER BY `seqnr` ASC')
 
       if req.payload.limit?
-        query = query.concat(" limit #{@db.escape(req.payload.limit)}")
+        query = query.concat(" limit #{my.escape(req.payload.limit)}")
 
       query = query.concat(';')
 
