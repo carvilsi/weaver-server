@@ -12,10 +12,13 @@ authTokens = {}
 class AdminUser
 
   constructor: (@username) ->
-    @id = @username
+    @id = 'root'
 
   hasUsername: (username) ->
     @username is username
+
+  hasUserId: (id) ->
+    @id is id
 
   signInUsername: (username, password) ->
     bcrypt.compare(password,adminPass)

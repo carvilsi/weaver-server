@@ -33,7 +33,7 @@ bus.private("users").retrieve('user').on((req, user)->
 # Sign up a new user.
 bus.public("user.signUp").require('userId', 'username', 'password', 'email').on((req, userId, username, password, email)->
 
-  if AdminUser.hasUsername(username)
+  if AdminUser.hasUsername(username) or AdminUser.hasUserId(userId)
     throw {code:-1, message: "Admin user is not allowed to signup."}
 
   if username.length < 2
