@@ -134,7 +134,6 @@ bus.private('users.wipe')
 
   Promise.all([
     UserService.wipe()
-    AclService.wipe()
     RoleService.wipe()
   ])
 )
