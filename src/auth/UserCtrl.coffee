@@ -31,7 +31,8 @@ bus.private("users").retrieve('user').on((req, user)->
 )
 
 # Sign up a new user.
-bus.public("user.signUp").require('userId', 'username', 'password', 'email').on((req, userId, username, password, email)->
+bus.public("user.signUp").retrieve('user').require('userId', 'username', 'password', 'email').on((req, user, userId, username, password, email)->
+  AclService.assertServerFunctionPermission(user, 'create-users')
 
   if AdminUser.hasUsername(username)
     throw {code:-1, message: "Admin user is not allowed to signup."}
