@@ -30,14 +30,7 @@ bus.private("users").retrieve('user').on((req, user)->
   UserService.all()
 )
 
-# Sign up a new user.
-bus.public("user.signUp")
-.retrieve('user')
-.require('userId', 'username', 'password')
-.optional('email', 'firstname', 'lastname')
-.on((req, user, userId, username, password, email, firstname, lastname)->
-  config.get('application.openUserCreation') or AclService.assertServerFunctionPermission(user, 'create-users')
-
+registerUser = (userId, username, password, email, firstname, lastname)->
   if AdminUser.hasUsername(username) or AdminUser.hasUserId(userId)
     throw {code:-1, message: "Admin user is not allowed to signup."}
 
@@ -51,7 +44,24 @@ bus.public("user.signUp")
     throw {code:-1, message: "Password must be 6 characters minimum"}
 
   UserService.signUp(userId, username, email, password, firstname, lastname)
-)
+
+# Sign up a new user.
+if config.get('application.openUserCreation')
+  bus.public("user.signUp")
+  .require('userId', 'username', 'password')
+  .optional('email', 'firstname', 'lastname')
+  .on((req, userId, username, password, email, firstname, lastname)->
+    registerUser(userId, username, password, email, firstname, lastname)
+  )
+else
+  bus.private("user.signUp")
+  .retrieve('user')
+  .require('userId', 'username', 'password')
+  .optional('email', 'firstname', 'lastname')
+  .on((req, user, userId, username, password, email, firstname, lastname)->
+    AclService.assertServerFunctionPermission(user, 'create-users')
+    registerUser(userId, username, password, email, firstname, lastname)
+  )
 
 
 # Sign in existing user
