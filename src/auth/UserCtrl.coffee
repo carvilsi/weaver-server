@@ -36,7 +36,7 @@ bus.public("user.signUp")
 .optional('email', 'firstname', 'lastname')
 .on((req, userId, username, password, email, firstname, lastname)->
 
-  if AdminUser.hasUsername(username)
+  if AdminUser.hasUsername(username) or AdminUser.hasUserId(userId)
     throw {code:-1, message: "Admin user is not allowed to signup."}
 
   if username.length < 2
@@ -122,7 +122,13 @@ bus.private('user.changePassword').retrieve('user').require('userId', 'password'
 )
 
 # Wipe of all users
-bus.public('users.wipe').enable(config.get('application.wipe')).on((req) ->
+bus.private('users.wipe')
+.retrieve('user')
+.enable(config.get('application.wipe'))
+.on((req, user) ->
+
+  if not user.isAdmin()
+    throw {code: -1, message: 'Permission denied'}
 
   logger.usage.info "Wiping all users on weaver server"
 
