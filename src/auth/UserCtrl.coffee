@@ -53,6 +53,7 @@ registerUser = (userId, username, password, email, firstname, lastname)->
 
 # Sign up a new user.
 if config.get('application.openUserCreation')
+  logger.config.warn "User account creation is open to all"
   bus.public("user.signUp")
   .require('userId', 'username', 'password')
   .optional('email', 'firstname', 'lastname')
@@ -60,6 +61,7 @@ if config.get('application.openUserCreation')
     registerUser(userId, username, password, email, firstname, lastname)
   )
 else
+  logger.config.warn "User account creation is only available to those with permission"
   bus.private("user.signUp")
   .retrieve('user')
   .require('userId', 'username', 'password')
