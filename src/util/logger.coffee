@@ -27,6 +27,7 @@ Console    = winston.transports.Console
 configTransports = []
 codeTransports = []
 usageTransports = []
+authTransports = [] # No console for this one
 
 consoleLogger = new Console({
   timestamp
@@ -36,6 +37,7 @@ consoleLogger = new Console({
 configTransports.push(consoleLogger)
 codeTransports.push(consoleLogger)
 usageTransports.push(consoleLogger)
+authTransports.push(consoleLogger)
 
 # Create file transport
 
@@ -60,7 +62,13 @@ usageTransports.push(new (winston.transports.DailyRotateFile)({
   prepend: false
   level: "#{config.get('logging.file')}"
   }))
-
+authTransports.push(new (winston.transports.DailyRotateFile)({
+  filename: "#{config.get('logging.logFilePath.auth')}"
+  formatter
+  datePattern: '.yyyy-MM-dd.log'
+  prepend: false
+  level: "info" # this value is harcoded to have more tune. INFO: normal auth behaviour WARN: fails logIn attempts
+  }))
 
 
 # Create logger
@@ -69,6 +77,6 @@ logger = {}
 logger.config = new Logger({transports:configTransports})
 logger.code = new Logger({transports:codeTransports})
 logger.usage = new Logger({transports:usageTransports})
-
+logger.auth = new Logger({transports:authTransports})
 
 module.exports = logger
