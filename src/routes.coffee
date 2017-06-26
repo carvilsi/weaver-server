@@ -1,5 +1,6 @@
 RouteHandler = require('RouteHandler')
 bus          = require('WeaverBus')
+config       = require('config')
 
 route =
   public  : new RouteHandler(bus.get("public"))
@@ -25,7 +26,12 @@ route.private.POST "query.native"            # Execute a native query
 
 # Authentication
 route.private.GET  "users"                   # Gets all users
-route.public.POST  "user.signUp"             # Sign up a new user
+
+if config.get('application.openUserCreation')
+  route.public.POST  "user.signUp"             # Sign up a new user
+else
+  route.private.POST  "user.signUp"             # Sign up a new user
+
 route.public.POST  "user.signInUsername"     # Sign in using username and password
 route.public.POST  "user.signInToken"        # Sign in using a token
 route.private.POST "user.signOut"            # Sign out session identified by authToken
