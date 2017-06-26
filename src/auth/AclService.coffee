@@ -9,7 +9,6 @@ logger      = require('logger')
 class AclService extends LokiService
   serverFunctionACLs: [
     'create-projects',
-    'modify-acl',
     'create-users'
   ]
 
@@ -141,6 +140,9 @@ class AclService extends LokiService
     users[u] = null for u in usersFromRole
 
     (user for user of users)
+
+  assertServerFunctionPermission: (user, serverFunction) ->
+    @assertACLWritePermission(user, serverFunction)
 
   assertProjectFunctionPermission: (user, project, projectFunction) ->
     @assertACLWritePermission(user, @getProjectFunctionAclId(project.id, projectFunction))
