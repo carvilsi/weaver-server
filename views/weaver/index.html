@@ -1,78 +1,79 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Weaver Server {{server}}</title>
-        <link rel="icon" type="image/png" href="img/favicon.png">
-        <script type="application/javascript" src="sdk/weaver-sdk.full.js"></script>
-        <script>
-            var projects = null
-            var weaver   = new Weaver()
 
-            adminUser = '{{adminUser}}'
-            adminPass = '{{adminPass}}'
+<head>
+  <meta charset="UTF-8">
+  <title>Weaver Server {{server}}</title>
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <script type="application/javascript" src="sdk/weaver-sdk.full.js"></script>
+  <script>
+    var projects = null
+    var weaver = new Weaver()
 
-            // Connect on load
-            weaver.connect(window.location.href)
-            .then(function(){
-              console.log('Weaver SDK ' + weaver.version() + ' connected')
+    // Connect on load
+    weaver.connect(window.location.href)
+      .then(function() {
+        console.log('Weaver SDK ' + weaver.version() + ' connected')
+        console.log('Use signIn(user,pass)')
+      }).catch(console.error)
 
-              // Auto sign in if in development
-              if(adminUser !== '' && adminPass !== '') {
-                return signIn(adminUser, adminPass)
-              }
-              else {
-                console.log('Use signIn(user,pass)')
-              }
-            }).catch(console.error)
+    // Sign in
+    var signIn = function(username, password) {
+      weaver.signInWithUsername(username, password)
+        .then(function() {
+          return Weaver.Project.list()
+        })
+        .catch(console.error)
+        .then(function(p) {
+          projects = p
+          console.log('Succesfully signed in as ' + username + '.')
+          console.log('Available projects under variable `projects`:')
+          console.log(projects)
+        })
 
-            // Sign in
-            var signIn = function(username, password) {
-              weaver.signInWithUsername(username, password)
-              .then(function(){
-                return Weaver.Project.list()
-              })
-              .catch(console.error)
-              .then(function(p){
-                projects = p
-                console.log('Succesfully signed in as ' +username+ '.')
-                console.log('Available projects under variable `projects`:')
-                console.log(projects)
-              })
+      return 'Signing in...'
+    }
+  </script>
+  <style>
+    body {
+      background-image: -webkit-radial-gradient(top, circle cover, #393b45 0%, #2d3038 70%);
+    }
 
-              return 'Signing in...'
-            }
-        </script>
-        <style>
-            body {
-              background-image: -webkit-radial-gradient(top, circle cover, #393b45 0%, #2d3038 70%);
-            }
+    img {
+      position: absolute;
+      left: 50%;
+      top: 40%;
+      width: 600px;
+      margin-left: -300px;
+      margin-top: -104px;
 
-            img {
-                position: absolute;
-                left: 50%;
-                top: 40%;
-                width: 600px;
-                margin-left: -300px;
-                margin-top: -104px;
+      -webkit-animation: fadi 1s 1;
+      -moz-animation: fadi 1s 1;
+    }
 
-                -webkit-animation: fadi 1s 1;
-                -moz-animation: fadi 1s 1;
-            }
+    @-webkit-keyframes fadi {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
 
-            @-webkit-keyframes fadi {
-                0%   { opacity: 0; }
-                100% { opacity: 1; }
-            }
+    @-moz-keyframes fadi {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
 
-            @-moz-keyframes fadi {
-                0%   { opacity: 0; }
-                100% { opacity: 1; }
-            }
-        </style>
+</head>
 
-    </head>
-    <body>
-        <img src="img/logo.png" alt="">
-    </body>
+<body>
+  <img src="img/logo.png" alt="">
+</body>
+
 </html>
