@@ -37,6 +37,18 @@ class ProjectService extends LokiService
       @checkProjectAcls()
     )
 
+  getProjectsForUser: (user) ->
+    projects = []
+
+    for p in @projects.find()
+      try
+        AclService.assertACLReadPermission(user, p.acl)
+        projects.push(p)
+      catch err
+        continue
+
+    projects
+
   checkProjectAcls: ->
     for project in @all
       AclService.checkProjectAcl(project.id)

@@ -103,8 +103,8 @@ class UserService extends LokiService
     session = @sessions.findOne({authToken})
     @sessions.remove(session)
 
-  destroy: (username) ->
-    user = @users.findOne({username})
+  destroy: (id) ->
+    user = @users.findOne({userId:id})
     @users.remove(user)
 
   update: (update) ->

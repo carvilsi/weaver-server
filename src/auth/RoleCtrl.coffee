@@ -12,14 +12,14 @@ bus.private('role.read').retrieve('user').require('id').on((req, user, id) ->
   RoleService.getRole(id)
 )
 
-bus.private('role.update').retrieve('user').require('role').on((req, user, role) ->
-  AclService.assertACLWritePermission(user, role._id)
-  RoleService.updateRole(role)
+bus.private('role.update').retrieve('user').require('update').on((req, user, update) ->
+  AclService.assertACLWritePermission(user, update.roleId)
+  RoleService.update(update)
 )
 
 bus.private('role.delete').retrieve('user').require('id').on((req, user, id) ->
   AclService.assertACLWritePermission(user, id)
-  RoleService.deleteRole(id)
+  RoleService.destroy(id)
 )
 
 bus.private("roles").retrieve('user').on((req, user)->
