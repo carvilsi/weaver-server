@@ -36,7 +36,7 @@ bus.public("user.signUp")
 .require('userId', 'username', 'password')
 .optional('email', 'firstname', 'lastname')
 .on((req, user, userId, username, password, email, firstname, lastname)->
-  AclService.assertServerFunctionPermission(user, 'create-users')
+  config.get('application.openUserCreation') or AclService.assertServerFunctionPermission(user, 'create-users')
 
   if AdminUser.hasUsername(username) or AdminUser.hasUserId(userId)
     throw {code:-1, message: "Admin user is not allowed to signup."}
