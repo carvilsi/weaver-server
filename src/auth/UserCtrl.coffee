@@ -2,6 +2,7 @@ bus             = require('WeaverBus')
 UserService     = require('UserService')
 AclService      = require('AclService')
 RoleService     = require('RoleService')
+ProjectService  = require('ProjectService')
 AdminUser       = require('AdminUser')
 logger          = require('logger')
 config          = require('config')
@@ -96,14 +97,29 @@ bus.private("user.roles").require('id').on((req, id) ->
   RoleService.getRolesForUser(id)
 )
 
+bus.private("user.projects").retrieve('user').require('id').on((req, user, id) ->
+  if not user.isAdmin() and user.userId isnt id
+    throw {code: -1, message: 'Permission denied'}
+
+  if user.userId is id
+    return ProjectService.getProjectsForUser(user)
+  else
+    proxyUser =
+      userId: id
+      isAdmin: -> false
+
+    return ProjectService.getProjectsForUser(proxyUser)
+)
+
+
 
 # Destroy user
-bus.private("user.delete").retrieve('user').require('username').on((req, user, username) ->
+bus.private("user.delete").retrieve('user').require('id').on((req, user, id) ->
 
-  if AdminUser.hasUsername(username)
+  if AdminUser.id is id
     throw {code:-1, message: "Admin user can not be deleted."}
 
-  UserService.destroy(username)
+  UserService.destroy(id)
   return
 )
 

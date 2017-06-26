@@ -40,6 +40,7 @@ class AclService extends LokiService
     logger.code.debug "Creating server function ACL: #{functionACL}"
     acl =
       id: functionACL
+      functionACL: true
       userRead: []
       userWrite: []
       roleRead: []
