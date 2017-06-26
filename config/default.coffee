@@ -57,8 +57,8 @@ module.exports =
       agentAddress: 'localhost'
 
   logging:
-    console: 'error'
-    file:    'warn'
+    console: 'silly'
+    file:    'silly'
     logFilePath:
       config: './logs/weaver.config'
       code: './logs/weaver.code'

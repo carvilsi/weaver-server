@@ -157,6 +157,7 @@ class Tracker
 
 
   getHistoryFor: (req)->
+    logger.usage.debug "History request: #{JSON.stringify(req)}"
     @initDb().then( =>
       quote = '\''
       conditions = []

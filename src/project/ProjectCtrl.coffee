@@ -7,6 +7,7 @@ ProjectPool     = require('ProjectPool')
 AclService      = require('AclService')
 DatabaseService = require('DatabaseService')
 logger          = require('logger')
+Tracker         = require('tracker')
 
 
 
@@ -91,15 +92,18 @@ bus.private('snapshot').retrieve('project', 'user').on((req, project, user) ->
 
 # Wipe single project
 bus.private('project.wipe')
-.retrieve('project', 'user')
+.retrieve('project', 'user', 'database', 'tracker')
 .enable(config.get('application.wipe'))
-.on((req, project, user) ->
+.on((req, project, user, database, tracker) ->
   if not user.isAdmin()
     throw {code: -1, message: 'Permission denied'}
 
   logger.usage.info "Wiping project with id #{project.id}"
-  database = new DatabaseService(project.database)
-  database.wipe()
+  Promise.all([
+    database.wipe()
+    tracker.wipe()
+  ])
+
 )
 
 
@@ -117,10 +121,18 @@ bus.private('projects.wipe')
   endpoints = (p.database for p in ProjectService.all())
   databases = (new DatabaseService(endpoint) for endpoint in endpoints)
 
-  Promise.map(databases, (database) ->
-    logger.usage.info "Wiping database: #{database.uri}"
-    database.wipe()
-  )
+  trackers = (new Tracker(p.tracker) for p in ProjectService.all())
+
+  Promise.all([
+    Promise.map(databases, (database) ->
+      logger.usage.info "Wiping database: #{database.uri}"
+      database.wipe()
+    )
+    Promise.map(trackers, (tracker) ->
+      logger.usage.info "Wiping tracker"
+      tracker.wipe()
+    )
+  ])
 )
 
 
