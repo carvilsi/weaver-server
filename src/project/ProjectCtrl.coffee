@@ -7,7 +7,7 @@ ProjectPool     = require('ProjectPool')
 AclService      = require('AclService')
 DatabaseService = require('DatabaseService')
 logger          = require('logger')
-Tracker         = require('tracker')
+Tracker         = require('Tracker')
 
 
 
