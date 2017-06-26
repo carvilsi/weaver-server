@@ -13,11 +13,13 @@ bus.private("*").priority(1000).retrieve('user').on((req, user) ->
 
 
 bus.provide("user").require('authToken').on((req, authToken) ->
+  logger.usage.silly "Getting user for authtoken #{authToken}"
   if AdminUser.hasAuthToken(authToken)
+    logger.usage.silly "Getting user for authtoken #{authToken}: admin"
     AdminUser
   else
-    logger.code.silly "Getting user for authToken #{authToken}"
     user = UserService.getUser(authToken)
+    logger.code.silly "Getting user for authToken #{authToken}: #{user.username}"
     user.isAdmin = -> false
     user
 )
@@ -33,6 +35,7 @@ bus.private("users").retrieve('user').on((req, user)->
 )
 
 registerUser = (userId, username, password, email, firstname, lastname)->
+  logger.usage.info "User signup for #{username}"
   if AdminUser.hasUsername(username) or AdminUser.hasUserId(userId)
     logger.auth.warn("Attempt to sign up with Admin.")
     throw {code:-1, message: "Admin user is not allowed to signup."}
@@ -48,6 +51,8 @@ registerUser = (userId, username, password, email, firstname, lastname)->
   if password.length < 6
     logger.auth.warn("Sign up attempt Password must be 6 characters minimum")
     throw {code:-1, message: "Password must be 6 characters minimum"}
+
+  logger.usage.info "User signup for #{username} - passed checks"
 
   UserService.signUp(userId, username, email, password, firstname, lastname)
 
@@ -67,10 +72,10 @@ else
   .require('userId', 'username', 'password')
   .optional('email', 'firstname', 'lastname')
   .on((req, user, userId, username, password, email, firstname, lastname)->
+    logger.usage.info "User #{user.username} is trying to create account for #{username}"
     AclService.assertServerFunctionPermission(user, 'create-users')
     registerUser(userId, username, password, email, firstname, lastname)
   )
-
 
 # Sign in existing user
 bus.public("user.signInUsername").require('username', 'password').on((req, username, password) ->
