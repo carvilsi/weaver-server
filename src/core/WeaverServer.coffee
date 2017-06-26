@@ -23,12 +23,6 @@ class Server
       port: config.get('server.port')
       cors: config.get('server.cors')
 
-    # This means development
-    if config.get('application.wipe')
-      @options.views[0].vars['adminUser'] = config.get('admin.username')
-      @options.views[0].vars['adminPass'] = config.get('admin.password')
-
-
     # Set default options
     require('util/options').defaults(@options,
       host: '0.0.0.0'
