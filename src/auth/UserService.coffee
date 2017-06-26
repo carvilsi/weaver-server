@@ -19,32 +19,31 @@ class UserService extends LokiService
     checkPasswords()
 
   all: ->
-    users = []
-    for u in @users.find()
-      users.push({
-        username: u.username
-        email: u.email
-        userId: u.userId
-        })
+    (_.omit(user, ['passwordHash']) for user in @users.find())
 
-    users
+  signUp: (userId, username, email, password, firstname, lastname) ->
 
-  signUp: (userId, username, email, password) ->
-    userExists = @users.findOne({username})?
-
-    if userExists
+    if @users.findOne({username})?
       throw {code:-1, message: "User with username #{username} already exists"}
+
+    if @users.findOne({userId})?
+      throw {code:-1, message: "User with userId #{userId} already exists"}
 
     bcrypt.hash(password,conf.get('auth.salt'))
     .then((passwordHash) =>
-      @users.insert({userId, username, email, passwordHash})
+      @users.insert({userId, username, email, passwordHash, firstname, lastname, active: true})
       @signInUsername(username, password)
     )
 
   comparePassword =  (plainPassword, passwordHash) ->
     bcrypt.compare(plainPassword,passwordHash)
-    .then((res) ->
-      res
+
+  changePassword: (userId, password) ->
+    user = @users.findOne({userId})
+    bcrypt.hash(password, conf.get('auth.salt'))
+    .then((passwordHash) =>
+      user.passwordHash = passwordHash
+      @users.update(user)
     )
 
   insertSession: (authToken, username) ->
@@ -59,6 +58,9 @@ class UserService extends LokiService
         throw {code: -1, message: "Invalid Username or Password"}
       )
     else
+      if not user.active
+        throw {code: -1, message: "User not active"}
+
       comparePassword(password, user.passwordHash)
       .then((res) =>
         if !res
@@ -77,6 +79,11 @@ class UserService extends LokiService
   signInToken: (authToken) ->
     payload = @verifyToken(authToken)
     username = payload.username
+
+    user = @users.find({username})[0]
+    if not user?.active
+        throw {code: -1, message: "User not active"}
+
     @insertSession(authToken, username)
 
     authToken
@@ -90,7 +97,7 @@ class UserService extends LokiService
     @verifyToken(authToken)
 
     user = @users.findOne({username: session.username})
-    _.omit(user, ['password'])
+    _.omit(user, ['passwordHash'])
 
   signOut: (authToken) ->
     session = @sessions.findOne({authToken})
@@ -103,8 +110,11 @@ class UserService extends LokiService
   update: (update) ->
     # TODO Lots of checking (is the username/email correct?, does the user exist? etc)
     user = @users.findOne({userId: update.userId})
-    user.username = update.username
-    user.email    = update.email
+    user.username  = update.username
+    user.email     = update.email
+    user.firstname = update.firstname
+    user.lastname  = update.lastname
+    user.active    = update.active
     @users.update(user)
     return
 

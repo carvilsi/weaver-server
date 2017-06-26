@@ -16,6 +16,9 @@ server       = require('WeaverServer')
 multer       = require('multer')
 FileService = require('FileService')
 AclService    = require('AclService')
+UserService     = require('UserService')
+AdminUser       = require('AdminUser')
+ProjectService  = require('ProjectService')
 
 upload = multer({
   dest: 'uploads/'
@@ -27,18 +30,36 @@ server
   logger.code.debug('target: ' + req.body.target)
   logger.code.debug('file name: ' + req.body.fileName)
   logger.code.debug('authToken: ' + req.body.authToken)
-  if !req.body.authToken
+
+  if not req.body.authToken?
     res.status(500).send('No authToken provided')
-  else
-    FileService.uploadFileStream(req.file.path,req.body.fileName, req.body.target)
-    .then((resol) ->
-      logger.code.debug(resol)
-      res.send(resol)
-    )
-    .catch((err) ->
-      logger.code.error(err)
-      res.status(500).send('Error somewhere')
-    )
+    return
+
+  if not req.body.target?
+    res.status(500).send('No target provided')
+    return
+
+  # Check permission
+  if not AdminUser.hasAuthToken(req.body.authToken)
+    user = UserService.getUser(req.body.authToken)
+    user.isAdmin = -> false
+    project = ProjectService.get(req.body.target)
+    try
+      AclService.assertACLWritePermission(user, project.acl)
+    catch err
+      res.status(500).send('Permission denied')
+      return
+
+  # All good
+  FileService.uploadFileStream(req.file.path,req.body.fileName, req.body.target)
+  .then((resol) ->
+    logger.code.debug(resol)
+    res.send(resol)
+  )
+  .catch((err) ->
+    logger.code.error(err)
+    res.status(500).send('Error somewhere')
+  )
 )
 
 bus.private('file.downloadByID')
