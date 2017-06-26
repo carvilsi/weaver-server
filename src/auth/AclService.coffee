@@ -81,7 +81,7 @@ class AclService extends LokiService
       publicWrite: false
 
     logger.code.silly "User: #{JSON.stringify(user)}" if user?
-    acl.userWrite = [ user.userId ] if user?
+    acl.userWrite = [ user.userId ] if user? and user.userId?
 
     @objects.insert({id: objectId, acl: acl.id})
     aclDoc = @acl.insert(acl)
@@ -145,11 +145,13 @@ class AclService extends LokiService
     @assertACLWritePermission(user, @getProjectFunctionAclId(project.id, projectFunction))
 
   assertACLPermission: (user, aclId, readOnly) ->
-    logger.usage.silly "Checking acl access for user #{user.username} on #{aclId}"
+    logger.usage.silly "Checking acl access for user #{user.username}(#{user.userId}) on #{aclId}"
     return if user.isAdmin()
 
     acl = @getACL(aclId)
     allowedUsers = @getAllowedUsers(acl, readOnly)
+
+    logger.usage.silly "Allowed users: #{JSON.stringify(allowedUsers)}"
 
     denied = allowedUsers.indexOf(user.userId) is -1
     if denied
