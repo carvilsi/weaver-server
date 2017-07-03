@@ -172,6 +172,9 @@ class Tracker
       if req.payload.keys?
         conditions.push('`key` IN (' + (my.escape(i) for i in req.payload.keys).join(', ') + ')')
 
+      if req.payload.froms?
+        conditions.push('`from` IN (' + (my.escape(i) for i in req.payload.froms).join(', ') + ')')
+
       if req.payload.fromDateTime?
         conditions.push('`datetime` >= ' + my.escape(req.payload.fromDateTime))
 
