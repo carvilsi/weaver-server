@@ -104,7 +104,7 @@ class Tracker
 
     insert.timestamp = operation.timestamp
     insert.datetime = Math.round(operation.timestamp / 1000)
-    insert.user_id = user.id
+    insert.user_id = user.userId
     insert.action = operation.action
     insert.payload = @db.pool.escape(JSON.stringify(operation))
 
