@@ -8,27 +8,10 @@ module.exports =
     expire: '7d'
     salt: 10
 
-  projectPool: [
-    {
-      database: 'http://localhost:9474'
-      fileServer:
-        endpoint: 'http://localhost:9000'
-        accessKey: 'NYLEXGR6MF2IE99LZ4UE'
-        secretKey: 'CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD'
-      tracker:
-        enabled: true
-        host: 'localhost'
-        port: 3306
-        user: 'root'
-        password: 'K00B88HQB1UV9MZ7YYUP'
-        database: 'trackerdb'
-    }
-  ]
-
   application:
     openUserCreation: true
     wipe: true
-    singleDatabase: true
+    projectpool: 'PostgreSQLProjectPool'
     sounds:
       muteAll: false
       loaded:  true
@@ -45,6 +28,14 @@ module.exports =
       enable: true
 
   services:
+    database:
+      url: 'http://localhost:4567'
+
+    fileServer:
+      endpoint: 'http://localhost:9000'
+      accessKey: 'NYLEXGR6MF2IE99LZ4UE'
+      secretKey: 'CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD'
+
     projectController:
       endpoint: 'http://localhost:9888'
 
