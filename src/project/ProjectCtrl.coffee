@@ -7,9 +7,6 @@ ProjectPool     = require('ProjectPool')
 AclService      = require('AclService')
 DatabaseService = require('DatabaseService')
 logger          = require('logger')
-Tracker         = require('Tracker')
-
-
 
 bus.provide("project").require('target').on((req, target) ->
   ProjectService.get(target)
@@ -17,7 +14,7 @@ bus.provide("project").require('target').on((req, target) ->
 
 bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
   AclService.assertACLReadPermission(user, project.acl)
-  new DatabaseService(project.database)
+  new DatabaseService(config.get('services.database.url'), project.id)
 )
 
 # Move to FileController
@@ -45,6 +42,7 @@ bus.private('project').retrieve('user').on((req, user) ->
 )
 
 bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
+  logger.code.info "Creating project id: #{id} name: #{name}"
   AclService.assertACLWritePermission(user, 'create-projects')
 
   ProjectPool.create(id).then((project) ->
@@ -85,23 +83,20 @@ bus.internal('getMinioForProject').on((project) ->
 bus.private('snapshot').retrieve('project', 'user').on((req, project, user) ->
   AclService.assertProjectFunctionPermission(user, project, 'snapshot')
   logger.usage.info "Generating snapshot for project with id #{project.id}"
-  database = new DatabaseService(project.database)
+  database = new DatabaseService(config.get('services.database.url'), project.id)
   database.snapshot()
 )
 
 # Wipe single project
 bus.private('project.wipe')
-.retrieve('project', 'user', 'database', 'tracker')
+.retrieve('project', 'user', 'database')
 .enable(config.get('application.wipe'))
-.on((req, project, user, database, tracker) ->
+.on((req, project, user, database) ->
   if not user.isAdmin()
     throw {code: -1, message: 'Permission denied'}
 
   logger.usage.info "Wiping project with id #{project.id}"
-  Promise.all([
-    database.wipe()
-    tracker.wipe()
-  ])
+  database.wipe()
 
 )
 
@@ -117,21 +112,13 @@ bus.private('projects.wipe')
 
   logger.usage.info "Wiping all projects"
 
-  endpoints = (p.database for p in ProjectService.all())
-  databases = (new DatabaseService(endpoint) for endpoint in endpoints)
+  ids = (p.id for p in ProjectService.all())
+  databases = (new DatabaseService(config.get('services.database.url'), id) for id in ids)
 
-  trackers = (new Tracker(p.tracker) for p in ProjectService.all())
-
-  Promise.all([
-    Promise.map(databases, (database) ->
-      logger.usage.info "Wiping database: #{database.uri}"
-      database.wipe()
-    )
-    Promise.map(trackers, (tracker) ->
-      logger.usage.info "Wiping tracker"
-      tracker.wipe()
-    )
-  ])
+  Promise.map(databases, (database) ->
+    logger.usage.info "Wiping database: #{database.uri}"
+    database.wipe()
+  )
 )
 
 

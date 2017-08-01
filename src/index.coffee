@@ -32,7 +32,6 @@ PluginService   = require('PluginService')
 WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
-Tracker         = require('Tracker')
 logger          = require('logger')
 
 
@@ -50,7 +49,6 @@ initModules = ->
     'RoleCtrl'
     'UserCtrl'
     'WeaverQueryCtrl'
-    'TrackerCtrl'
     'snmp'
   ]
 
