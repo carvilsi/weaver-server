@@ -23,7 +23,7 @@ bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
 # Move to FileController
 bus.provide('minio').retrieve('project', 'user').on((req, project, user) ->
   AclService.assertACLReadPermission(user, project.acl)
-  MinioClient.create(project.fileServer)
+  MinioClient.create(config.get('services.fileServer'))
 )
 
 bus.private('project').retrieve('user').on((req, user) ->
@@ -59,12 +59,11 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
   )
 )
 
-bus.private('project.delete').retrieve('user', 'project', 'database', 'minio', 'tracker').on((req, user, project, database, minio, tracker) ->
+bus.private('project.delete').retrieve('user', 'project', 'database', 'minio').on((req, user, project, database, minio) ->
   AclService.assertProjectFunctionPermission(user, project, 'delete-project')
 
   logger.usage.info "Deleting project with id #{project.id}"
   Promise.all([
-    tracker.wipe()
     database.wipe()
     ProjectPool.clean(project.id)
     ProjectService.delete(project)
@@ -79,7 +78,7 @@ bus.private('project.ready').retrieve('user').require('id').on((req, user, id) -
 )
 
 bus.internal('getMinioForProject').on((project) ->
-  Promise.resolve(MinioClient.create(ProjectService.get(project).fileServer))
+  Promise.resolve(MinioClient.create(config.get('services.fileServer')))
 )
 
 # Create a snapshot with write operations for the project
