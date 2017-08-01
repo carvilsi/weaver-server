@@ -65,6 +65,4 @@ getText = ->
 module.exports =
 
   printLoaded: ->
-    cursor.clear()
-    cursor.toTop()
     console.log(getText().cyan)

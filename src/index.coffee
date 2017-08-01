@@ -13,7 +13,6 @@
 # Loading
 console.log(`'\033[2J'`)             # Clear terminal
 console.log(`'\033[0;0H'`)           # To top
-console.log(`'\033[36mLoading...'`)  # Loading in cyan
 
 require('./module-path') # Contains module paths
 
@@ -75,7 +74,7 @@ Promise.map(servicesToLoad, (service) ->
 ).then(->
   initModules()
 
-  logger.config.info('weaver-server restarted')
+  logger.config.info('weaver-server started and ready')
   splash.printLoaded()
   sounds.loaded()
 )
