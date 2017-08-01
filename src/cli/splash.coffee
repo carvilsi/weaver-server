@@ -33,8 +33,8 @@ _ "File:      #{conf.get('logging.file').toUpperCase()}"
 _ ""
 _ "# Settings"
 _ "Admin userName: #{conf.get('admin.username')}"
-_ "Single database:   #{BOOL conf.get('application.singleDatabase')}"
-_ "System wipe:       #{BOOL conf.get('application.wipe')}"
+_ "Project pool:   #{conf.get('application.projectpool')}"
+_ "System wipe:    #{BOOL conf.get('application.wipe')}"
 _ ""
 _ require('./funnies')()
 
