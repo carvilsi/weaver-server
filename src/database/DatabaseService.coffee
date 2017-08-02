@@ -6,7 +6,6 @@ module.exports =
     constructor: (@uri, @database) ->
 
     _rp : (method) -> (uri, body, parameters) =>
-      console.log parameters
       qs = { database: @database }
       qs[key] = value for key, value of parameters
       rp({method, uri, body, json: true, qs, resolveWithFullResponse: true}).then((response) ->
