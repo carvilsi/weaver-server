@@ -57,12 +57,11 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
   )
 )
 
-bus.private('project.delete').retrieve('user', 'project', 'database', 'minio').on((req, user, project, database, minio) ->
+bus.private('project.delete').retrieve('user', 'project').on((req, user, project) ->
   AclService.assertProjectFunctionPermission(user, project, 'delete-project')
 
   logger.usage.info "Deleting project with id #{project.id}"
   Promise.all([
-    database.wipe()
     ProjectPool.clean(project.id)
     ProjectService.delete(project)
   ])
