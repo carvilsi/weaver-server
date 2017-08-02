@@ -51,7 +51,7 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
     acl = AclService.createProjectACLs(id, user)
     ProjectService.create(id, name, acl.id)
 
-    logger.code.debug "Project #{id} created, acl: #{acl}"
+    logger.code.debug "Project #{id} created, acl: #{acl.id}"
 
     return acl
   )
