@@ -11,7 +11,7 @@ class Tracker
     logger.usage.debug "History request: #{JSON.stringify(req)}"
     quote = '\''
     conditions = []
-    query = 'SELECT "seqnr", "datetime", "user", "action", "node", "key", "from", "to", "oldTo", "value" FROM "dummy_tracker"'
+    query = "SELECT \"seqnr\", \"datetime\", \"user\", \"action\", \"node\", \"key\", \"from\", \"to\", \"oldTo\", \"value\" FROM \"trackerdb\""
 
     if req.payload.users?
       conditions.push('"user" IN (' + (my.escape(u) for u in req.payload.users).join(', ') + ')')
@@ -42,7 +42,6 @@ class Tracker
     query = query.concat(';')
 
     logger.code.debug("The query: #{query}")
-
 
     @database.postgresQuery(query)
 
