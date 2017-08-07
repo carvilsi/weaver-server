@@ -3,10 +3,12 @@ rp = require('request-promise')
 module.exports =
   class DatabaseService
 
-    constructor: (@uri) ->
+    constructor: (@uri, @database) ->
 
-    _rp : (method) -> (uri, body) ->
-      rp({method, uri, body, json: true, resolveWithFullResponse: true}).then((response) ->
+    _rp : (method) -> (uri, body, parameters) =>
+      qs = { database: @database }
+      qs[key] = value for key, value of parameters
+      rp({method, uri, body, json: true, qs, resolveWithFullResponse: true}).then((response) ->
         if response.statusCode is 200
           Promise.resolve(response.body)
         else
@@ -33,11 +35,8 @@ module.exports =
     snapshot: () ->
       @_POST("#{@uri}/snapshot")
 
-    write: (payload) ->
-      @_POST("#{@uri}/write", payload)
-
-    writeQuick: (payload) ->
-      @_POST("#{@uri}/write?disable-checking", payload)
+    write: (payload, creator) ->
+      @_POST("#{@uri}/write", payload, {creator})
 
     query: (query) ->
       @_POST("#{@uri}/query", query)

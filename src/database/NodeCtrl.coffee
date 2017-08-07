@@ -1,20 +1,11 @@
 bus           = require('WeaverBus')
 AclService    = require('AclService')
 logger        = require('logger')
-operationSort = require('operationSort')
 
 bus.private('write').retrieve('user', 'project', 'database').on((req, user, project, database) ->
   logger.code.debug("The user stuff: #{JSON.stringify(user)}")
   AclService.assertACLWritePermission(user, project.acl)
-  req.payload.operations.sort(operationSort)
-  database.write(req.payload.operations)
-)
-
-bus.private('write.quick').retrieve('user', 'project', 'database').on((req, user, project, database) ->
-  logger.code.debug("The user stuff: #{JSON.stringify(user)}")
-  AclService.assertACLWritePermission(user, project.acl)
-  req.payload.operations.sort(operationSort)
-  database.writeQuick(req.payload.operations)
+  database.write(req.payload.operations, user.userId)
 )
 
 bus.private('nodes').retrieve('database').on((req, database) ->

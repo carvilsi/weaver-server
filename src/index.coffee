@@ -13,7 +13,6 @@
 # Loading
 console.log(`'\033[2J'`)             # Clear terminal
 console.log(`'\033[0;0H'`)           # To top
-console.log(`'\033[36mLoading...'`)  # Loading in cyan
 
 require('./module-path') # Contains module paths
 
@@ -32,7 +31,6 @@ PluginService   = require('PluginService')
 WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
-Tracker         = require('Tracker')
 logger          = require('logger')
 
 
@@ -50,7 +48,6 @@ initModules = ->
     'RoleCtrl'
     'UserCtrl'
     'WeaverQueryCtrl'
-    'TrackerCtrl'
     'snmp'
   ]
 
@@ -77,7 +74,7 @@ Promise.map(servicesToLoad, (service) ->
 ).then(->
   initModules()
 
-  logger.config.info('weaver-server restarted')
+  logger.config.info('weaver-server started and ready')
   splash.printLoaded()
   sounds.loaded()
 )
