@@ -4,7 +4,6 @@ module.exports =
 
   application:
     wipe: false
-    singleDatabase: false
     sounds:
       muteAll: true
 

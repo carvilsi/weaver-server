@@ -36,9 +36,6 @@ module.exports =
       accessKey: 'NYLEXGR6MF2IE99LZ4UE'
       secretKey: 'CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD'
 
-    projectController:
-      endpoint: 'http://localhost:9888'
-
     snmp:
       enabled: false
       ipMonitor: 'localhost'
