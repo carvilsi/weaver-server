@@ -7,9 +7,6 @@ ProjectPool     = require('ProjectPool')
 AclService      = require('AclService')
 DatabaseService = require('DatabaseService')
 logger          = require('logger')
-Tracker         = require('Tracker')
-
-
 
 bus.provide("project").require('target').on((req, target) ->
   ProjectService.get(target)
@@ -17,13 +14,13 @@ bus.provide("project").require('target').on((req, target) ->
 
 bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
   AclService.assertACLReadPermission(user, project.acl)
-  new DatabaseService(project.database)
+  new DatabaseService(config.get('services.database.url'), project.id)
 )
 
 # Move to FileController
 bus.provide('minio').retrieve('project', 'user').on((req, project, user) ->
   AclService.assertACLReadPermission(user, project.acl)
-  MinioClient.create(project.fileServer)
+  MinioClient.create(config.get('services.fileServer'))
 )
 
 bus.private('project').retrieve('user').on((req, user) ->
@@ -45,27 +42,26 @@ bus.private('project').retrieve('user').on((req, user) ->
 )
 
 bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
+  logger.code.info "Creating project id: #{id} name: #{name}"
   AclService.assertACLWritePermission(user, 'create-projects')
 
   ProjectPool.create(id).then((project) ->
 
     # Create an ACL for this user to set on the project
     acl = AclService.createProjectACLs(id, user)
-    ProjectService.create(id, name, project.database, acl.id, project.fileServer, project.tracker)
+    ProjectService.create(id, name, acl.id)
 
-    logger.code.debug "Project #{id} created, acl: #{acl}"
+    logger.code.debug "Project #{id} created, acl: #{acl.id}"
 
     return acl
   )
 )
 
-bus.private('project.delete').retrieve('user', 'project', 'database', 'minio', 'tracker').on((req, user, project, database, minio, tracker) ->
+bus.private('project.delete').retrieve('user', 'project').on((req, user, project) ->
   AclService.assertProjectFunctionPermission(user, project, 'delete-project')
 
   logger.usage.info "Deleting project with id #{project.id}"
   Promise.all([
-    tracker.wipe()
-    database.wipe()
     ProjectPool.clean(project.id)
     ProjectService.delete(project)
   ])
@@ -79,30 +75,27 @@ bus.private('project.ready').retrieve('user').require('id').on((req, user, id) -
 )
 
 bus.internal('getMinioForProject').on((project) ->
-  Promise.resolve(MinioClient.create(ProjectService.get(project).fileServer))
+  Promise.resolve(MinioClient.create(config.get('services.fileServer')))
 )
 
 # Create a snapshot with write operations for the project
 bus.private('snapshot').retrieve('project', 'user').on((req, project, user) ->
   AclService.assertProjectFunctionPermission(user, project, 'snapshot')
   logger.usage.info "Generating snapshot for project with id #{project.id}"
-  database = new DatabaseService(project.database)
+  database = new DatabaseService(config.get('services.database.url'), project.id)
   database.snapshot()
 )
 
 # Wipe single project
 bus.private('project.wipe')
-.retrieve('project', 'user', 'database', 'tracker')
+.retrieve('project', 'user', 'database')
 .enable(config.get('application.wipe'))
-.on((req, project, user, database, tracker) ->
+.on((req, project, user, database) ->
   if not user.isAdmin()
     throw {code: -1, message: 'Permission denied'}
 
   logger.usage.info "Wiping project with id #{project.id}"
-  Promise.all([
-    database.wipe()
-    tracker.wipe()
-  ])
+  database.wipe()
 
 )
 
@@ -118,21 +111,13 @@ bus.private('projects.wipe')
 
   logger.usage.info "Wiping all projects"
 
-  endpoints = (p.database for p in ProjectService.all())
-  databases = (new DatabaseService(endpoint) for endpoint in endpoints)
+  ids = (p.id for p in ProjectService.all())
+  databases = (new DatabaseService(config.get('services.database.url'), id) for id in ids)
 
-  trackers = (new Tracker(p.tracker) for p in ProjectService.all())
-
-  Promise.all([
-    Promise.map(databases, (database) ->
-      logger.usage.info "Wiping database: #{database.uri}"
-      database.wipe()
-    )
-    Promise.map(trackers, (tracker) ->
-      logger.usage.info "Wiping tracker"
-      tracker.wipe()
-    )
-  ])
+  Promise.map(databases, (database) ->
+    logger.usage.info "Wiping database: #{database.uri}"
+    database.wipe()
+  )
 )
 
 
