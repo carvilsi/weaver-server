@@ -4,6 +4,7 @@
 node_modules
 coverage.html
 coverage/
+postgresql/
 *.iml
 *.log
 data
