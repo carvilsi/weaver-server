@@ -33,13 +33,16 @@ module.exports =
       @_GET("#{@uri}/read/#{id}")
 
     snapshot: () ->
-      @_POST("#{@uri}/snapshot")
+      @_GET("#{@uri}/dump")
 
     write: (payload, creator) ->
       @_POST("#{@uri}/write", payload, {creator})
 
     query: (query) ->
       @_POST("#{@uri}/query", query)
+
+    postgresQuery: (query) ->
+      @_POST("#{@uri}/postgresQuery", query)
 
     nativeQuery: (query) ->
       switch ('VIRTUOSO') #add all our different database types here, at some point

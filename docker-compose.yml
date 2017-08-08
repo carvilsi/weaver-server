@@ -1,5 +1,27 @@
 version: '2.1'
 services:
+  postgres:
+    image: postgres:9.6
+    volumes:
+    - ./postgresql:/var/lib/postgresql/data
+    expose:
+    - "5432"
+    ports:
+    - "5432:5432"
+
+  postgresql-connector:
+    image: sysunite/weaver-database-postgresql:0.0.4
+    links:
+    - postgres
+    expose:
+    - "4567"
+    ports:
+    - "4567:4567"
+    environment:
+    - POSTGRES_HOST=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASS=root
+
   file-system:
     image: minio/minio:RELEASE.2017-04-25T01-27-49Z
     expose:
@@ -10,3 +32,4 @@ services:
     - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
     - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
     command: server /data
+

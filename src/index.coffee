@@ -32,6 +32,7 @@ WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
 logger          = require('logger')
+tracker         = require('Tracker')
 
 
 # Init routes and controllers by running once
@@ -49,6 +50,7 @@ initModules = ->
     'UserCtrl'
     'WeaverQueryCtrl'
     'snmp'
+    'TrackerCtrl'
   ]
 
 servicesToLoad = [
