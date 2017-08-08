@@ -33,7 +33,7 @@ module.exports =
       @_GET("#{@uri}/read/#{id}")
 
     snapshot: () ->
-      @_POST("#{@uri}/snapshot")
+      @_GET("#{@uri}/dump")
 
     write: (payload, creator) ->
       @_POST("#{@uri}/write", payload, {creator})
