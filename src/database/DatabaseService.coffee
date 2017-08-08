@@ -41,6 +41,9 @@ module.exports =
     query: (query) ->
       @_POST("#{@uri}/query", query)
 
+    postgresQuery: (query) ->
+      @_POST("#{@uri}/postgresQuery", query)
+
     nativeQuery: (query) ->
       switch ('VIRTUOSO') #add all our different database types here, at some point
         when 'NEO4J'                then return
