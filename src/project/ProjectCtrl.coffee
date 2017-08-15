@@ -57,6 +57,24 @@ bus.private('project.create').retrieve('user').require('id', 'name').on((req, us
   )
 )
 
+bus.private('project.clone').retrieve('user', 'project').require('id', 'name').on((req, user, project, id, name) ->
+  AclService.assertACLWritePermission(user, 'create-projects')
+  AclService.assertProjectFunctionPermission(user, project, 'snapshot')
+
+  logger.usage.info "Cloning project with id #{project.id}"
+  ProjectPool.clone(project.id, id).then((cloned_project) ->
+    
+    # Create an ACL for this user to set on the project
+    acl = AclService.createProjectACLs(id, user)
+    ProjectService.create(id, name, acl.id)
+
+    logger.code.debug "Project #{project.id} cloned into #{id}, acl: #{acl.id}"
+
+    return acl
+    
+  )
+)
+
 bus.private('project.delete').retrieve('user', 'project').on((req, user, project) ->
   AclService.assertProjectFunctionPermission(user, project, 'delete-project')
 
