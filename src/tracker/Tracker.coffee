@@ -34,14 +34,13 @@ class Tracker
     if conditions.length > 0
       query = query.concat(' WHERE ' + conditions.join(' AND '))
 
-    console.log '=^^=|_PAYLOAD HISTORY QUERY________________________|=^^='
-    console.log req.payload
-    console.log '=^^=|_________________________|=^^='
-
     if req.payload.sorted? and req.payload.sorted is 'descending'
       query = query.concat(' ORDER BY "seqnr" DESC')
     else
       query = query.concat(' ORDER BY "seqnr" ASC')
+
+    if req.payload.offset?
+      query = query.concat(" OFFSET #{my.escape(req.payload.offset)}")
 
     if req.payload.limit?
       query = query.concat(" LIMIT #{my.escape(req.payload.limit)}")
