@@ -35,6 +35,13 @@ class PostgreSQLProjectPool
       result
     )
 
+  dump: (id) ->
+    @request("GET")('dump', { database: id }).then((result) ->
+      logger.usage.info "Dumping postgres database #{id}"
+      # todo zip results
+      result
+    )
+
   isReady: ->
     Promise.resolve({ ready: true })   # Always ready
 
