@@ -10,7 +10,7 @@ services:
     - "5432:5432"
 
   postgresql-connector:
-    image: sysunite/weaver-database-postgresql:0.0.4
+    image: sysunite/weaver-database-postgresql:0.0.13
     links:
     - postgres
     expose:
@@ -32,4 +32,3 @@ services:
     - MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE
     - MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD
     command: server /data
-

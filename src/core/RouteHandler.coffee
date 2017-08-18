@@ -19,6 +19,10 @@ class RouteHandler
     # Init payload on empty
     req.payload = {} if not req.payload?
 
+    # Adding authToken when it's provided on the headers
+    if !req.payload.authToken? and req.headers? and req.headers['authtoken']?
+      req.payload.authToken = req.headers['authtoken']
+
     logger.code.silly "Request: #{route}, payload: #{JSON.stringify(req.payload)}"
 
     @bus.emit(route, req).then((data)->
