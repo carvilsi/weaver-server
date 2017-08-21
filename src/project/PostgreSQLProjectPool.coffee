@@ -1,8 +1,12 @@
-_       = require('lodash')
-config  = require('config')
-logger  = require('logger')
-Promise = require('bluebird')
-rp      = require('request-promise')
+_             = require('lodash')
+config        = require('config')
+logger        = require('logger')
+Promise       = require('bluebird')
+fileService   = require('FileService')
+rp            = require('request-promise')
+fs            = require('fs')
+cuid          = require('cuid')
+zip           = require('node-zip')
 
 class PostgreSQLProjectPool
 
@@ -39,7 +43,16 @@ class PostgreSQLProjectPool
     @request("GET")('dump', { database: id }).then((result) ->
       logger.usage.info "Dumping postgres database #{id}"
       # todo zip results
-      result
+      
+      filename = cuid()
+      pathFilename = __dirname + '/../../uploads/' + filename
+      writeFile = Promise.promisify(fs.writeFile)
+      
+      writeFile(pathFilename, JSON.stringify(result)).then(->
+        fileService.uploadFileStream(pathFilename, filename, id)
+      ).then((filenameMinio) ->
+        filenameMinio
+      )
     )
 
   isReady: ->

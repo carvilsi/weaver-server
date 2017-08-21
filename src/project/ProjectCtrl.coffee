@@ -42,9 +42,8 @@ bus.private('project').retrieve('user').on((req, user) ->
 )
 
 bus.private('project.dump').retrieve('user', 'project').on((req, user, project) ->
-  logger.usage.silly "Checking acl for dumping project #{id}"
-  AclService.assertACLReadPermission(user, AclService.getACLByObject(id).id)
-  logger.usage.silly "Dumping project #{id}"
+  logger.usage.silly "Checking acl for dumping project #{project.id}"
+  AclService.assertACLReadPermission(user, AclService.getACLByObject(project.id).id)
   ProjectPool.dump(project.id)
 )
 
