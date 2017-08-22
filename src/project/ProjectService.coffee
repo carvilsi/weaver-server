@@ -24,7 +24,7 @@ class ProjectService extends LokiService
       throw {code: -1, message: "No project found for id #{id}"}
 
     project
-
+    
   delete: (project) ->
     logger.code.info "ProjectService deleting project with id #{project.id if project}"
     @projects.remove(project)

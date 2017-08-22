@@ -32,6 +32,13 @@ class PostgreSQLProjectPool
       result
     )
 
+  clone: (id, clone_id) ->
+    logger.code.info "PostgreSQL cloning project with id #{id}"
+    @request("POST")('duplicateDatabase', { database: id, cloned_database: clone_id }).then((result) ->
+      logger.usage.info "New PostgreSQL database cloned: #{clone_id}"
+      result
+    )
+
   clean: (id) ->
     logger.code.info "PostgreSQL deleting project with id #{id}"
     @request("POST")('deleteDatabase', { database: id }).then((result) ->
