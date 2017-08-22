@@ -7,6 +7,7 @@ logger       = require('logger')
 fs           = require('fs')
 cuid         = require('cuid')
 server       = require('WeaverServer')
+zlib         = require('zlib')
 
 module.exports =
   class FileService
@@ -40,6 +41,24 @@ module.exports =
             resolve()
         )
       )
+
+    @gunZip: (path, filename, removeSource) ->
+      gzip = zlib.createGzip()
+      zippedName = filename + '.gz'
+      pathAndName = __dirname + '/../../uploads/' + zippedName
+      r = fs.createReadStream(path + '/' + filename)
+      w = fs.createWriteStream(pathAndName)
+      r.pipe(gzip).pipe(w)
+      
+      if(removeSource)
+        fs.unlink(path + '/' + filename, (err) ->
+          if err
+            logger.code.error('An error occurred trying to delete the file: '.concat(err))
+          else
+            logger.code.debug('Successfully deleted source file')
+        )
+      
+      {pathAndName, zippedName}
 
     @uploadFileStream: (filePath, fileName, project) ->
       logger.code.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"

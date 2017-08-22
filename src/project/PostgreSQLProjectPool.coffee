@@ -6,7 +6,7 @@ fileService   = require('FileService')
 rp            = require('request-promise')
 fs            = require('fs')
 cuid          = require('cuid')
-zip           = require('node-zip')
+
 
 class PostgreSQLProjectPool
 
@@ -42,14 +42,16 @@ class PostgreSQLProjectPool
   dump: (id) ->
     @request("GET")('dump', { database: id }).then((result) ->
       logger.usage.info "Dumping postgres database #{id}"
-      # todo zip results
       
       filename = cuid()
-      pathFilename = __dirname + '/../../uploads/' + filename
+      path = __dirname + '/../../uploads/'
+      pathFilename = path + filename
+            
       writeFile = Promise.promisify(fs.writeFile)
       
       writeFile(pathFilename, JSON.stringify(result)).then(->
-        fileService.uploadFileStream(pathFilename, filename, id)
+        gz = fileService.gunZip(path, filename, true)
+        fileService.uploadFileStream(gz.pathAndName, gz.zippedName, id)
       ).then((filenameMinio) ->
         filenameMinio
       )
