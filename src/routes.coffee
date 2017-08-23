@@ -65,6 +65,8 @@ route.private.POST "project.clone"           # Clones a project
 route.private.POST "project.delete"          # Delete a project
 route.private.POST "project.ready"           # Checks if a project is setup and ready
 route.private.POST "project.wipe"            # Wipe a single project
+route.private.POST "project.freeze"          # Wipe a single project
+route.private.POST "project.unfreeze"        # Wipe a single project
 route.private.POST "projects.wipe"           # Wipe all projects
 route.private.POST "projects.destroy"        # Destroy all projects
 
