@@ -9,6 +9,7 @@ DatabaseService = require('DatabaseService')
 logger          = require('logger')
 
 bus.private('write').priority(1000).retrieve('user', 'project').on((req, user, project) ->
+  console.log ProjectService.isFrozen(project)
   if ProjectService.isFrozen(project)
     throw {code: -1, message: 'Project is frozen'}
 )
@@ -29,13 +30,13 @@ bus.provide('minio').retrieve('project', 'user').on((req, project, user) ->
 )
 
 bus.private('project.freeze').retrieve('user', 'project').on((req, user, project) ->
-  logger.code.info "Freezing project id: #{project.id}"
   ProjectService.freezeProject(user, project)
+  logger.code.info "Freezing project id: #{project.id}"
 )
 
 bus.private('project.unfreeze').retrieve('user', 'project').on((req, user, project) ->
-  logger.code.info "Unfreezing project id: #{project.id}"
   ProjectService.unfreezeProject(user, project)
+  logger.code.info "Unfreezing project id: #{project.id}"
 )
 
 bus.private('project').retrieve('user').on((req, user) ->
