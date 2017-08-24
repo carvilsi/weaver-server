@@ -57,7 +57,7 @@ class PostgreSQLProjectPool
       writeFile = Promise.promisify(fs.writeFile)
       
       writeFile(pathFilename, JSON.stringify(result)).then(->
-        gz = fileService.gunZip(path, filename, true)
+        gz = fileService.gunZip(path, filename)
         fileService.uploadFileStream(gz.pathAndName, gz.zippedName, id)
       ).then((filenameMinio) ->
         filenameMinio

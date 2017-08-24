@@ -19,9 +19,10 @@ AclService    = require('AclService')
 UserService     = require('UserService')
 AdminUser       = require('AdminUser')
 ProjectService  = require('ProjectService')
+config          = require('config')
 
 upload = multer({
-  dest: 'uploads/'
+  dest: config.uploads
 })
 
 server
