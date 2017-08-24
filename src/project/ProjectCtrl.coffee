@@ -41,9 +41,10 @@ bus.private('project').retrieve('user').on((req, user) ->
   result
 )
 
-bus.private('project.name').retrieve('user', 'project').on((req, user, project) ->
-  ProjectService.nameProject(user, project)
-  logger.code.info "Renaming project #{name} to: #{name}"
+bus.private('project.name').retrieve('user', 'project').require('name').on((req, user, project, name) ->
+  old = project.name
+  ProjectService.nameProject(user, project, name)
+  logger.code.info "Renaming project #{old} to: #{name}"
 )
 
 bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
