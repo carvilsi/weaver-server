@@ -36,6 +36,11 @@ class ProjectService extends LokiService
     super().then(=>
       @checkProjectAcls()
     )
+  
+  nameProject: (user, project) ->
+    AclService.assertACLWritePermission(user, project.acl)
+    project = @projects.find({id: project.id})[0]
+    console.log project
 
   getProjectsForUser: (user) ->
     projects = []

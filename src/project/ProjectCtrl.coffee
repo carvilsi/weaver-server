@@ -41,6 +41,11 @@ bus.private('project').retrieve('user').on((req, user) ->
   result
 )
 
+bus.private('project.name').retrieve('user', 'project').on((req, user, project) ->
+  ProjectService.nameProject(user, project)
+  logger.code.info "Renaming project #{name} to: #{name}"
+)
+
 bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
   logger.code.info "Creating project id: #{id} name: #{name}"
   AclService.assertACLWritePermission(user, 'create-projects')
