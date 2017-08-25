@@ -37,7 +37,13 @@ bus.private("projectUsers").retrieve('user', 'project').on((req, user, project) 
   projectAcl = AclService.getACLByObject(project.id)
   AclService.assertACLReadPermission(user, projectAcl.id)
   userIds = AclService.getAllowedUsers(projectAcl, true)
-  (UserService.get(i) for i in userIds when i isnt 'root')
+  result = []
+  for i in userIds
+    try
+      result.push(UserService.get(i))
+    catch
+      #noop
+  result
 )
 
 registerUser = (userId, username, password, email, firstname, lastname)->
