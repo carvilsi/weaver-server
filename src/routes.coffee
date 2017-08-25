@@ -25,6 +25,7 @@ route.private.POST "query.native"            # Execute a native query
 
 # Authentication
 route.private.GET  "users"                   # Gets all users
+route.private.GET  "projectUsers"            # Gets users beloning to a project
 
 if config.get('application.openUserCreation')
   route.public.POST  "user.signUp"             # Sign up a new user
