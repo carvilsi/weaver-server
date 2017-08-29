@@ -3,6 +3,7 @@ config          = require('config')
 bus             = require('WeaverBus')
 MinioClient     = require('MinioClient')
 ProjectService  = require('ProjectService')
+FileService     = require('FileService')
 ProjectPool     = require('ProjectPool')
 AclService      = require('AclService')
 DatabaseService = require('DatabaseService')
@@ -39,12 +40,6 @@ bus.private('project').retrieve('user').on((req, user) ->
     catch error
       # User has no access to this project
   result
-)
-
-bus.private('project.dump').retrieve('user', 'project').on((req, user, project) ->
-  logger.usage.silly "Checking acl for dumping project #{project.id}"
-  AclService.assertACLReadPermission(user, AclService.getACLByObject(project.id).id)
-  ProjectPool.dump(project.id)
 )
 
 bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
@@ -103,11 +98,21 @@ bus.internal('getMinioForProject').on((project) ->
 )
 
 # Create a snapshot with write operations for the project
-bus.private('snapshot').retrieve('project', 'user').on((req, project, user) ->
+bus.private('snapshot').retrieve('project', 'user').require('zipped').on((req, project, user, zipped) ->
   AclService.assertProjectFunctionPermission(user, project, 'snapshot')
   logger.usage.info "Generating snapshot for project with id #{project.id}"
   database = new DatabaseService(config.get('services.database.url'), project.id)
-  database.snapshot()
+  database.snapshot().then((data)->
+    console.log "we here"
+    if not zipped
+      data
+    else
+      console.log "we here -1" + data
+      FileService.writeToDisk(JSON.stringify(data)).then((file)->
+        console.log "we here 1"
+        FileService.gunZip(file.name)
+      )
+  )
 )
 
 # Wipe single project

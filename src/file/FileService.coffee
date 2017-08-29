@@ -9,6 +9,7 @@ multer       = require('multer')
 cuid         = require('cuid')
 server       = require('WeaverServer')
 zlib         = require('zlib')
+config       = require('config')
 
 module.exports =
   class FileService
@@ -43,22 +44,37 @@ module.exports =
         )
       )
 
-    @gunZip: (path, filename) ->
+    @writeToDisk: (text) ->
+      filename = cuid()
+      path = config.get('services.fileServer.uploads')
+      url = path + filename
+      writeFile = Promise.promisify(fs.writeFile)
+      
+      writeFile(pathFile, JSON.stringify(text)).then(->
+        {path: path, name: filename, url}
+      )
+
+    @gunZip: (filename) ->
+      console.log "we here 2"
       gzip = zlib.createGzip()
+      path = config.get('services.fileServer.uploads')
       zippedName = filename + '.gz'
-      pathAndName = config.uploads + '/' + zippedName
-      r = fs.createReadStream(path + '/' + filename)
-      w = fs.createWriteStream(pathAndName)
+      url = path + zippedName
+      r = fs.createReadStream(path + filename)
+      w = fs.createWriteStream(url)
       r.pipe(gzip).pipe(w)
       
-      fs.unlink(path + '/' + filename, (err) ->
+      fs.unlink(config.get('services.fileServer.uploads') + filename, (err) ->
         if err
           logger.code.error('An error occurred trying to delete the file: '.concat(err))
         else
           logger.code.debug('Successfully deleted source file')
-      
-      {pathAndName, zippedName}
+      )
 
+      a = {path, name: zippedName, url}
+      console.log a
+      a
+      
     @uploadFileStream: (filePath, fileName, project) ->
       logger.code.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"
       getMinioClient(project).then((minioClient) ->

@@ -60,7 +60,6 @@ route.private.POST "role.delete"
 
 # Project management
 route.private.GET  "project"                 # Get a list of projects
-route.private.GET  "project.dump"            # Creates and zips the database dump and sends it
 route.private.POST "project.create"          # Create a project
 route.private.POST "project.clone"           # Clones a project
 route.private.POST "project.delete"          # Delete a project
