@@ -7,6 +7,10 @@ class Tracker
 
   constructor: (@database) ->
 
+  countHistoryRows: ->
+    query = "SELECT COUNT(*) FROM \"trackerdb\";"
+    @database.postgresQuery(query)
+
   getHistoryFor: (req) ->
     logger.usage.debug "History request: #{JSON.stringify(req)}"
     quote = '\''
