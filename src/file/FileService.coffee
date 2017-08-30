@@ -5,7 +5,6 @@ WeaverError  = Weaver.Error
 Promise      = require('bluebird')
 logger       = require('logger')
 fs           = require('fs')
-multer       = require('multer')
 cuid         = require('cuid')
 server       = require('WeaverServer')
 zlib         = require('zlib')
