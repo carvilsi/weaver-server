@@ -48,14 +48,14 @@ module.exports =
       filename = cuid()
       path = config.get('services.fileServer.uploads')
       url = path + filename
+
       writeFile = Promise.promisify(fs.writeFile)
       
-      writeFile(pathFile, JSON.stringify(text)).then(->
+      writeFile(url, JSON.stringify(text)).then(->
         {path: path, name: filename, url}
       )
 
-    @gunZip: (filename) ->
-      console.log "we here 2"
+    @gunZip: (filename, project) ->
       gzip = zlib.createGzip()
       path = config.get('services.fileServer.uploads')
       zippedName = filename + '.gz'
@@ -71,9 +71,7 @@ module.exports =
           logger.code.debug('Successfully deleted source file')
       )
 
-      a = {path, name: zippedName, url}
-      console.log a
-      a
+      @uploadFileStream(url, zippedName, project.id)
       
     @uploadFileStream: (filePath, fileName, project) ->
       logger.code.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"

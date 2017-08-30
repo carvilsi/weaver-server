@@ -103,14 +103,11 @@ bus.private('snapshot').retrieve('project', 'user').require('zipped').on((req, p
   logger.usage.info "Generating snapshot for project with id #{project.id}"
   database = new DatabaseService(config.get('services.database.url'), project.id)
   database.snapshot().then((data)->
-    console.log "we here"
     if not zipped
       data
     else
-      console.log "we here -1" + data
-      FileService.writeToDisk(JSON.stringify(data)).then((file)->
-        console.log "we here 1"
-        FileService.gunZip(file.name)
+      FileService.writeToDisk(data).then((file)->
+        FileService.gunZip(file.name, project)
       )
   )
 )
