@@ -9,7 +9,6 @@ DatabaseService = require('DatabaseService')
 logger          = require('logger')
 
 bus.private('write').priority(1000).retrieve('user', 'project').on((req, user, project) ->
-  console.log ProjectService.isFrozen(project)
   if ProjectService.isFrozen(project)
     throw {code: -1, message: 'Project is frozen'}
 )
