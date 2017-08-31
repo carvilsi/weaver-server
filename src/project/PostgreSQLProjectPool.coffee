@@ -1,8 +1,9 @@
-_       = require('lodash')
-config  = require('config')
-logger  = require('logger')
-Promise = require('bluebird')
-rp      = require('request-promise')
+_             = require('lodash')
+config        = require('config')
+logger        = require('logger')
+Promise       = require('bluebird')
+fileService   = require('FileService')
+rp            = require('request-promise')
 
 class PostgreSQLProjectPool
 

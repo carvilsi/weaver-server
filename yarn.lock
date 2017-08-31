@@ -3091,9 +3091,9 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-weaver-sdk@3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/weaver-sdk/-/weaver-sdk-3.0.1.tgz#7045b10888dcb893e0e33ea56b02bdff227a5b5a"
+weaver-sdk@3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/weaver-sdk/-/weaver-sdk-3.0.3.tgz#7cf01dc5ee97d125f6a8dfd3fa965534704234a1"
   dependencies:
     bluebird "~3.5.0"
     chirql "^1.0.16"
