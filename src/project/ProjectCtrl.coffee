@@ -3,10 +3,16 @@ config          = require('config')
 bus             = require('WeaverBus')
 MinioClient     = require('MinioClient')
 ProjectService  = require('ProjectService')
+FileService     = require('FileService')
 ProjectPool     = require('ProjectPool')
 AclService      = require('AclService')
 DatabaseService = require('DatabaseService')
 logger          = require('logger')
+
+bus.private('write').priority(1000).retrieve('user', 'project').on((req, user, project) ->
+  if ProjectService.isFrozen(project)
+    throw {code: -1, message: 'Project is frozen'}
+)
 
 bus.provide("project").require('target').on((req, target) ->
   ProjectService.get(target)
@@ -21,6 +27,16 @@ bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
 bus.provide('minio').retrieve('project', 'user').on((req, project, user) ->
   AclService.assertACLReadPermission(user, project.acl)
   MinioClient.create(config.get('services.fileServer'))
+)
+
+bus.private('project.freeze').retrieve('user', 'project').on((req, user, project) ->
+  logger.code.info "Freezing project id: #{project.id}"
+  ProjectService.freezeProject(user, project)
+)
+
+bus.private('project.unfreeze').retrieve('user', 'project').on((req, user, project) ->
+  logger.code.info "Unfreezing project id: #{project.id}"
+  ProjectService.unfreezeProject(user, project)
 )
 
 bus.private('project').retrieve('user').on((req, user) ->
@@ -68,7 +84,7 @@ bus.private('project.clone').retrieve('user', 'project').require('id', 'name').o
 
   logger.usage.info "Cloning project with id #{project.id}"
   ProjectPool.clone(project.id, id).then((cloned_project) ->
-    
+
     # Create an ACL for this user to set on the project
     acl = AclService.createProjectACLs(id, user)
     ProjectService.create(id, name, acl.id)
@@ -76,7 +92,7 @@ bus.private('project.clone').retrieve('user', 'project').require('id', 'name').o
     logger.code.debug "Project #{project.id} cloned into #{id}, acl: #{acl.id}"
 
     return acl
-    
+
   )
 )
 
@@ -102,11 +118,18 @@ bus.internal('getMinioForProject').on((project) ->
 )
 
 # Create a snapshot with write operations for the project
-bus.private('snapshot').retrieve('project', 'user').on((req, project, user) ->
+bus.private('snapshot').retrieve('project', 'user').optional('zipped').on((req, project, user, zipped = false) ->
   AclService.assertProjectFunctionPermission(user, project, 'snapshot')
-  logger.usage.info "Generating snapshot for project with id #{project.id}"
+  logger.usage.info "Generating snapshot for project with id #{project.id} - zipped #{zipped}"
   database = new DatabaseService(config.get('services.database.url'), project.id)
-  database.snapshot()
+  database.snapshot().then((data)->
+    if not zipped
+      data
+    else
+      FileService.writeToDisk(data).then((file)->
+        FileService.gunZip(file.name, project)
+      )
+  )
 )
 
 # Wipe single project

@@ -7,11 +7,15 @@ class Tracker
 
   constructor: (@database) ->
 
+  countHistoryRows: ->
+    query = "SELECT COUNT(*) FROM \"trackerdb\";"
+    @database.postgresQuery(query)
+
   getHistoryFor: (req) ->
     logger.usage.debug "History request: #{JSON.stringify(req)}"
     quote = '\''
     conditions = []
-    query = "SELECT \"seqnr\", \"datetime\", \"user\", \"action\", \"node\", \"key\", \"from\", \"to\", \"oldTo\", \"value\" FROM \"trackerdb\""
+    query = "SELECT * FROM \"trackerdb\""
 
     if req.payload.users?
       conditions.push('"user" IN (' + (my.escape(u) for u in req.payload.users).join(', ') + ')')
@@ -25,6 +29,9 @@ class Tracker
     if req.payload.froms?
       conditions.push('"from" IN (' + (my.escape(i) for i in req.payload.froms).join(', ') + ')')
 
+    if req.payload.tos?
+      conditions.push('"to" IN (' + (my.escape(i) for i in req.payload.tos).join(', ') + ')')
+
     if req.payload.fromDateTime?
       conditions.push('"datetime" >= ' + my.escape(req.payload.fromDateTime))
 
@@ -32,7 +39,10 @@ class Tracker
       conditions.push('"datetime" < ' + my.escape(req.payload.beforeDateTime))
 
     if conditions.length > 0
-      query = query.concat(' WHERE ' + conditions.join(' AND '))
+      if req.payload.booleanOperator? and req.payload.booleanOperator is 'or'
+        query = query.concat(' WHERE ' + conditions.join(' OR '))
+      else
+        query = query.concat(' WHERE ' + conditions.join(' AND '))
 
     if req.payload.sorted? and req.payload.sorted is 'descending'
       query = query.concat(' ORDER BY "seqnr" DESC')

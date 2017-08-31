@@ -7,6 +7,8 @@ logger       = require('logger')
 fs           = require('fs')
 cuid         = require('cuid')
 server       = require('WeaverServer')
+zlib         = require('zlib')
+config       = require('config')
 
 module.exports =
   class FileService
@@ -41,6 +43,35 @@ module.exports =
         )
       )
 
+    @writeToDisk: (text) ->
+      filename = cuid()
+      path = config.get('services.fileServer.uploads')
+      url = path + filename
+
+      writeFile = Promise.promisify(fs.writeFile)
+      
+      writeFile(url, JSON.stringify(text)).then(->
+        {path: path, name: filename, url}
+      )
+
+    @gunZip: (filename, project) ->
+      gzip = zlib.createGzip()
+      path = config.get('services.fileServer.uploads')
+      zippedName = filename + '.gz'
+      url = path + zippedName
+      r = fs.createReadStream(path + filename)
+      w = fs.createWriteStream(url)
+      r.pipe(gzip).pipe(w)
+      
+      fs.unlink(config.get('services.fileServer.uploads') + filename, (err) ->
+        if err
+          logger.code.error('An error occurred trying to delete the file: '.concat(err))
+        else
+          logger.code.debug('Successfully deleted source file')
+      )
+
+      @uploadFileStream(url, zippedName, project.id)
+      
     @uploadFileStream: (filePath, fileName, project) ->
       logger.code.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"
       getMinioClient(project).then((minioClient) ->

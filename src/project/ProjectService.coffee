@@ -42,6 +42,21 @@ class ProjectService extends LokiService
     project = @projects.find({id: project.id})[0]
     project.name = name
     
+
+  unfreezeProject: (user, project) ->
+    AclService.assertProjectFunctionPermission(user, project, 'project-administration')
+    project = @projects.find({id: project.id})[0]
+    project.frozen = false
+
+  freezeProject: (user, project) ->
+    AclService.assertProjectFunctionPermission(user, project, 'project-administration')
+    project = @projects.find({id: project.id})[0]
+    project.frozen = true
+
+  isFrozen: (project) ->
+    frozenState = @projects.find({id: project.id})[0].frozen
+    if frozenState? then frozenState else false
+
   getProjectsForUser: (user) ->
     projects = []
 

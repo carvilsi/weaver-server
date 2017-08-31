@@ -25,6 +25,7 @@ route.private.POST "query.native"            # Execute a native query
 
 # Authentication
 route.private.GET  "users"                   # Gets all users
+route.private.GET  "projectUsers"            # Gets users beloning to a project
 
 if config.get('application.openUserCreation')
   route.public.POST  "user.signUp"             # Sign up a new user
@@ -60,6 +61,8 @@ route.private.POST "role.delete"
 
 # Project management
 route.private.GET  "project"                 # Get a list of projects
+route.private.GET  "project.freeze"          # Freezes a project
+route.private.GET  "project.unfreeze"        # Unfreezes project
 route.private.POST "project.create"          # Create a project
 route.private.POST "project.clone"           # Clones a project
 route.private.POST "project.name"            # Renames a project

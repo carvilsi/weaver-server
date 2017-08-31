@@ -11,7 +11,6 @@ config          = require('config')
 bus.private("*").priority(1000).retrieve('user').on((req, user) ->
 )
 
-
 bus.provide("user").require('authToken').on((req, authToken) ->
   logger.usage.silly "Getting user for authtoken #{authToken}"
   if AdminUser.hasAuthToken(authToken)
@@ -24,7 +23,6 @@ bus.provide("user").require('authToken').on((req, authToken) ->
     user
 )
 
-
 # Get all users
 bus.private("users").retrieve('user').on((req, user)->
   if not user.isAdmin()
@@ -32,6 +30,20 @@ bus.private("users").retrieve('user').on((req, user)->
     throw {code:-1, message: "Only admin user is allowed to get all users."}
 
   UserService.all()
+)
+
+bus.private("projectUsers").retrieve('user', 'project').on((req, user, project) ->
+  logger.usage.silly "Got request from user #{user} for members of project #{project.id}"
+  projectAcl = AclService.getACLByObject(project.id)
+  AclService.assertACLReadPermission(user, projectAcl.id)
+  userIds = AclService.getAllowedUsers(projectAcl, true)
+  result = []
+  for i in userIds
+    try
+      result.push(UserService.get(i))
+    catch
+      #noop
+  result
 )
 
 registerUser = (userId, username, password, email, firstname, lastname)->
