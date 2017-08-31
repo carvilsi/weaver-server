@@ -16,6 +16,7 @@ class AclService extends LokiService
     'delete-project',
     'history',
     'snapshot',
+    'project-administration',
     'wipe'
   ]
 
