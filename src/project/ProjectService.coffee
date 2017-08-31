@@ -38,7 +38,7 @@ class ProjectService extends LokiService
     )
   
   nameProject: (user, project, name) ->
-    AclService.assertACLWritePermission(user, project.acl)
+    AclService.assertProjectFunctionPermission(user, project, 'project-administration')
     project = @projects.find({id: project.id})[0]
     project.name = name
     
