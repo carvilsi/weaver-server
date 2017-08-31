@@ -98,9 +98,9 @@ bus.internal('getMinioForProject').on((project) ->
 )
 
 # Create a snapshot with write operations for the project
-bus.private('snapshot').retrieve('project', 'user').optional('zipped').on((req, project, user, zipped) ->
+bus.private('snapshot').retrieve('project', 'user').optional('zipped').on((req, project, user, zipped = false) ->
   AclService.assertProjectFunctionPermission(user, project, 'snapshot')
-  logger.usage.info "Generating snapshot for project with id #{project.id}"
+  logger.usage.info "Generating snapshot for project with id #{project.id} - zipped #{zipped}"
   database = new DatabaseService(config.get('services.database.url'), project.id)
   database.snapshot().then((data)->
     if not zipped
