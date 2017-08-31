@@ -22,6 +22,13 @@ class UserService extends LokiService
   all: ->
     (_.omit(user, ['passwordHash']) for user in @users.find())
 
+  get: (userId) ->
+    user = @users.find({userId})[0]
+    if not user?
+      throw {code: -1, message: "No user found for id #{userId}"}
+
+    _.omit(user, ['passwordHash', 'password' ])
+
   signUp: (userId, username, email, password, firstname, lastname) ->
 
     if @users.findOne({username})?
