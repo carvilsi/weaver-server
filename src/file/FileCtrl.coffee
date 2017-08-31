@@ -22,7 +22,7 @@ ProjectService  = require('ProjectService')
 config          = require('config')
 
 upload = multer({
-  dest: config.uploads
+  dest: config.get('services.fileServer.uploads')
 })
 
 server
