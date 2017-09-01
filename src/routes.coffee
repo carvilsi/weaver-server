@@ -65,6 +65,7 @@ route.private.GET  "project.freeze"          # Freezes a project
 route.private.GET  "project.unfreeze"        # Unfreezes project
 route.private.POST "project.create"          # Create a project
 route.private.POST "project.clone"           # Clones a project
+route.private.POST "project.name"            # Renames a project
 route.private.POST "project.delete"          # Delete a project
 route.private.POST "project.ready"           # Checks if a project is setup and ready
 route.private.POST "project.wipe"            # Wipe a single project

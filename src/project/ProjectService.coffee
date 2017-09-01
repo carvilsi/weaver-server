@@ -36,6 +36,12 @@ class ProjectService extends LokiService
     super().then(=>
       @checkProjectAcls()
     )
+  
+  nameProject: (user, project, name) ->
+    AclService.assertProjectFunctionPermission(user, project, 'project-administration')
+    project = @projects.find({id: project.id})[0]
+    project.name = name
+    
 
   unfreezeProject: (user, project) ->
     AclService.assertProjectFunctionPermission(user, project, 'project-administration')
