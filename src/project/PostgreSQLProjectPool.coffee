@@ -10,16 +10,31 @@ class PostgreSQLProjectPool
   constructor:  (@endpoint) ->
     logger.code.info("PostgreSQL project pool loaded with endpoint: -#{@endpoint}-")
 
-  request: (method) -> (path, qs) =>
+  request: (method) -> (path, qs, body) =>
     logger.code.debug "PostgreSQLProjectPool calling uri: #{@endpoint}/#{path}"
     rp({
       method
       uri: "#{@endpoint}/#{path}"
       json: true
+      body
       qs
     }).then((response) ->
       logger.code.silly "Called -#{path}-, reponse: -#{response}-"
       response
+    )
+
+  executeZip: (filename, project) ->
+    console.log "im here"
+    req = @request("POST")
+    fileService.downloadFileByID(filename, project.id).then((file)->
+      JSON.parse(fileService.unZip(file).toString())
+    ).then((data)->
+      req('write', {database: project.id}, data)
+    ).then((result) ->
+      logger.usage.info "Executed write operations from zip on: #{project.id}"
+      result
+    ).catch((err) ->
+      console.log err
     )
 
   create: (id) ->

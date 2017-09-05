@@ -63,6 +63,7 @@ route.private.POST "role.delete"
 route.private.GET  "project"                 # Get a list of projects
 route.private.GET  "project.freeze"          # Freezes a project
 route.private.GET  "project.unfreeze"        # Unfreezes project
+route.private.POST "project.executeZip"      # Executes a ZIP with WriteOperations
 route.private.POST "project.create"          # Create a project
 route.private.POST "project.clone"           # Clones a project
 route.private.POST "project.name"            # Renames a project
