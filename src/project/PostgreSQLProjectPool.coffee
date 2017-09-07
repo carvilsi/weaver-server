@@ -24,7 +24,6 @@ class PostgreSQLProjectPool
     )
 
   executeZip: (filename, project) ->
-    console.log "im here"
     req = @request("POST")
     fileService.downloadFileByID(filename, project.id).then((file)->
       JSON.parse(fileService.unZip(file).toString())
@@ -33,8 +32,6 @@ class PostgreSQLProjectPool
     ).then((result) ->
       logger.usage.info "Executed write operations from zip on: #{project.id}"
       result
-    ).catch((err) ->
-      console.log err
     )
 
   create: (id) ->
