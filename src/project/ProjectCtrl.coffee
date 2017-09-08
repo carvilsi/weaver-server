@@ -9,6 +9,11 @@ AclService      = require('AclService')
 DatabaseService = require('DatabaseService')
 logger          = require('logger')
 
+bus.private('write').priority(1000).retrieve('user', 'project').on((req, user, project) ->
+  if ProjectService.isFrozen(project)
+    throw {code: -1, message: 'Project is frozen'}
+)
+
 bus.provide("project").require('target').on((req, target) ->
   ProjectService.get(target)
 )
@@ -22,6 +27,16 @@ bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
 bus.provide('minio').retrieve('project', 'user').on((req, project, user) ->
   AclService.assertACLReadPermission(user, project.acl)
   MinioClient.create(config.get('services.fileServer'))
+)
+
+bus.private('project.freeze').retrieve('user', 'project').on((req, user, project) ->
+  logger.code.info "Freezing project id: #{project.id}"
+  ProjectService.freezeProject(user, project)
+)
+
+bus.private('project.unfreeze').retrieve('user', 'project').on((req, user, project) ->
+  logger.code.info "Unfreezing project id: #{project.id}"
+  ProjectService.unfreezeProject(user, project)
 )
 
 bus.private('project').retrieve('user').on((req, user) ->
@@ -40,6 +55,11 @@ bus.private('project').retrieve('user').on((req, user) ->
     catch error
       # User has no access to this project
   result
+)
+
+bus.private('project.name').retrieve('user', 'project').require('name').on((req, user, project, name) ->
+  logger.code.info "Renaming project #{project.name} to: #{name}"
+  ProjectService.nameProject(user, project, name)
 )
 
 bus.private('project.create').retrieve('user').require('id', 'name').on((req, user, id, name) ->
