@@ -23,12 +23,21 @@ class PostgreSQLProjectPool
       response
     )
 
+  upload: (path, qs, formData) ->
+    logger.code.debug "PostgreSQLProjectPool calling upload uri: #{@endpoint}/#{path}"
+    rp({
+      method: "POST"
+      uri: "#{@endpoint}/#{path}"
+      qs
+      formData
+    }).then((response) ->
+      logger.code.silly "Called -#{path}-, reponse: -#{response}-"
+      response
+    )
+
   executeZip: (filename, project) ->
-    req = @request("POST")
-    fileService.downloadFileByID(filename, project.id).then((file)->
-      JSON.parse(fileService.unZip(file).toString())
-    ).then((data)->
-      req('write', {database: project.id}, data)
+    fileService.downloadFileByID(filename, project.id).then((file) =>
+      @upload("upload", { database: project.id }, { file })
     ).then((result) ->
       logger.usage.info "Executed write operations from zip on: #{project.id}"
       result

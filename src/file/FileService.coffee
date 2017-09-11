@@ -72,9 +72,6 @@ module.exports =
 
       @uploadFileStream(url, zippedName, project.id)
 
-    @unZip: (file) ->
-      zlib.unzipSync(file)
-
     @uploadFileStream: (filePath, fileName, project) ->
       logger.code.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"
       getMinioClient(project).then((minioClient) ->
