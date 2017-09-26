@@ -1,5 +1,4 @@
 FROM node:6.11.3-alpine
-RUN apk update && apk add git
 RUN mkdir -p /usr/src/app/uploads /usr/src/app/logs /usr/src/app/loki
 
 WORKDIR /usr/src/app
@@ -11,11 +10,14 @@ COPY . /usr/src/app/
 #RUN chmod 777 /usr/health.sh
 #HEALTHCHECK CMD /usr/health.sh
 
-RUN apk update && \
-  apk add git && \
-  npm install && \
+RUN apk --no-cache add --virtual native-deps \
+  git g++ gcc libgcc libstdc++ linux-headers make python && \
+  npm install coffee node-gyp -g &&\
+  npm install --build-from-source=bcrypt && \
+  npm cache clean --force &&\
+  apk del native-deps &&\
   npm run prepublish && \
-  npm prune --production && \
-  apk del git
+  npm prune --production &&\
+  npm uninstall -g coffee node-gyp
 
 CMD node lib/index.js

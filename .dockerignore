@@ -11,3 +11,4 @@ data
 loki
 uploads
 config/local.coffee
+.git/
