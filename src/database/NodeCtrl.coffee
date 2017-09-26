@@ -12,6 +12,10 @@ bus.private('nodes').retrieve('database').on((req, database) ->
   database.listAllNodes(req)
 )
 
+bus.private('node.clone').retrieve('database').require('sourceId').optional('targetId', 'relationsToTraverse').on((req, database, sourceId, targetId, relationsToTraverse) ->
+  database.clone(sourceId, targetId, relationsToTraverse)
+)
+
 bus.private('relations').retrieve('database').on((req, database) ->
   database.listAllRelations()
 )
