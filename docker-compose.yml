@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   postgres:
-    image: postgres:9.6
+    image: postgres:9.6-alpine
     volumes:
     - ./postgresql:/var/lib/postgresql/data
     expose:
@@ -10,7 +10,7 @@ services:
     - "5432:5432"
 
   postgresql-connector:
-    image: sysunite/weaver-database-postgresql:0.0.19
+    image: sysunite/weaver-database-postgresql:0.0.20
     links:
     - postgres
     expose:
