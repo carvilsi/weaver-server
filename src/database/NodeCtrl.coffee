@@ -12,6 +12,11 @@ bus.private('nodes').retrieve('database').on((req, database) ->
   database.listAllNodes(req)
 )
 
+bus.private('node.clone').retrieve('database', 'user', 'project').require('sourceId', 'targetId', 'relationsToTraverse').on((req, database, user, project, sourceId, targetId, relationsToTraverse) ->
+  AclService.assertACLWritePermission(user, project.acl)
+  database.clone(sourceId, targetId, user.userId, relationsToTraverse)
+)
+
 bus.private('relations').retrieve('database').on((req, database) ->
   database.listAllRelations()
 )

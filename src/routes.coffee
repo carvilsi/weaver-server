@@ -15,6 +15,7 @@ route.public.GET   "application.time"        # Server system time
 route.private.GET  "read"                    # Reads a single entity
 route.private.POST "write"                   # Execute Create, Update and Delete operations in bulk
 route.private.POST "nodes"                   # Lists all nodes on the database
+route.private.POST "node.clone"              # Clone a specific node
 route.private.GET  "relations"               # Lists all relations on the database
 route.private.GET  "history"                 # Change history by element
 route.private.GET  "snapshot"                # Download snapshot write operations

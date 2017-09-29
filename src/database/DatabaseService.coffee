@@ -61,3 +61,6 @@ module.exports =
 
     wipe: ->
       @_GET("#{@uri}/wipe")
+
+    clone: (sourceNodeId, targetNodeId, userUid, relationsToTraverse) ->
+      @_POST("#{@uri}/node/clone", { sourceNodeId, targetNodeId, userUid, relationsToTraverse})
