@@ -29,6 +29,9 @@ module.exports =
     _POST: (args...) ->
       @_rp("POST")(args...)
 
+    base: ->
+      @_GET("#{@uri}/")
+
     read: (id) ->
       @_GET("#{@uri}/read/#{id}")
 
