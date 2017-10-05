@@ -17,7 +17,7 @@ describe 'The version checker', ->
 
   describe 'given an instance', ->
     before ->
-      @checker = new ClientVersionChecker('2.2.2')
+      @checker = new ClientVersionChecker('2.2.2', '3.2.1')
 
     describe 'should check sdk versions for', ->
       it 'defined', ->
@@ -36,4 +36,15 @@ describe 'The version checker', ->
       it 'should accept version requirements it satisfies', ->
         expect(@checker.serverSatisfies('2.2.2')).to.be.true
 
+      it 'should deny version requirements it doesnt satisfy', ->
+        expect(@checker.serverSatisfies('1.2.3')).to.be.false
 
+    describe 'should check weaver-connector-version', ->
+      it 'should accept undefined versions', ->
+        expect(@checker.connectorSatisfies(undefined)).to.be.true
+
+      it 'should accept version requirements it satisfies', ->
+        expect(@checker.connectorSatisfies('3.2.1')).to.be.true
+
+      it 'should deny version requirements it doesnt satisfy', ->
+        expect(@checker.connectorSatisfies('3.2.0')).to.be.false
