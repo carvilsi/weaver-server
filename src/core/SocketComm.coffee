@@ -1,6 +1,7 @@
 Promise  = require('bluebird')
 socketIO = require('socket.io')
 logger   = require('logger')
+ss       = require('socket.io-stream')
 
 ClientVersionChecker = require('ClientVersionChecker')
 
@@ -34,12 +35,14 @@ class Socket
       # Wire GET and POST requests
       (handler for name, handler of @routes).forEach((routeHandler) =>
         routeHandler.allRoutes().forEach((route) =>
-          socket.on(route, (payload, ack) =>
+          ss(socket).on(route, (payload, ack) =>
             # Must always give a ack function from client
             return if not ack?
 
+            req = { payload } if payload.type? and payload.type is "streamable"
+
             try
-              req = { payload: JSON.parse(payload or "{}") }
+              req = { payload: JSON.parse(payload or "{}") } if payload.type isnt "streamable"
             catch error
               ack("Invalid json payload")
               return

@@ -80,6 +80,7 @@ route.private.POST "plugin.read"             # Get a single plugin
 # Files management
 route.private.GET  "file.downloadByID"       # Retrieves a file from the object storage server by ID
 route.private.POST "file.deleteByID"         # Deletes a file from the object storage server by ID
+route.private.POST "file.upload"             # Uploads a file to the object storage server
 
 # Return array of handlers
 module.exports = route

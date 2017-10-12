@@ -20,6 +20,7 @@ UserService     = require('UserService')
 AdminUser       = require('AdminUser')
 ProjectService  = require('ProjectService')
 config          = require('config')
+fs              = require('fs')
 
 upload = multer({
   dest: config.get('services.fileServer.uploads')
@@ -75,6 +76,15 @@ bus.private('file.downloadByID')
     Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
   )
 )
+
+bus.private('file.upload')
+  .retrieve('project', 'user')
+  .require('target', 'stream', 'filename')
+  .on((req, project, user, target, stream, filename) ->
+    AclService.assertACLWritePermission(user, project.acl)
+
+    FileService.uploadFile(filename, project.id, stream)
+  )
 
 bus.private('file.deleteByID')
 .retrieve('project', 'user')

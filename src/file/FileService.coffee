@@ -9,6 +9,7 @@ cuid         = require('cuid')
 server       = require('WeaverServer')
 zlib         = require('zlib')
 config       = require('config')
+ss           = require('socket.io-stream')
 
 module.exports =
   class FileService
@@ -24,9 +25,7 @@ module.exports =
         minioClient.bucketExists("#{project}", (err) ->
           logger.code.debug "bucket #{project} exists: #{err.code if err?}"
           if err and err.code is 'NoSuchBucket'
-            createBucket("#{project}", minioClient).then(->
-              resolve()
-            )
+            createBucket("#{project}", minioClient).then(resolve)
           else
             resolve()
         )
@@ -49,7 +48,7 @@ module.exports =
       url = path + filename
 
       writeFile = Promise.promisify(fs.writeFile)
-      
+
       writeFile(url, JSON.stringify(text)).then(->
         {path: path, name: filename, url}
       )
@@ -62,7 +61,7 @@ module.exports =
       r = fs.createReadStream(path + filename)
       w = fs.createWriteStream(url)
       r.pipe(gzip).pipe(w)
-      
+
       fs.unlink(config.get('services.fileServer.uploads') + filename, (err) ->
         if err
           logger.code.error('An error occurred trying to delete the file: '.concat(err))
@@ -71,37 +70,27 @@ module.exports =
       )
 
       @uploadFileStream(url, zippedName, project.id)
-      
-    @uploadFileStream: (filePath, fileName, project) ->
-      logger.code.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"
-      getMinioClient(project).then((minioClient) ->
-        logger.code.debug "Got minioclient #{minioClient}"
-        checkBucket(project, minioClient)
-        .then( ->
-          logger.code.debug "Sending file to server"
-          readStream = fs.createReadStream(filePath)
-          sendFileToServerStream(readStream, fileName, project, minioClient, filePath)
-        )
-      )
 
-    sendFileToServerStream = (readStream, fileName, project, minioClient, filePath) ->
+    @uploadFile: (fileName, project, stream) ->
+      logger.code.debug "Uploading file stream: #{fileName}, #{project}"
+      getMinioClient(project)
+        .then((minioClient) ->
+          logger.code.debug "Got minioclient #{minioClient}"
+          checkBucket(project, minioClient)
+          .then( ->
+            logger.code.debug "Sending file to server"
+            sendFileToServerStream(fileName, project, minioClient, stream)
+          )
+        )
+
+    sendFileToServerStream = (fileName, project, minioClient, stream) ->
       uuid = cuid()
-      new Promise((resolve, reject) =>
-        minioClient.putObject("#{project}","#{uuid}-#{fileName}",readStream, 'application/octet-stream', (err) ->
+      new Promise((resolve, reject) ->
+        minioClient.putObject("#{project}", "#{uuid}-#{fileName}", stream, 'application/octet-stream', (err) ->
           if err
             reject(err)
           else
-            try
-              fs.unlink(filePath, (err) ->
-                if err
-                  logger.code.error('An error trying to delete the file: '.concat(err))
-                else
-                  logger.code.debug('successfully deleted')
-              )
-            catch error
-              logger.code.error('An error trying to delete the file: '.concat(error))
-            finally
-              resolve("#{uuid}-#{fileName}")
+            resolve("#{uuid}-#{fileName}")
         )
       )
 
