@@ -39,10 +39,11 @@ class Socket
             # Must always give a ack function from client
             return if not ack?
 
-            req = { payload } if payload.type? and payload.type is "streamable"
-
             try
-              req = { payload: JSON.parse(payload or "{}") } if payload.type isnt "streamable"
+              if payload.type isnt "STREAM"
+                req = { payload: JSON.parse(payload or "{}") }
+              else
+                req = { payload }
             catch error
               ack("Invalid json payload")
               return

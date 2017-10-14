@@ -77,24 +77,34 @@ bus.private('file.downloadByID')
   )
 )
 
+bus.private('file.list')
+  .retrieve('project', 'user')
+  .require('target')
+  .on((req, project, user, target) ->
+    AclService.assertACLReadPermission(user, project.acl)
+    FileService.listFiles(project.id)
+  )
+
+bus.private('file.download')
+  .retrieve('project', 'user')
+  .require('target', 'fileId')
+  .on((req, project, user, target, fileId) ->
+    AclService.assertACLReadPermission(user, project.acl)
+    FileService.downloadFile(project.id, fileId)
+  )
+
 bus.private('file.upload')
   .retrieve('project', 'user')
   .require('target', 'stream', 'filename')
   .on((req, project, user, target, stream, filename) ->
     AclService.assertACLWritePermission(user, project.acl)
-
     FileService.uploadFile(filename, project.id, stream)
   )
 
-bus.private('file.deleteByID')
-.retrieve('project', 'user')
-.require('target', 'id')
-.on((req, project, user, target, id) ->
-
-  AclService.assertACLWritePermission(user, project.acl)
-
-  FileService.deleteFileByID(id, target)
-  .catch((err) ->
-    Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'Project does not exists')
+bus.private('file.delete')
+  .retrieve('project', 'user')
+  .require('target', 'fileId')
+  .on((req, project, user, target, fileId) ->
+    AclService.assertACLReadPermission(user, project.acl)
+    FileService.deleteFile(fileId, project.id)
   )
-)

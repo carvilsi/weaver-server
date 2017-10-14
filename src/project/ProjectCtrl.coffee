@@ -126,9 +126,7 @@ bus.private('snapshot').retrieve('project', 'user').optional('zipped').on((req, 
     if not zipped
       data
     else
-      FileService.writeToDisk(data).then((file)->
-        FileService.gunZip(file.name, project)
-      )
+      FileService.gunZip(data, project)
   )
 )
 
