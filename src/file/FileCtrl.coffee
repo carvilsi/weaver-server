@@ -64,19 +64,6 @@ server
   )
 )
 
-bus.private('file.downloadByID')
-.retrieve('project', 'user')
-.require('target', 'id')
-.on((req, project, user, target, id) ->
-
-  AclService.assertACLReadPermission(user, project.acl)
-
-  FileService.downloadFileByID(id, target)
-  .catch((err) ->
-    Promise.reject(Error WeaverError.FILE_NOT_EXISTS_ERROR, 'File by ID not found')
-  )
-)
-
 bus.private('file.list')
   .retrieve('project', 'user')
   .require('target')
