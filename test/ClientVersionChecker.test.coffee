@@ -10,14 +10,14 @@ describe 'The version checker', ->
       new ClientVersionChecker('1.asd1.1')
       assert.fail()
     catch err
-  
+
   it 'should use the defined sensor version to compare against if none is provided', ->
     checker = new ClientVersionChecker()
     expect(checker.serverVersion).to.be.defined
-  
+
   it 'should use the defined connector version to compare against if none is provided', ->
     checker = new ClientVersionChecker()
-    checker.getVersion()
+    checker.getConnectorVersion()
     .then( (version)->
       expect(version).to.not.be.undefined
     )
@@ -48,10 +48,10 @@ describe 'The version checker', ->
 
     describe 'should check weaver-connector-version', ->
       it 'should accept undefined connector versions', ->
-        expect(@checker.connectorSatisfies(undefined)).to.be.true
+        @checker.connectorSatisfies(undefined).should.eventually.eql(true)
 
       it 'should accept connector version requirements it satisfies', ->
-        expect(@checker.connectorSatisfies('3.2.1')).to.be.true
+        @checker.connectorSatisfies('3.2.1').should.eventually.eql(true)
 
       it 'should deny connector version requirements it doesnt satisfy', ->
-        expect(@checker.connectorSatisfies('3.2.0')).to.be.false
+        @checker.connectorSatisfies('3.2.0').should.eventually.eql(false)

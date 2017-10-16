@@ -14,7 +14,6 @@ class ClientVersionChecker
     if @connectorVersion?
       throw new Error("Invalid connector version: #{@connectorVersion}") if not semver.valid(@connectorVersion)
 
-      
   isValidSDKVersion: (sdkVersion) ->
     if !sdkVersion?
       logger.usage.warn "Client without a sdkVersion connected, rejecting"
@@ -32,17 +31,20 @@ class ClientVersionChecker
       false
 
   connectorSatisfies: (versionRequirement) ->
-    if !@connectorVersion?
-      @getVersion()
-    if !versionRequirement? or semver.satisfies(@connectorVersion, versionRequirement)
-      logger.usage.debug "Client with required connector version #{versionRequirement}"
-      true
-    else
-      logger.usage.warn "Connector does not satisfy required version #{versionRequirement}"
-      false
-
-  getVersion: ->
-    database = new DatabaseService(config.get('services.database.url'))
-    database.base().then((data)=>
-      @connectorVersion = data.version
+    @getConnectorVersion().then((connectorVersion) ->
+      if !versionRequirement? or semver.satisfies(connectorVersion, versionRequirement)
+        logger.usage.debug "Client with required connector version #{versionRequirement}"
+        true
+      else
+        logger.usage.warn "Connector does not satisfy required version #{versionRequirement}"
+        false
     )
+
+  getConnectorVersion: ->
+    if !@connectorVersion?
+      database = new DatabaseService(config.get('services.database.url'))
+      database.base().then((data)=>
+        data.version
+      )
+    else
+      Promise.resolve(@connectorVersion)

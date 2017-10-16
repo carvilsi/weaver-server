@@ -17,10 +17,15 @@ class Socket
         next(new Error("Invalid SDK Version '#{socket.handshake.query.sdkVersion}'"))
       else if not @versionChecker.serverSatisfies(socket.handshake.query.requiredServerVersion)
         next(new Error("Server version #{@versionChecker.serverVersion} does not satisfy '#{socket.handshake.query.requiredServerVersion}'"))
-      else if not @versionChecker.connectorSatisfies(socket.handshake.query.requiredConnectorVersion)
-        next(new Error("Connector version #{@versionChecker.connectorVersion} does not satisfy '#{socket.handshake.query.requiredConnectorVersion}'"))
+
+
       else
-        next()
+      @versionChecker.connectorSatisfies(socket.handshake.query.requiredConnectorVersion).then((checkResult) =>
+        if !checkResult
+          next(new Error("Connector version #{@versionChecker.connectorVersion} does not satisfy '#{socket.handshake.query.requiredConnectorVersion}'"))
+        else
+          next()
+      )
     )
 
     io.on('connection', (socket, next) =>
