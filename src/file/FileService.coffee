@@ -62,8 +62,8 @@ module.exports =
           )
         )
 
-    @downloadFile: (project, fileId) ->
-      writeStream = ss.createStream()
+    @downloadFile: (project, fileId, outputStream) ->
+      outputStream = ss.createStream() if not outputStream?
       getMinioClient(project)
         .then((minioClient) =>
           checkBucket(project, minioClient).then(=>
@@ -73,8 +73,8 @@ module.exports =
 
             Promise.reject({code: Weaver.Error.FILE_NOT_EXISTS_ERROR, message: 'File does not exist!'})
           ).then((readStream) ->
-            readStream.pipe(writeStream)
-            writeStream
+            readStream.pipe(outputStream)
+            outputStream
           )
         )
 

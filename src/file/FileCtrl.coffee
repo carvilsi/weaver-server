@@ -1,68 +1,9 @@
-###
-FileSystem.coffee
-Dealing with the file management, implemented with minio
-
-$ docker pull minio/minio
-$ docker run -p 9000:9000 --name minio -e "MINIO_ACCESS_KEY=NYLEXGR6MF2IE99LZ4UE" -e "MINIO_SECRET_KEY=CjMuTRwYPcneXnGac2aQH0J+EdYdehTW4Cw7bZGD" -v /Path/to/store/data/minio:/data -v /Path/where/the/config/minio/exsits:/root/.minio  minio/minio server /data
-
-###
-bus          = require('WeaverBus')
-Weaver       = require('weaver-sdk')
-Error        = Weaver.LegacyError
-WeaverError  = Weaver.Error
-Promise      = require('bluebird')
-logger       = require('logger')
-server       = require('WeaverServer')
-multer       = require('multer')
-FileService = require('FileService')
-AclService    = require('AclService')
-UserService     = require('UserService')
-AdminUser       = require('AdminUser')
+bus             = require('WeaverBus')
+Weaver          = require('weaver-sdk')
+Promise         = require('bluebird')
+FileService     = require('FileService')
+AclService      = require('AclService')
 ProjectService  = require('ProjectService')
-config          = require('config')
-fs              = require('fs')
-
-upload = multer({
-  dest: config.get('services.fileServer.uploads')
-})
-
-server
-.getApp()
-.post('/upload', upload.single('file'), (req, res, next) ->
-  logger.code.debug('target: ' + req.body.target)
-  logger.code.debug('file name: ' + req.body.fileName)
-  logger.code.debug('authToken: ' + req.body.authToken)
-
-  if not req.body.authToken?
-    res.status(500).send('No authToken provided')
-    return
-
-  if not req.body.target?
-    res.status(500).send('No target provided')
-    return
-
-  # Check permission
-  if not AdminUser.hasAuthToken(req.body.authToken)
-    user = UserService.getUser(req.body.authToken)
-    user.isAdmin = -> false
-    project = ProjectService.get(req.body.target)
-    try
-      AclService.assertACLWritePermission(user, project.acl)
-    catch err
-      res.status(500).send('Permission denied')
-      return
-
-  # All good
-  FileService.uploadFileStream(req.file.path,req.body.fileName, req.body.target)
-  .then((resol) ->
-    logger.code.debug(resol)
-    res.send(resol)
-  )
-  .catch((err) ->
-    logger.code.error(err)
-    res.status(500).send('Error somewhere')
-  )
-)
 
 bus.private('file.list')
   .retrieve('project', 'user')
@@ -77,15 +18,16 @@ bus.private('file.download')
   .require('target', 'fileId')
   .on((req, project, user, target, fileId) ->
     AclService.assertACLReadPermission(user, project.acl)
-    FileService.downloadFile(project.id, fileId)
+    outputStream = req.res if req.res?
+    FileService.downloadFile(project.id, fileId, outputStream)
   )
 
 bus.private('file.upload')
   .retrieve('project', 'user')
-  .require('target', 'stream', 'filename')
-  .on((req, project, user, target, stream, filename) ->
+  .require('target', 'file', 'filename')
+  .on((req, project, user, target, file, filename) ->
     AclService.assertACLWritePermission(user, project.acl)
-    FileService.uploadFile(filename, project.id, stream)
+    FileService.uploadFile(filename, project.id, file)
   )
 
 bus.private('file.delete')

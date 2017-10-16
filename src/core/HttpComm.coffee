@@ -1,51 +1,76 @@
-Promise      = require('bluebird')
-Weaver       = require('weaver-sdk')
-Error        = Weaver.LegacyError
-WeaverError  = Weaver.Error
+  Promise      = require('bluebird')
+  Weaver       = require('weaver-sdk')
+  Error        = Weaver.LegacyError
+  WeaverError  = Weaver.Error
+  Busboy       = require('busboy')
 
-module.exports =
-class HTTP
-  constructor: (@routes) ->
+  module.exports =
+  class HTTP
+    constructor: (@routes) ->
 
-  # Transforms application.version to /application/version
-  transform: (route) ->
-    '/' + route.replace('.', '/')
+    # Transforms application.version to /application/version
+    transform: (route) ->
+      '/' + route.replace('.', '/')
 
-  wire: (app) ->
-    # Wire GET requests
-    (handler for name, handler of @routes).forEach((routeHandler) =>
-      routeHandler.getRoutes.forEach((route) =>
-         app.get(@transform(route), (req, res) =>
+    #Will either resolve multipart or json
+    _resolvePayload: (req) ->
+      new Promise((resolve, reject) ->
+        if req.headers['content-type']? and req.headers['content-type'].indexOf('multipart/form-data') isnt -1
+          payload = {}
+          busboy = new Busboy({headers: req.headers})
+          busboy.on('field', (fieldname, value) ->
+            payload[fieldname] = value
+          )
+          busboy.on('file', (fieldname, file) ->
+            return file.resume() if fieldname isnt 'file'
+            payload[fieldname] = file
+            resolve(payload)
+          )
+          req.pipe(busboy)
+        else
+          resolve(req.body)
+      )
 
-           req.payload = req.query['payload']
 
-           try
-             req.payload = JSON.parse(req.payload or "{}")
-           catch error
-             res.status(400).send(Error(WeaverError.INVALID_JSON, "Invalid json: #{error}"))
-             return
+    wire: (app) ->
+      # Wire GET requests
+      (handler for name, handler of @routes).forEach((routeHandler) =>
+        routeHandler.getRoutes.forEach((route) =>
+          app.get(@transform(route), (req, res) =>
 
-           res.success = (data) ->
-             res.status(200).send(data)
+            req.payload = req.query['payload']
 
-           res.fail = (error) ->
-             res.status(503).send(error)
+            try
+              req.payload = JSON.parse(req.payload or "{}")
+            catch error
+              res.status(400).send(Error(WeaverError.INVALID_JSON, "Invalid json: #{error}"))
+              return
 
-           routeHandler.handleRequest(route, req, res)
-         )
-       )
+            res.success = (data) ->
+              res.status(200).send(data)
 
-      routeHandler.postRoutes.forEach((route) =>
-         app.post(@transform(route), (req, res) =>
-           req.payload = req.body
+            res.fail = (error) ->
+              res.status(503).send(error)
 
-           res.success = (data) ->
-             res.status(200).send(data)
+            routeHandler.handleRequest(route, req, res)
+          )
+        )
 
-           res.fail = (error) ->
-             res.status(503).send(error)
+        routeHandler.postRoutes.forEach((route) =>
+          app.post(@transform(route), (req, res) =>
+            @_resolvePayload(req).then((payload) =>
+              req.payload = payload
 
-           routeHandler.handleRequest(route, req, res)
-         )
-       )
-    )
+              res.success = (data) ->
+                res.status(200).send(data)
+
+              res.fail = (error) ->
+                res.status(503).send(error)
+
+              routeHandler.handleRequest(route, req, res)
+            ).catch((error) =>
+              res.status(400).send(Error(WeaverError.INVALID_JSON, "Invalid json: #{error}"))
+            )
+          )
+        )
+      )

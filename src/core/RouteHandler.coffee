@@ -22,8 +22,8 @@ class RouteHandler
     req.payload = {} if not req.payload?
 
     # Adding authToken when it's provided on the headers
-    if !req.payload.authToken? and req.headers? and req.headers['authtoken']?
-      req.payload.authToken = req.headers['authtoken']
+    if !req.payload.authToken? and req.headers? and req.headers['authorization']?
+      req.payload.authToken = req.headers['authorization'].replace('Bearer ', '')
 
     logger.code.silly "Request: #{route}, payload: #{CircularJSON.stringify(req.payload)}"
     @bus.emit(route, req).then((data)->
