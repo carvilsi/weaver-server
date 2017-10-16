@@ -53,24 +53,3 @@ module.exports =
       code: './logs/weaver.code'
       usage: './logs/weaver.usage'
       auth: './logs/weaver.auth'
-
-  'mobilizer-interface':
-      application:
-        fetchCycleTime: 20 # Seconds
-
-      relatics:
-        url       : "https://mobilis.relaticsonline.com/DataExchange.asmx"
-        workspaces: [
-          "e3de3482-4b2e-e711-80e3-000af753dd43",
-          "e9a4ae95-636f-47ff-8665-2ed5d12ad394"
-        ]
-        entryCode : "Mobilis2017001"
-
-      operations:
-        requirements: 'eisen'
-        properties:   'eiseigenschappen'
-        sbs:          'sbs'
-
-      projects:
-        'se-rijnland-test': "e3de3482-4b2e-e711-80e3-000af753dd43"
-        eefde:    "e9a4ae95-636f-47ff-8665-2ed5d12ad394"

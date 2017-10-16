@@ -15,13 +15,6 @@ describe 'The version checker', ->
     checker = new ClientVersionChecker()
     expect(checker.serverVersion).to.be.defined
 
-  it 'should use the defined connector version to compare against if none is provided', ->
-    checker = new ClientVersionChecker()
-    checker.getConnectorVersion()
-    .then( (version)->
-      expect(version).to.not.be.undefined
-    )
-
   describe 'given an instance', ->
     before ->
       @checker = new ClientVersionChecker('2.2.2', '3.2.1')
