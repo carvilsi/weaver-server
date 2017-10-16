@@ -17,8 +17,6 @@ class Socket
         next(new Error("Invalid SDK Version '#{socket.handshake.query.sdkVersion}'"))
       else if not @versionChecker.serverSatisfies(socket.handshake.query.requiredServerVersion)
         next(new Error("Server version #{@versionChecker.serverVersion} does not satisfy '#{socket.handshake.query.requiredServerVersion}'"))
-
-
       else
       @versionChecker.connectorSatisfies(socket.handshake.query.requiredConnectorVersion).then((checkResult) =>
         if !checkResult
