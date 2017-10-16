@@ -1,14 +1,18 @@
-semver = require('semver')
-pack   = require('../../package.json')
-logger = require('logger')
+semver          = require('semver')
+pack            = require('../../package.json')
+logger          = require('logger')
+config          = require('config')
+DatabaseService = require('DatabaseService')
 
 module.exports =
 class ClientVersionChecker
-  constructor: (@serverVersion) ->
+  constructor: (@serverVersion, @connectorVersion) ->
     if @serverVersion?
       throw new Error("Invalid server version: #{@serverVersion}") if not semver.valid(@serverVersion)
     else
       @serverVersion = pack.version
+    if @connectorVersion?
+      throw new Error("Invalid connector version: #{@connectorVersion}") if not semver.valid(@connectorVersion)
 
   isValidSDKVersion: (sdkVersion) ->
     if !sdkVersion?
@@ -25,3 +29,22 @@ class ClientVersionChecker
     else
       logger.usage.warn "Server does not satisfy required version #{versionRequirement}"
       false
+
+  connectorSatisfies: (versionRequirement) ->
+    @getConnectorVersion().then((connectorVersion) ->
+      if !versionRequirement? or semver.satisfies(connectorVersion, versionRequirement)
+        logger.usage.debug "Client with required connector version #{versionRequirement}"
+        true
+      else
+        logger.usage.warn "Connector does not satisfy required version #{versionRequirement}"
+        false
+    )
+
+  getConnectorVersion: ->
+    if !@connectorVersion?
+      database = new DatabaseService(config.get('services.database.url'))
+      database.base().then((data)=>
+        data.version
+      )
+    else
+      Promise.resolve(@connectorVersion)
