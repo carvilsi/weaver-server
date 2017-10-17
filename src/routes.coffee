@@ -82,6 +82,9 @@ route.private.GET  "file.list"               # Retreive all files from a bucket
 route.private.GET  "file.download"           # Downloads a file from the object storage using an ID
 route.private.POST "file.upload"             # Uploads a file to the object storage server
 route.private.POST "file.delete"             # Deletes a file from the object storage by ID
+#LEGACY ROUTES
+route.private.GET "file.downloadByID"
+route.private.POST "file.deleteByID"
 
 # Return array of handlers
 module.exports = route
