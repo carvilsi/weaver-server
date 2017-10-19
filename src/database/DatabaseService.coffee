@@ -6,12 +6,19 @@ module.exports =
     constructor: (@uri, @database) ->
 
     _rp : (method) -> (uri, body, parameters) =>
+      beginRP = Date.now()
       qs = { database: @database }
       qs[key] = value for key, value of parameters
       rp({method, uri, body, json: true, qs, resolveWithFullResponse: true}).then((response) ->
         if response.statusCode is 200
+          endRP = Date.now()
+          response.body.totalConnectorTime = endRP-beginRP
+          response.body.timeToConnector = response.body.totalConnectorTime - response.body.executionTime
           Promise.resolve(response.body)
         else
+          endRP = Date.now()
+          response.body.connectorTime = endRP-beginRP
+          console.log(response.body)
           Promise.reject({code: -1, message: "Server error: #{response.body}"})
       )
       .catch((err) ->
