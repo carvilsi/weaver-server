@@ -29,6 +29,12 @@ bus.provide('minio').retrieve('project', 'user').on((req, project, user) ->
   MinioClient.create(config.get('services.fileServer'))
 )
 
+bus.private('project.executeZip').retrieve('user', 'project').require('filename').on((req, user, project, filename) ->
+  AclService.assertProjectFunctionPermission(user, project, 'project-administration')
+  logger.code.info "Executing ZIP: #{filename}, on: #{project.id}"
+  ProjectPool.executeZip(filename, project)
+)
+
 bus.private('project.freeze').retrieve('user', 'project').on((req, user, project) ->
   logger.code.info "Freezing project id: #{project.id}"
   ProjectService.freezeProject(user, project)
