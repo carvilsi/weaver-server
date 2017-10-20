@@ -10,15 +10,14 @@ module.exports =
       qs = { database: @database }
       qs[key] = value for key, value of parameters
       rp({method, uri, body, json: true, qs, resolveWithFullResponse: true}).then((response) ->
+        response.body.serverStart = beginRP
         if response.statusCode is 200
           endRP = Date.now()
-          response.body.totalConnectorTime = endRP-beginRP
-          response.body.timeToConnector = response.body.totalConnectorTime - response.body.executionTime
+          response.body.serverEnd = endRP
           Promise.resolve(response.body)
         else
           endRP = Date.now()
-          response.body.connectorTime = endRP-beginRP
-          response.body.timeToConnector = response.body.totalConnectorTime - response.body.executionTime
+          response.body.serverEnd = endRP
           Promise.reject({code: -1, message: "Server error: #{response.body}"})
       )
       .catch((err) ->
