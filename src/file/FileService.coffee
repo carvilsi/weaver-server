@@ -71,7 +71,7 @@ module.exports =
       )
 
       @uploadFileStream(url, zippedName, project.id)
-      
+
     @uploadFileStream: (filePath, fileName, project) ->
       logger.code.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"
       getMinioClient(project).then((minioClient) ->
