@@ -18,7 +18,7 @@ module.exports =
         else
           endRP = Date.now()
           response.body.connectorTime = endRP-beginRP
-          console.log(response.body)
+          response.body.timeToConnector = response.body.totalConnectorTime - response.body.executionTime
           Promise.reject({code: -1, message: "Server error: #{response.body}"})
       )
       .catch((err) ->
