@@ -11,13 +11,11 @@ module.exports =
       qs[key] = value for key, value of parameters
       rp({method, uri, body, json: true, qs, resolveWithFullResponse: true}).then((response) ->
         response.body.serverStart = beginRP
+        endRP = Date.now()
+        response.body.serverEnd = endRP
         if response.statusCode is 200
-          endRP = Date.now()
-          response.body.serverEnd = endRP
           Promise.resolve(response.body)
         else
-          endRP = Date.now()
-          response.body.serverEnd = endRP
           Promise.reject({code: -1, message: "Server error: #{response.body}"})
       )
       .catch((err) ->
