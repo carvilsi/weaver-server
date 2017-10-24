@@ -45,6 +45,7 @@ class Socket
 
             try
               req = { payload: JSON.parse(payload or "{}") }
+              req.payload.serverStart = Date.now()
             catch error
               ack("Invalid json payload")
               return
