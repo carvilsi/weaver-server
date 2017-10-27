@@ -36,7 +36,7 @@ class ClientVersionChecker
         logger.usage.debug "Client with required connector version #{versionRequirement}"
         true
       else
-        logger.usage.warn "Connector does not satisfy required version #{versionRequirement}"
+        logger.usage.warn "Connector #{connectorVersion} does not satisfy required version #{versionRequirement}"
         false
     )
 
