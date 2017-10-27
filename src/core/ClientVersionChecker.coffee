@@ -44,7 +44,7 @@ class ClientVersionChecker
     if !@connectorVersion?
       database = new DatabaseService(config.get('services.database.url'))
       database.base().then((data)=>
-        data.version
+        @lastKnownConnectorVersion = data.version
       )
     else
       Promise.resolve(@connectorVersion)
