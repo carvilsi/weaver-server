@@ -20,7 +20,7 @@ class Socket
       else
       @versionChecker.connectorSatisfies(socket.handshake.query.requiredConnectorVersion).then((checkResult) =>
         if !checkResult
-          next(new Error("Connector version #{@versionChecker.connectorVersion} does not satisfy '#{socket.handshake.query.requiredConnectorVersion}'"))
+          next(new Error("Connector version #{@versionChecker.lastKnownConnectorVersion} does not satisfy '#{socket.handshake.query.requiredConnectorVersion}'"))
         else
           next()
       )
