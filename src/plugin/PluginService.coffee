@@ -1,7 +1,9 @@
-Promise     = require('bluebird')
-path        = require('path')
-fs          = Promise.promisifyAll(require("fs"))
-Plugin      = require('Plugin')
+Promise       = require('bluebird')
+path          = require('path')
+fs            = Promise.promisifyAll(require("fs"))
+Plugin        = require('Plugin')
+ServicePlugin = require('ServicePlugin')
+config        = require('config')
 
 class PluginService
 
@@ -12,7 +14,6 @@ class PluginService
 
   load: ->
     fs.readdirAsync(@directory).then((files) =>
-
       # Only get the directories
       directories = files.filter((file) =>
         filePath = path.resolve(@directory, file)
@@ -31,7 +32,10 @@ class PluginService
         plugin = new Plugin(pluginPath)
         @plugins[plugin.getName()] = plugin
 
-      # Initialize plugins
+      if config.has('pluggableServices')
+        for id, url of config.get('pluggableServices')
+          @plugins[id] = new ServicePlugin(url, id)
+    ).then(=>
       Promise.map((plugin for name, plugin of @plugins), (plugin) ->
         plugin.init()
       )
