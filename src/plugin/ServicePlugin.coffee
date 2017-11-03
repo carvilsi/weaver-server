@@ -20,6 +20,16 @@ class ServicePlugin
       
       for apipath, details of api.paths
         @_registerFunction(apipath, details)
+
+      @ready = true
+    ).catch((err) =>
+      if err.code is "ECONNREFUSED"
+        logger.code.warn "Unable to connect to plugin service #{@name} on #{@url}"
+      else
+        logger.code.warn "Unable add #{@name} service"
+        logger.code.warn err
+
+      @ready = false
     )
 
   _registerFunction: (apipath, details) ->
