@@ -5,11 +5,12 @@ author:
   email: mohamad@sysunite.com
 
 classes:
-  - Person:
+  Building:
+  Person:
     attributes:
-      - fullName:
+      fullName:
         key: 'hasFullName'
         required: true
         datatype: string
-      - age:
+      age:
         datatype: integer
