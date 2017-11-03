@@ -90,7 +90,7 @@ class ServicePlugin
     name:        @name
     version:     @version
     author:      @author
-    description: @getDescription
+    description: @description
     functions:   @pluginBus.getFunctions()
 
 
