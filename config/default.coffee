@@ -45,10 +45,10 @@ module.exports =
       heartbeatsInterval: 5000
       agentAddress: 'localhost'
 
-#  pluggableServices:
 # Enables plugins via webservices
-#
 # Structure:
+#
+# pluggableServices:
 #   someplugin: 'http://localhost:234'
 
   logging:
