@@ -1,0 +1,15 @@
+name: test-model
+version: 1.0.0
+author:
+  name: Mohamad Alamili
+  email: mohamad@sysunite.com
+
+classes:
+  - Person:
+    attributes:
+      - fullName:
+        key: 'hasFullName'
+        required: true
+        datatype: string
+      - age:
+        datatype: integer
