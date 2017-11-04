@@ -5,7 +5,10 @@ author:
   email: mohamad@sysunite.com
 
 classes:
+  City:
+  Country:
   Building:
+  Head:
   Person:
     attributes:
       fullName:
@@ -14,3 +17,15 @@ classes:
         datatype: string
       age:
         datatype: integer
+    relations:
+      livesIn:
+        key: 'livesInSomeBuilding'
+        range: [Building]
+      hasFriend:
+        range: [Person]
+      comesFrom:
+        range: [Country, City]
+      hasHead:
+        require: true
+        range: [Head]
+      hasRelation:
