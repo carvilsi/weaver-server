@@ -7,11 +7,29 @@ author:
 classes:
   Human:
   City:
+  Area:
+    attributes:
+      squareMeter:
+        datatype: integer
+    relations:
+      intersection:
+        range: [Area]
+  AreaSection:
+    super: Area
   Country:
+    super: AreaSection
+  Construction:
+    attributes:
+      yearOfConstruction:
+        datatype: integer
   Building:
+    super: Construction
+    relations:
+      placedIn:
+        range: [Area]
   Head:
   Person:
-    super: [Human]
+    super: Human
     attributes:
       fullName:
         key: 'hasFullName'
