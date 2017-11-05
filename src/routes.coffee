@@ -82,5 +82,8 @@ route.private.POST "plugin.read"             # Get a single plugin
 route.private.GET  "file.downloadByID"       # Retrieves a file from the object storage server by ID
 route.private.POST "file.deleteByID"         # Deletes a file from the object storage server by ID
 
+# Socket events
+route.private.POST "socket.shout"            # Shout a message to all other connected clients
+
 # Return array of handlers
 module.exports = route
