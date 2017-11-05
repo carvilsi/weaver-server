@@ -5,11 +5,13 @@ author:
   email: mohamad@sysunite.com
 
 classes:
+  Human:
   City:
   Country:
   Building:
   Head:
   Person:
+    super: [Human]
     attributes:
       fullName:
         key: 'hasFullName'
@@ -25,7 +27,7 @@ classes:
         range: [Person]
       comesFrom:
         range: [Country, City]
+        card: [0,1]
       hasHead:
-        require: true
         range: [Head]
       hasRelation:
