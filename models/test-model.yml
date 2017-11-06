@@ -25,6 +25,10 @@ classes:
     attributes:
       yearOfConstruction:
         datatype: integer
+    relations:
+      buildBy:
+        range: [Person]
+        card:  [1,2]
   Building:
     super: Construction
     relations:
