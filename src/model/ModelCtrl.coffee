@@ -3,7 +3,6 @@ AclService    = require('AclService')
 ModelService  = require('ModelService')
 logger        = require('logger')
 
-
 bus.provide('model').require('name', 'version').on((req, name, version) ->
   ModelService.get(name, version)
 )

@@ -14,7 +14,6 @@ class ModelService
   load: ->
     # Only YAML rootfiles are considered valid model files
     fs.readdirAsync(@directory).then((filePaths) =>
-
       # Filter on .yml or .yaml extension
       yamlFilePaths = filePaths.filter((filePath) =>
         extension = path.extname(filePath)
@@ -33,6 +32,5 @@ class ModelService
       throw {code: Weaver.Error.MODEL_VERSION_NOT_FOUND, message: "Model #{name} with version #{version} could not be found"}
 
     @models[name]
-
 
 module.exports = new ModelService()
