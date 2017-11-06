@@ -16,6 +16,9 @@ classes:
         range: [Area]
   AreaSection:
     super: Area
+    attributes:
+      areaName:
+        datatype: string
   Country:
     super: AreaSection
   Construction:
