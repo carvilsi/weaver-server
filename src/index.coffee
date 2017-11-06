@@ -28,6 +28,7 @@ FclService      = require('FclService')
 RoleService     = require('RoleService')
 ProjectService  = require('ProjectService')
 PluginService   = require('PluginService')
+ModelService    = require('ModelService')
 WeaverBus       = require('WeaverBus')
 routes          = require('routes')
 pjson           = require('../package.json')
@@ -43,6 +44,7 @@ initModules = ->
     'ApplicationCtrl'
     'FileCtrl'
     'FclCtrl'
+    'ModelCtrl'
     'NodeCtrl'
     'PluginCtrl'
     'ProjectCtrl'
@@ -60,6 +62,7 @@ servicesToLoad = [
   RoleService
   ProjectService
   PluginService
+  ModelService
 ]
 
 # Initialize services
