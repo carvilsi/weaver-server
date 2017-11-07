@@ -1,4 +1,2 @@
 #!/bin/bash
-rm -rf lib
-npm run prepublish
-docker build -t sysunite/weaver-server:2.2.1 .
+docker build -t sysunite/weaver-server:3.0.10-beta.3 .

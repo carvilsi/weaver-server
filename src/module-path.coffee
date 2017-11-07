@@ -9,6 +9,7 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   'core'
   'database'
   'file'
+  'model'
   'project'
   'plugin'
   'util'
