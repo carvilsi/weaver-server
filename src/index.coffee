@@ -49,6 +49,7 @@ initModules = ->
     'PluginCtrl'
     'ProjectCtrl'
     'RoleCtrl'
+    'SocketCtrl'
     'UserCtrl'
     'WeaverQueryCtrl'
     'snmp'
