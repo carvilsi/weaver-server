@@ -33,18 +33,26 @@ class ServicePlugin
     )
 
   _registerFunction: (apipath, details) ->
-    if !details.get?
+    method = ""
+    definition = {}
+    if details.get?
+      method = "GET"
+      definition = details.get
+    else if details.post?
+      method = "POST"
+      definition = details.post
+    else
       logger.code.error "Unable to add #{apipath} operation to #{@name} service, only get operations are supported"
       return
 
-    listener = @pluginBus.private(details.get.operationId)
+    listener = @pluginBus.private(definition.operationId)
 
     requireds = []
     optionals = []
     retrieves = []
 
-    if details.get.parameters?
-      for i in details.get.parameters
+    if definition.parameters?
+      for i in definition.parameters
         if i.name in [ 'project', 'user' ]
           retrieves.push i.name
         else if i.required
@@ -57,7 +65,7 @@ class ServicePlugin
     listener.retrieve(retrieves...)
 
     listener.on((params...) =>
-      logger.usage.silly("Plugin #{@getName()} got request for operation: #{details.get.operationId} (#{apipath})")
+      logger.usage.silly("Plugin #{@getName()} got request for operation: #{definition.operationId} (#{apipath})")
       logger.usage.silly params
 
       qs = {}
@@ -70,7 +78,7 @@ class ServicePlugin
           else if p is 'user'
             qs.user = param.getAuthToken()
           else
-            logger.code.error "Unknown retrieve parameter #{p} provided to #{@getName()}.#{details.get.operationId}"
+            logger.code.error "Unknown retrieve parameter #{p} provided to #{@getName()}.#{definition.operationId}"
         else if index > retrieves.length && index <= retrieves.length + requireds.length
           p = requireds[index - 1 - retrieves.length]
           qs[p] = param
@@ -79,7 +87,7 @@ class ServicePlugin
           if param?
             qs[p] = param
 
-      request = { uri: "#{@url}#{apipath}", qs}
+      request = { uri: "#{@url}#{apipath}", method, qs}
       rp(request)
     )
 
