@@ -10,14 +10,14 @@ describe 'The version checker', ->
       new ClientVersionChecker('1.asd1.1')
       assert.fail()
     catch err
-  
-  it 'should use the defined version to compare against if none is provided', ->
+
+  it 'should use the defined sensor version to compare against if none is provided', ->
     checker = new ClientVersionChecker()
     expect(checker.serverVersion).to.be.defined
 
   describe 'given an instance', ->
     before ->
-      @checker = new ClientVersionChecker('2.2.2')
+      @checker = new ClientVersionChecker('2.2.2', '3.2.1')
 
     describe 'should check sdk versions for', ->
       it 'defined', ->
@@ -30,10 +30,21 @@ describe 'The version checker', ->
         expect(@checker.isValidSDKVersion(undefined)).to.be.false
 
     describe 'should check weaver-server-requirement', ->
-      it 'should accept undefined versions', ->
+      it 'should accept undefined server versions', ->
         expect(@checker.serverSatisfies(undefined)).to.be.true
 
-      it 'should accept version requirements it satisfies', ->
+      it 'should accept server version requirements it satisfies', ->
         expect(@checker.serverSatisfies('2.2.2')).to.be.true
 
+      it 'should deny server version requirements it doesnt satisfy', ->
+        expect(@checker.serverSatisfies('1.2.3')).to.be.false
 
+    describe 'should check weaver-connector-version', ->
+      it 'should accept undefined connector versions', ->
+        @checker.connectorSatisfies(undefined).should.eventually.eql(true)
+
+      it 'should accept connector version requirements it satisfies', ->
+        @checker.connectorSatisfies('3.2.1').should.eventually.eql(true)
+
+      it 'should deny connector version requirements it doesnt satisfy', ->
+        @checker.connectorSatisfies('3.2.0').should.eventually.eql(false)

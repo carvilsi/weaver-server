@@ -1,6 +1,7 @@
 Promise  = require('bluebird')
 socketIO = require('socket.io')
 logger   = require('logger')
+PubSub   = require('pubsub-js')
 
 ClientVersionChecker = require('ClientVersionChecker')
 
@@ -18,7 +19,16 @@ class Socket
       else if not @versionChecker.serverSatisfies(socket.handshake.query.requiredServerVersion)
         next(new Error("Server version #{@versionChecker.serverVersion} does not satisfy '#{socket.handshake.query.requiredServerVersion}'"))
       else
-        next()
+      @versionChecker.connectorSatisfies(socket.handshake.query.requiredConnectorVersion).then((checkResult) =>
+        if !checkResult
+          next(new Error("Connector version #{@versionChecker.lastKnownConnectorVersion} does not satisfy '#{socket.handshake.query.requiredConnectorVersion}'"))
+        else
+          next()
+      )
+    )
+
+    PubSub.subscribe("socket.shout", (msg, data) ->
+      io.emit("socket.shout", data)
     )
 
     io.on('connection', (socket, next) =>
@@ -40,6 +50,7 @@ class Socket
 
             try
               req = { payload: JSON.parse(payload or "{}") }
+              req.payload.serverStart = Date.now()
             catch error
               ack("Invalid json payload")
               return

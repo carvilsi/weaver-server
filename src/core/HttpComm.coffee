@@ -15,37 +15,37 @@ class HTTP
     # Wire GET requests
     (handler for name, handler of @routes).forEach((routeHandler) =>
       routeHandler.getRoutes.forEach((route) =>
-         app.get(@transform(route), (req, res) =>
+        app.get(@transform(route), (req, res) =>
 
-           req.payload = req.query['payload']
+          req.payload = req.query['payload']
 
-           try
-             req.payload = JSON.parse(req.payload or "{}")
-           catch error
-             res.status(400).send(Error(WeaverError.INVALID_JSON, "Invalid json: #{error}"))
-             return
+          try
+            req.payload = JSON.parse(req.payload or "{}")
+          catch error
+            res.status(400).send(Error(WeaverError.INVALID_JSON, "Invalid json: #{error}"))
+            return
 
-           res.success = (data) ->
-             res.status(200).send(data)
+          res.success = (data) ->
+            res.status(200).send(data)
 
            res.fail = (error) ->
              res.status(503).send(error)
 
            routeHandler.handleRequest(route, req, res)
-         )
-       )
+        )
+      )
 
       routeHandler.postRoutes.forEach((route) =>
-         app.post(@transform(route), (req, res) =>
-           req.payload = req.body
+        app.post(@transform(route), (req, res) =>
+          req.payload = req.body
 
-           res.success = (data) ->
-             res.status(200).send(data)
+          res.success = (data) ->
+            res.status(200).send(data)
 
-           res.fail = (error) ->
-             res.status(503).send(error)
+          res.fail = (error) ->
+            res.status(503).send(error)
 
-           routeHandler.handleRequest(route, req, res)
-         )
-       )
+          routeHandler.handleRequest(route, req, res)
+        )
+      )
     )

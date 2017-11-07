@@ -26,6 +26,7 @@ class RouteHandler
     logger.code.silly "Request: #{route}, payload: #{JSON.stringify(req.payload)}"
 
     @bus.emit(route, req).then((data)->
+      data.serverStart = req.payload.serverStart
       logger.code.silly "Request: #{route}, payload: #{JSON.stringify(req.payload)}, 200 data: #{JSON.stringify(data)}"
       res.success(data or "200")
     )

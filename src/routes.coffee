@@ -64,6 +64,7 @@ route.private.POST "role.delete"
 route.private.GET  "project"                 # Get a list of projects
 route.private.GET  "project.freeze"          # Freezes a project
 route.private.GET  "project.unfreeze"        # Unfreezes project
+route.private.POST "project.executeZip"      # Executes a ZIP with WriteOperations
 route.private.POST "project.create"          # Create a project
 route.private.POST "project.clone"           # Clones a project
 route.private.POST "project.name"            # Renames a project
@@ -80,6 +81,12 @@ route.private.POST "plugin.read"             # Get a single plugin
 # Files management
 route.private.GET  "file.downloadByID"       # Retrieves a file from the object storage server by ID
 route.private.POST "file.deleteByID"         # Deletes a file from the object storage server by ID
+
+# Socket events
+route.private.POST "socket.shout"            # Shout a message to all other connected clients
+
+# Model
+route.private.POST "model.read"              # Get a single model
 
 # Return array of handlers
 module.exports = route
