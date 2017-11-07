@@ -1,6 +1,7 @@
 Promise  = require('bluebird')
 socketIO = require('socket.io')
 logger   = require('logger')
+PubSub   = require('pubsub-js')
 
 ClientVersionChecker = require('ClientVersionChecker')
 
@@ -24,6 +25,10 @@ class Socket
         else
           next()
       )
+    )
+
+    PubSub.subscribe("socket.shout", (msg, data) ->
+      io.emit("socket.shout", data)
     )
 
     io.on('connection', (socket, next) =>

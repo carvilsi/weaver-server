@@ -15,4 +15,5 @@ require('app-module-path').addPath("#{__dirname}/#{path}") for path in [
   'util'
   'tracker'
   'snmp'
+  'socket'
 ]
