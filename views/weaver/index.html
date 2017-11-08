@@ -17,6 +17,14 @@
         console.log('Use signIn(user,pass)')
       }).catch(console.error)
 
+    // Listen for thuglife
+    Weaver.sniff(function(msg, data){
+      if (data.msg === "thuglife"){
+        var visibility = {"true": "visible", "false": "hidden"}[data.status];
+        document.getElementById("thuglife").style.visibility = visibility;
+      }
+    });
+
     // Sign in
     var signIn = function(username, password) {
       weaver.signInWithUsername(username, password)
@@ -39,14 +47,25 @@
       background-image: -webkit-radial-gradient(top, circle cover, #393b45 0%, #2d3038 70%);
     }
 
-    img {
+    .logo-container {
       position: absolute;
       left: 50%;
       top: 40%;
-      width: 600px;
+
       margin-left: -300px;
       margin-top: -104px;
+    }
 
+    #thuglife {
+      visibility: hidden;
+      position: absolute;
+      top: 29px;
+      width: 129px;
+      left: -3px;
+    }
+
+    .logo {
+      width: 600px;
       -webkit-animation: fadi 1s 1;
       -moz-animation: fadi 1s 1;
     }
@@ -73,7 +92,10 @@
 </head>
 
 <body>
-  <img src="img/logo.png" alt="">
+  <div class='logo-container'>
+    <img class='logo' src="img/logo.png" alt="">
+    <img id='thuglife' src="img/thuglife.png" alt="">
+  </div>
 </body>
 
 </html>
