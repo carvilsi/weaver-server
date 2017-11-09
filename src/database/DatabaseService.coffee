@@ -6,9 +6,12 @@ module.exports =
     constructor: (@uri, @database) ->
 
     _rp : (method) -> (uri, body, parameters) =>
+      beginRequestPromise = Date.now()
       qs = { database: @database }
       qs[key] = value for key, value of parameters
       rp({method, uri, body, json: true, qs, resolveWithFullResponse: true}).then((response) ->
+        response.body.serverStartConnector = beginRequestPromise
+        response.body.serverEnd = Date.now()
         if response.statusCode is 200
           Promise.resolve(response.body)
         else

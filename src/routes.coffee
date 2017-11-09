@@ -87,5 +87,11 @@ route.private.POST "file.delete"             # Deletes a file from the object st
 route.private.GET "file.downloadByID"
 route.private.POST "file.deleteByID"
 
+# Socket events
+route.private.POST "socket.shout"            # Shout a message to all other connected clients
+
+# Model
+route.private.POST "model.read"              # Get a single model
+
 # Return array of handlers
 module.exports = route
