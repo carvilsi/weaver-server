@@ -13,7 +13,7 @@
   "dependencies": {
     "app-module-path": "^2.1.0",
     "bcrypt": "^1.0.2",
-    "bluebird": "^3.5.1",
+    "bluebird": "^3.4.1",
     "body-parser": "^1.15.0",
     "busboy": "^0.2.14",
     "circular-json": "^0.3.3",
@@ -40,9 +40,9 @@
     "snmpjs": "git://github.com/VoltServer/node-snmpjs.git#65cadf5",
     "socket.io": "1.4.5",
     "socket.io-stream": "^0.9.1",
+    "swagger-parser": "^4.0.0",
     "tmp": "0.0.33",
     "weaver-sdk": "3.0.15",
-    "swagger-parser": "^4.0.0",
     "winston": "^2.2.0",
     "winston-daily-rotate-file": "^1.4.6"
   },
