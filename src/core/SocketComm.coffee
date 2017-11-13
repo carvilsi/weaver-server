@@ -13,7 +13,9 @@ class Socket
 
   wire: (http) ->
 
-    io = socketIO(http)
+    io = socketIO(http, {
+      pingTimeout: 120000
+    })
     io.use((socket, next) =>
       if not @versionChecker.isValidSDKVersion(socket.handshake.query.sdkVersion)
         next(new Error("Invalid SDK Version '#{socket.handshake.query.sdkVersion}'"))
@@ -50,7 +52,7 @@ class Socket
             return if not ack?
 
             try
-              if payload.type isnt "STREAM"
+              if typeof payload is 'string'
                 req = { payload: JSON.parse(payload or "{}") }
               else
                 req = { payload }
