@@ -28,6 +28,7 @@ class PluginBus
       route:    listener.eventName
       name:     listener._functionName
       require:  listener._require
+      optional: listener._optional
       provide:  listener._provide
 
     (compileFunction(l) for l in @listeners)

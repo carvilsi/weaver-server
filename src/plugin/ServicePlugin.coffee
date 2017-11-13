@@ -60,9 +60,9 @@ class ServicePlugin
         else
           optionals.push i.name
 
+    listener.retrieve(retrieves...)
     listener.require(requireds...)
     listener.optional(optionals...)
-    listener.retrieve(retrieves...)
 
     listener.on((params...) =>
       logger.usage.silly("Plugin #{@getName()} got request for operation: #{definition.operationId} (#{apipath})")
