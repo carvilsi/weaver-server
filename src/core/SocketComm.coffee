@@ -13,9 +13,7 @@ class Socket
 
   wire: (http) ->
 
-    io = socketIO(http, {
-      pingTimeout: 120000
-    })
+    io = socketIO(http)
     io.use((socket, next) =>
       if not @versionChecker.isValidSDKVersion(socket.handshake.query.sdkVersion)
         next(new Error("Invalid SDK Version '#{socket.handshake.query.sdkVersion}'"))
@@ -47,28 +45,40 @@ class Socket
       # Wire GET and POST requests
       (handler for name, handler of @routes).forEach((routeHandler) =>
         routeHandler.allRoutes().forEach((route) =>
-          ss(socket).on(route, (payload, ack) =>
-            # Must always give a ack function from client
-            return if not ack?
-
-            try
-              if typeof payload is 'string'
-                req = { payload: JSON.parse(payload or "{}") }
-              else
-                req = { payload }
-              req.payload.serverStart = Date.now()
-            catch error
-              ack("Invalid json payload")
-              return
-
-            res =
-              success: (data) ->
-                ack(data)
-              fail: (error) ->
-                ack(error)
-
-            routeHandler.handleRequest(route, req, res)
-          )
+          socket.on(route, @handleEvent(route, routeHandler).bind(@)) # Receive plain data (backward compatibility)
+          ss(socket).on(route, @handleStream(route, routeHandler).bind(@)) #Receive streams
         )
       )
     )
+
+  handleRoute: (routeHandler, route, req, ack) ->
+
+    req.payload.serverStart = Date.now()
+
+    res =
+      success: (data) ->
+        ack(data)
+      fail: (error) ->
+        ack(error)
+
+    routeHandler.handleRequest(route, req, res)
+
+  handleStream: (route, routeHandler) -> (payload, ack) ->
+    # Must always give a ack function from client
+    return if not ack?
+
+    req = { payload }
+
+    @handleRoute(routeHandler, route, req, ack)
+
+  handleEvent: (route, routeHandler) -> (payload, ack) ->
+    # Must always give a ack function from client
+    return if not ack?
+
+    try
+      req = { payload: JSON.parse(payload or "{}") }
+    catch error
+      ack("Invalid json payload")
+      return
+
+    @handleRoute(routeHandler, route, req, ack)
