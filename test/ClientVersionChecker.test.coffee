@@ -3,7 +3,7 @@ ClientVersionChecker = require('../src/core/ClientVersionChecker')
 
 describe 'The version checker', ->
   it 'should instantiate', ->
-    expect(new ClientVersionChecker('1.1.1')).to.be.defined
+    expect(new ClientVersionChecker('1.1.1')).to.be.not.undefined
 
   it 'should reject invalid version on creation', ->
     try
@@ -13,7 +13,7 @@ describe 'The version checker', ->
 
   it 'should use the defined sensor version to compare against if none is provided', ->
     checker = new ClientVersionChecker()
-    expect(checker.serverVersion).to.be.defined
+    expect(checker.serverVersion).to.be.not.undefined
 
   describe 'given an instance', ->
     before ->
