@@ -34,7 +34,7 @@ class PostgreSQLProjectPool
     }).then((response) ->
       logger.code.silly "Called -#{path}-, reponse: -#{response}-"
       response
-    ).catch(console.log)
+    )
 
   executeZip: (fileId, project) ->
     fileService.downloadFile(project.id, fileId, false).then((file) =>
