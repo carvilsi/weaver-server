@@ -4,6 +4,7 @@ logger        = require('logger')
 Promise       = require('bluebird')
 fileService   = require('FileService')
 rp            = require('request-promise')
+PassThrough   = require('stream').PassThrough
 
 class PostgreSQLProjectPool
 
@@ -35,8 +36,8 @@ class PostgreSQLProjectPool
       response
     )
 
-  executeZip: (filename, project) ->
-    fileService.downloadFileByID(filename, project.id).then((file) =>
+  executeZip: (fileId, project) ->
+    fileService.downloadFile(project.id, fileId, false).then((file) =>
       @upload("upload", { database: project.id }, { file })
     ).then((result) ->
       logger.usage.info "Executed write operations from zip on: #{project.id}"
