@@ -4,75 +4,110 @@ Error        = Weaver.LegacyError
 WeaverError  = Weaver.Error
 Promise      = require('bluebird')
 logger       = require('logger')
-fs           = require('fs')
 cuid         = require('cuid')
 server       = require('WeaverServer')
 zlib         = require('zlib')
-config       = require('config')
+ss           = require('socket.io-stream')
+Readable     = require('stream').Readable
 
 module.exports =
   class FileService
 
-    constructor: ->
-
     getMinioClient = (project) ->
       bus.get("internal").emit('getMinioForProject', project)
 
-
     checkBucket = (project, minioClient) ->
-      new Promise((resolve, reject) =>
-        minioClient.bucketExists("#{project}", (err) ->
-          logger.code.debug "bucket #{project} exists: #{err.code if err?}"
-          if err and err.code is 'NoSuchBucket'
-            createBucket("#{project}", minioClient).then(->
-              resolve()
-            )
-          else
-            resolve()
+      minioClient.bucketExists("#{project}")
+        .catch((err) ->
+          logger.code.debug "Minio bucket error for project #{project}: #{err.code if err?}"
+          createBucket("#{project}", minioClient) if err and err.code is 'NoSuchBucket'
         )
-      )
 
     createBucket = (project, minioClient) ->
-      new Promise((resolve, reject) =>
-        minioClient.makeBucket("#{project}", "us-east-1", (err) ->
-          if err
-            logger.code.error(err)
-            reject()
-          else
-            resolve()
+      minioClient.makeBucket("#{project}", "us-east-1")
+        .catch((err) -> logger.code.error(err))
+
+    @listFiles: (project) ->
+      getMinioClient(project)
+        .then((minioClient) ->
+          checkBucket(project, minioClient).then(->
+            new Promise((resolve, reject) ->
+              files = []
+              objStream = minioClient.listObjectsV2("#{project}")
+              objStream.on('data', (file) -> files.push(file))
+              objStream.on('end', -> resolve(files))
+            )
+          )
         )
-      )
 
-    @writeToDisk: (text) ->
-      filename = cuid()
-      path = config.get('services.fileServer.uploads')
-      url = path + filename
+    @gunZip: (data, project) ->
+      read = new Readable()
+      read.push(JSON.stringify(data))
+      read.push(null)
 
-      writeFile = Promise.promisify(fs.writeFile)
-      
-      writeFile(url, JSON.stringify(text)).then(->
-        {path: path, name: filename, url}
-      )
-
-    @gunZip: (filename, project) ->
+      fileName = cuid()
       gzip = zlib.createGzip()
-      path = config.get('services.fileServer.uploads')
-      zippedName = filename + '.gz'
-      url = path + zippedName
-      r = fs.createReadStream(path + filename)
-      w = fs.createWriteStream(url)
-      r.pipe(gzip).pipe(w)
-      
-      fs.unlink(config.get('services.fileServer.uploads') + filename, (err) ->
-        if err
-          logger.code.error('An error occurred trying to delete the file: '.concat(err))
-        else
-          logger.code.debug('Successfully deleted source file')
-      )
+      zippedName = fileName + '.gz'
+      read.pipe(gzip)
 
-      @uploadFileStream(url, zippedName, project.id)
+      @uploadFile(zippedName, project.id, gzip)
 
-    @uploadFileStream: (filePath, fileName, project) ->
+    @uploadFile: (fileName, project, stream) ->
+      logger.code.debug "Uploading file stream: #{fileName}, #{project}"
+      getMinioClient(project)
+        .then((minioClient) ->
+          logger.code.debug "Got minioclient #{minioClient}"
+          checkBucket(project, minioClient)
+          .then( ->
+            logger.code.debug "Sending file to server"
+            uploadStream(fileName, project, minioClient, stream)
+          )
+        )
+
+    @downloadFile: (project, fileId, outputStream = ss.createStream()) ->
+      getMinioClient(project)
+        .then((minioClient) =>
+          checkBucket(project, minioClient).then(=>
+            @listFiles(project)
+          ).then((files) ->
+            return minioClient.getObject(project, file.name) for file in files when file.name.startsWith(fileId)
+
+            Promise.reject({code: Weaver.Error.FILE_NOT_EXISTS_ERROR, message: 'File does not exist!'})
+          ).then((readStream) ->
+            return readStream if outputStream is false
+            readStream.pipe(outputStream)
+            outputStream
+          )
+        )
+
+    uploadStream = (fileName, project, minioClient, stream) ->
+      uuid = cuid()
+      minioClient
+        .putObject(project, "#{uuid}-#{fileName}", stream, 'application/octet-stream')
+        .then(-> Promise.resolve({
+          id: uuid
+          name: fileName
+        }))
+
+    @deleteFile = (fileId, project) ->
+      getMinioClient(project)
+        .then((minioClient) =>
+          checkBucket(project, minioClient).then(=>
+            @listFiles(project)
+          ).then((files) ->
+            return minioClient.removeObject(project, file.name) for file in files when file.name.startsWith(fileId)
+
+            Promise.reject({code: Weaver.Error.FILE_NOT_EXISTS_ERROR, message: 'File does not exist!'})
+          )
+        )
+
+    #######################################
+    # LEGACY FUNCTIONS                    #
+    # These should eventually be removed  #
+    #######################################
+    fs = require('fs')
+
+    @uploadFileStream = (filePath, fileName, project) ->
       logger.code.debug "Uploading file stream: #{filePath}, #{fileName}, #{project}"
       getMinioClient(project).then((minioClient) ->
         logger.code.debug "Got minioclient #{minioClient}"
@@ -102,64 +137,6 @@ module.exports =
               logger.code.error('An error trying to delete the file: '.concat(error))
             finally
               resolve("#{uuid}-#{fileName}")
-        )
-      )
-
-    sendFileToServer: (file, fileName, project, minioClient) ->
-      buf = new Buffer(file.data)
-      uuid = cuid()
-      new Promise((resolve, reject) =>
-        minioClient.putObject("#{project}","#{uuid}-#{fileName}",buf, 'application/octet-stream', (err) ->
-          if err
-            reject(err)
-          else
-            resolve("#{uuid}-#{fileName}")
-        )
-      )
-
-    downloadFile = (fileName, project) ->
-      new Promise((resolve, reject) =>
-        getMinioClient(project).then((minioClient) ->
-          size = 0
-          bufArray = []
-          try
-            minioClient.getObject("#{project}","#{fileName}", (err, stream) ->
-              if err
-                reject(err)
-              else
-                stream.on('data', (chunk) ->
-                  size += chunk.length
-                  bufArray.push(chunk)
-                )
-                stream.on('end', ->
-                  buffer = Buffer.concat(bufArray)
-                  resolve(buffer)
-                )
-                stream.on('error', (err) ->
-                  reject(err)
-                )
-            )
-          catch error
-            reject(error)
-        ).catch((err) ->
-          reject(err)
-        )
-      )
-
-    deleteFile = (fileName, project) ->
-      new Promise((resolve, reject) =>
-        getMinioClient(project).then((minioClient) ->
-          try
-            minioClient.removeObject("#{project}","#{fileName}", (err) ->
-              if err and err.code is 'NoSuchBucket'
-                reject(Error(WeaverError.FILE_NOT_EXISTS_ERROR, 'Project not found'))
-              else
-                resolve()
-            )
-          catch error
-            reject(error)
-        ).catch((err) ->
-          reject(err)
         )
       )
 
@@ -210,6 +187,52 @@ module.exports =
             stream.on('end', (smt) ->
               if !file
                 reject('file not found')
+            )
+          catch error
+            reject(error)
+        ).catch((err) ->
+          reject(err)
+        )
+      )
+
+    downloadFile = (fileName, project) ->
+      new Promise((resolve, reject) =>
+        getMinioClient(project).then((minioClient) ->
+          size = 0
+          bufArray = []
+          try
+            minioClient.getObject("#{project}","#{fileName}", (err, stream) ->
+              if err
+                reject(err)
+              else
+                stream.on('data', (chunk) ->
+                  size += chunk.length
+                  bufArray.push(chunk)
+                )
+                stream.on('end', ->
+                  buffer = Buffer.concat(bufArray)
+                  resolve(buffer)
+                )
+                stream.on('error', (err) ->
+                  reject(err)
+                )
+            )
+          catch error
+            reject(error)
+        ).catch((err) ->
+          reject(err)
+        )
+      )
+
+    deleteFile = (fileName, project) ->
+      new Promise((resolve, reject) =>
+        getMinioClient(project).then((minioClient) ->
+          try
+            minioClient.removeObject("#{project}","#{fileName}", (err) ->
+              if err and err.code is 'NoSuchBucket'
+                reject(Error(WeaverError.FILE_NOT_EXISTS_ERROR, 'Project not found'))
+              else
+                resolve()
             )
           catch error
             reject(error)

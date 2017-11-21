@@ -79,8 +79,13 @@ route.private.GET  "plugins"                 # Get a list of plugins
 route.private.POST "plugin.read"             # Get a single plugin
 
 # Files management
-route.private.GET  "file.downloadByID"       # Retrieves a file from the object storage server by ID
-route.private.POST "file.deleteByID"         # Deletes a file from the object storage server by ID
+route.private.GET  "file.list"               # Retreive all files from a bucket
+route.private.GET  "file.download"           # Downloads a file from the object storage using an ID
+route.private.POST "file.upload"             # Uploads a file to the object storage server
+route.private.POST "file.delete"             # Deletes a file from the object storage by ID
+#LEGACY ROUTES
+route.private.GET "file.downloadByID"
+route.private.POST "file.deleteByID"
 
 # Socket events
 route.private.POST "socket.shout"            # Shout a message to all other connected clients

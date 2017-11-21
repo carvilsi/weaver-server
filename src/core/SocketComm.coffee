@@ -2,6 +2,7 @@ Promise  = require('bluebird')
 socketIO = require('socket.io')
 logger   = require('logger')
 PubSub   = require('pubsub-js')
+ss       = require('socket.io-stream')
 
 ClientVersionChecker = require('ClientVersionChecker')
 
@@ -44,25 +45,40 @@ class Socket
       # Wire GET and POST requests
       (handler for name, handler of @routes).forEach((routeHandler) =>
         routeHandler.allRoutes().forEach((route) =>
-          socket.on(route, (payload, ack) =>
-            # Must always give a ack function from client
-            return if not ack?
-
-            try
-              req = { payload: JSON.parse(payload or "{}") }
-              req.payload.serverStart = Date.now()
-            catch error
-              ack("Invalid json payload")
-              return
-
-            res =
-              success: (data) ->
-                ack(data)
-              fail: (error) ->
-                ack(error)
-
-            routeHandler.handleRequest(route, req, res)
-          )
+          socket.on(route, @handleEvent(route, routeHandler).bind(@)) # Receive plain data (backward compatibility)
+          ss(socket).on(route, @handleStream(route, routeHandler).bind(@)) #Receive streams
         )
       )
     )
+
+  handleRoute: (routeHandler, route, req, ack) ->
+
+    req.payload.serverStart = Date.now()
+
+    res =
+      success: (data) ->
+        ack(data)
+      fail: (error) ->
+        ack(error)
+
+    routeHandler.handleRequest(route, req, res)
+
+  handleStream: (route, routeHandler) -> (payload, ack) ->
+    # Must always give a ack function from client
+    return if not ack?
+
+    req = { payload }
+
+    @handleRoute(routeHandler, route, req, ack)
+
+  handleEvent: (route, routeHandler) -> (payload, ack) ->
+    # Must always give a ack function from client
+    return if not ack?
+
+    try
+      req = { payload: JSON.parse(payload or "{}") }
+    catch error
+      ack("Invalid json payload")
+      return
+
+    @handleRoute(routeHandler, route, req, ack)
