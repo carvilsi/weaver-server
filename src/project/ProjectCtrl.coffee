@@ -45,12 +45,23 @@ bus.private('project.unfreeze').retrieve('user', 'project').on((req, user, proje
   ProjectService.unfreezeProject(user, project)
 )
 
+bus.private('project.app.add').retrieve('user', 'project').require('app').on((req, user, project, app) ->
+  logger.code.info "Adding app #{app} to project id: #{project.id}"
+  ProjectService.addApp(user, project, app)
+)
+
+bus.private('project.app.remove').retrieve('user', 'project').require('app').on((req, user, project, app) ->
+  logger.code.info "Remove app #{app} to project id: #{project.id}"
+  ProjectService.removeApp(user, project, app)
+)
+
 bus.private('project').retrieve('user').on((req, user) ->
   stripProject = (project) ->
     {
       id: project.id
       acl: project.acl
       name: project.name
+      apps: project.apps
     }
   projects = ProjectService.all()
   result = []
