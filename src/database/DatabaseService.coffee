@@ -1,3 +1,4 @@
+request = require('request')
 rp = require('request-promise')
 
 module.exports =
@@ -26,6 +27,9 @@ module.exports =
           Promise.reject({code: -1, message: "Unexpected error occurred: #{err.message}"})
       )
 
+    _GETS : (uri) ->
+      request({uri, qs: {database: @database}})
+
     _GET : (args...) ->
       @_rp("GET")(args...)
 
@@ -39,7 +43,7 @@ module.exports =
       @_GET("#{@uri}/read/#{id}")
 
     snapshot: () ->
-      @_GET("#{@uri}/dump")
+      @_GETS("#{@uri}/dump")
 
     write: (payload, creator) ->
       @_POST("#{@uri}/write", payload, {creator})
