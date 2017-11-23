@@ -128,12 +128,7 @@ bus.private('snapshot').retrieve('project', 'user').optional('zipped').on((req, 
   AclService.assertProjectFunctionPermission(user, project, 'snapshot')
   logger.usage.info "Generating snapshot for project with id #{project.id} - zipped #{zipped}"
   database = new DatabaseService(config.get('services.database.url'), project.id)
-  database.snapshot().then((data)->
-    if not zipped
-      data
-    else
-      FileService.gunZip(data, project)
-  )
+  FileService.storeZip(database.snapshot(), project)
 )
 
 # Wipe single project
