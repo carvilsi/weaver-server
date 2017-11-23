@@ -9,7 +9,11 @@ class ModelService
   constructor: ->
     #__dirname provides the absolute path to the working directory of this file
     @directory = path.resolve(__dirname, '../../models')
-    @models   = {}
+    @models    = {}
+    @modelPath = {}
+
+  _yamlLoad: (filepath) ->
+    yaml.safeLoad(fs.readFileSync(path.join(@directory, filepath), 'utf8'))
 
   load: ->
     # Only YAML rootfiles are considered valid model files
@@ -20,10 +24,15 @@ class ModelService
         extension is '.yml' or extension is '.yaml'
       )
 
-      for yamlFilePath in yamlFilePaths
-        m = yaml.safeLoad(fs.readFileSync(path.join(@directory, yamlFilePath), 'utf8'));
+      for filepath in yamlFilePaths
+        m = @_yamlLoad(filepath)
         @models[m.name] = m
+        @modelPath[m.name] = filepath
     )
+
+  reload: (name) ->
+    @models[name] = @_yamlLoad(@modelPath[name])
+    @models[name]
 
   get: (name, version) ->
     if not @models[name]?
