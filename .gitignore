@@ -20,3 +20,4 @@ trackerdb
 trackerdb-beta
 plugins/*
 !plugins/bin/
+models
