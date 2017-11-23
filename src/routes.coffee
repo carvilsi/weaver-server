@@ -92,6 +92,7 @@ route.private.POST "socket.shout"            # Shout a message to all other conn
 
 # Model
 route.private.POST "model.read"              # Get a single model
+route.private.POST "model.reload"            # Reloads a model by reading the yaml file again
 
 # Return array of handlers
 module.exports = route
