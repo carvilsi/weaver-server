@@ -64,6 +64,8 @@ route.private.POST "role.delete"
 route.private.GET  "project"                 # Get a list of projects
 route.private.GET  "project.freeze"          # Freezes a project
 route.private.GET  "project.unfreeze"        # Unfreezes project
+route.private.POST "project.app.add"         # Add compatible app to project
+route.private.POST "project.app.remove"      # Remove compatible app to project
 route.private.POST "project.executeZip"      # Executes a ZIP with WriteOperations
 route.private.POST "project.create"          # Create a project
 route.private.POST "project.clone"           # Clones a project
@@ -92,6 +94,7 @@ route.private.POST "socket.shout"            # Shout a message to all other conn
 
 # Model
 route.private.POST "model.read"              # Get a single model
+route.private.POST "model.reload"            # Reloads a model by reading the yaml file again
 
 # Return array of handlers
 module.exports = route
