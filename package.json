@@ -1,6 +1,6 @@
 {
   "name": "weaver-server",
-  "version": "3.1.0",
+  "version": "3.2.0-beta.0",
   "description": "Module providing a Weaver-compatible API server",
   "author": {
     "name": "Mohamad Alamili",
@@ -41,7 +41,7 @@
     "socket.io": "~2.0.0",
     "socket.io-stream": "^0.9.1",
     "swagger-parser": "^4.0.0",
-    "weaver-sdk": "^4.1.0",
+    "weaver-sdk": "4.2.0-beta.0",
     "tmp": "0.0.33",
     "winston": "^2.2.0",
     "winston-daily-rotate-file": "^1.4.6"
