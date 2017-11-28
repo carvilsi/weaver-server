@@ -88,6 +88,10 @@ class ServicePlugin
             qs[p] = param
 
       request = { uri: "#{@url}#{apipath}", method, qs}
+
+      if definition.produces? and definition.produces[0] is 'application/octet-stream'
+        request = { uri: "#{@url}#{apipath}", method, qs, encoding: null}
+
       rp(request)
     )
 
