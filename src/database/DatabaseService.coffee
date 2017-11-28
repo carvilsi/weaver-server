@@ -42,17 +42,23 @@ module.exports =
     read: (id) ->
       @_GET("#{@uri}/read/#{id}")
 
-    snapshot: (graph) ->
-      if graph?
-        @_GET("#{@uri}/dump", null, {graph})
-      else 
-        @_GET("#{@uri}/dump", null)
+    snapshot: () ->
+      @_GET("#{@uri}/dump")
 
-    snapshotZipped: (graph) ->
+    snapshotZipped: () ->
+      @_GETS("#{@uri}/dump", {database: @database, zipped: true})
+
+    snapshotGraph: (graph) ->
       if graph?
-        @_GETS("#{@uri}/dump", {database: @database, graph, zipped: true})
+        @_GET("#{@uri}/dumpGraph", null, {graph})
+      else 
+        @_GET("#{@uri}/dumpGraph")
+
+    snapshotGraphZipped: (graph) ->
+      if graph?
+        @_GETS("#{@uri}/dumpGraph", {database: @database, graph, zipped: true})
       else
-        @_GETS("#{@uri}/dump", {database: @database, zipped: true})
+        @_GETS("#{@uri}/dumpGraph", {database: @database, zipped: true})
 
     write: (payload, creator) ->
       @_POST("#{@uri}/write", payload, {creator})
