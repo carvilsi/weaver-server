@@ -140,9 +140,9 @@ bus.private('snapshot').retrieve('project', 'user').optional('graph', 'zipped').
   logger.usage.info "Generating snapshot for project with id #{project.id} - zipped #{zipped}"
   database = new DatabaseService(config.get('services.database.url'), project.id)
   if zipped
-    return FileService.storeZip(database.snapshotZipped(graph), project)
+    FileService.storeZip(database.snapshotZipped(graph), project)
   else
-    database.snapshot(graph)  
+    database.snapshot(graph)
 )
 
 # Wipe single project
