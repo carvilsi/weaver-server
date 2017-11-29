@@ -17,14 +17,6 @@
         console.log('Use signIn(user,pass)')
       }).catch(console.error)
 
-    // Listen for thuglife
-    Weaver.sniff(function(msg, data){
-      if (data.msg === "thuglife"){
-        var visibility = {"true": "visible", "false": "hidden"}[data.status];
-        document.getElementById("thuglife").style.visibility = visibility;
-      }
-    });
-
     // Sign in
     var signIn = function(username, password) {
       weaver.signInWithUsername(username, password)
@@ -37,6 +29,8 @@
           console.log('Succesfully signed in as ' + username + '.')
           console.log('Available projects under variable `projects`:')
           console.log(projects)
+
+          document.getElementById("thuglife").style.visibility = "visible";
         })
 
       return 'Signing in...'
