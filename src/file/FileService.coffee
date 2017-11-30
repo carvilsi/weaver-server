@@ -9,6 +9,7 @@ server       = require('WeaverServer')
 zlib         = require('zlib')
 ss           = require('socket.io-stream')
 Readable     = require('stream').Readable
+PassThrough  = require('stream').PassThrough
 
 module.exports =
   class FileService
@@ -52,8 +53,18 @@ module.exports =
 
       @uploadFile(zippedName, project.id, gzip)
 
+
+    @storeZip: (data, project) ->
+      fileName = cuid()
+      zippedName = fileName + '.gz'
+
+      pass = new PassThrough()
+      data.pipe(pass)
+
+      @uploadFile(zippedName, project.id, pass)
+
     @uploadFile: (fileName, project, stream) ->
-      logger.code.debug "Uploading file stream: #{fileName}, #{project}"
+      logger.code.debug "Uploading file streaming: #{fileName}, #{project}"
       getMinioClient(project)
         .then((minioClient) ->
           logger.code.debug "Got minioclient #{minioClient}"

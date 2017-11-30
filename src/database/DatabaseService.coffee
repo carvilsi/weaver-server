@@ -1,3 +1,4 @@
+request = require('request')
 rp = require('request-promise')
 
 module.exports =
@@ -26,6 +27,9 @@ module.exports =
           Promise.reject({code: -1, message: "Unexpected error occurred: #{err.message}"})
       )
 
+    _GETS : (uri, qs) ->
+      request({uri, qs})
+
     _GET : (args...) ->
       @_rp("GET")(args...)
 
@@ -40,6 +44,21 @@ module.exports =
 
     snapshot: () ->
       @_GET("#{@uri}/dump")
+
+    snapshotZipped: () ->
+      @_GETS("#{@uri}/dump", {database: @database, zipped: true})
+
+    snapshotGraph: (graph) ->
+      if graph?
+        @_GET("#{@uri}/dumpGraph", null, {graph})
+      else 
+        @_GET("#{@uri}/dumpGraph")
+
+    snapshotGraphZipped: (graph) ->
+      if graph?
+        @_GETS("#{@uri}/dumpGraph", {database: @database, graph, zipped: true})
+      else
+        @_GETS("#{@uri}/dumpGraph", {database: @database, zipped: true})
 
     write: (payload, creator) ->
       @_POST("#{@uri}/write", payload, {creator})

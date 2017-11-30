@@ -19,6 +19,7 @@ route.private.POST "node.clone"              # Clone a specific node
 route.private.GET  "relations"               # Lists all relations on the database
 route.private.GET  "history"                 # Change history by element
 route.private.GET  "snapshot"                # Download snapshot write operations
+route.private.GET  "snapshotGraph"           # Download snapshot write operations
 
 # Querying
 route.private.POST "query"                   # Execute a WeaverQuery
