@@ -1,5 +1,5 @@
 name: test-model
-version: 1.0.0
+version: 1.1.0
 author:
   name: Mohamad Alamili
   email: mohamad@sysunite.com
@@ -8,6 +8,7 @@ proto: 'rdf:type'
 classes:
   Human:
   City:
+    init: [Delft, Rotterdam, Leiden]
   Area:
     attributes:
       squareMeter:
