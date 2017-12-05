@@ -4,7 +4,7 @@ author:
   name: Mohamad Alamili
   email: mohamad@sysunite.com
 
-proto: 'rdf:type'
+prototype: 'rdf:type'
 classes:
   Human:
   City:
