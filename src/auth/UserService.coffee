@@ -58,7 +58,7 @@ class UserService extends LokiService
     )
 
   insertSession: (authToken, username) ->
-    logger.auth.warn("Correct sigIn for #{username}")
+    logger.auth.info("#{username} signed in")
     sessionId = cuid()
     @sessions.insert({sessionId, authToken, username})
 
@@ -67,7 +67,7 @@ class UserService extends LokiService
     if not user?
       comparePassword(username,password)
       .then( ->
-        logger.auth.warn("Invalid attempt sigInUsername for #{username} wrong user")
+        logger.auth.warn("Invalid sign in: #{username} does not exist")
         throw {code: -1, message: "Invalid Username or Password"}
       )
     else
@@ -78,7 +78,7 @@ class UserService extends LokiService
       comparePassword(password, user.passwordHash)
       .then((res) =>
         if !res
-          logger.auth.warn("Invalid attempt sigInUsername for #{username} wrong password")
+          logger.auth.warn("Invalid sign in: #{username} wrong password")
           throw {code: -1, message: "Invalid Username or Password"}
         else
           # Sign token with secret set in config and add username to payload

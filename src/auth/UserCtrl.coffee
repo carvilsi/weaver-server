@@ -47,7 +47,7 @@ bus.private("projectUsers").retrieve('user', 'project').on((req, user, project) 
 )
 
 registerUser = (userId, username, password, email, firstname, lastname)->
-  logger.usage.info "User signup for #{username}"
+  logger.usage.debug "User signup for #{username}"
   if AdminUser.hasUsername(username) or AdminUser.hasUserId(userId)
     logger.auth.warn("Attempt to sign up with Admin.")
     throw {code:-1, message: "Admin user is not allowed to signup."}
@@ -98,7 +98,7 @@ bus.public("user.signInUsername").require('username', 'password').on((req, usern
     AdminUser.signInUsername(username, password)
     .then((res) =>
       if res
-        logger.auth.warn("Correct sigInUsername for Admin")
+        logger.auth.warn("Admin user signed in")
         return AdminUser.getAuthToken()
       else
         UserService.signInUsername(username, password)
