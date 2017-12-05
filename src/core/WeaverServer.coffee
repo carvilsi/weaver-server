@@ -34,6 +34,7 @@ class Server
     # Init express
     @app  = express()
     @http = http.Server(@app)
+    @http.setTimeout(0)
 
     # Use Mustache as templating engine
     @app.engine('html', mustacheExpress())

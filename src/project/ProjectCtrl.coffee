@@ -45,12 +45,23 @@ bus.private('project.unfreeze').retrieve('user', 'project').on((req, user, proje
   ProjectService.unfreezeProject(user, project)
 )
 
+bus.private('project.app.add').retrieve('user', 'project').require('app').on((req, user, project, app) ->
+  logger.code.info "Adding app #{app} to project id: #{project.id}"
+  ProjectService.addApp(user, project, app)
+)
+
+bus.private('project.app.remove').retrieve('user', 'project').require('app').on((req, user, project, app) ->
+  logger.code.info "Remove app #{app} to project id: #{project.id}"
+  ProjectService.removeApp(user, project, app)
+)
+
 bus.private('project').retrieve('user').on((req, user) ->
   stripProject = (project) ->
     {
       id: project.id
       acl: project.acl
       name: project.name
+      apps: project.apps
     }
   projects = ProjectService.all()
   result = []
@@ -128,12 +139,21 @@ bus.private('snapshot').retrieve('project', 'user').optional('zipped').on((req, 
   AclService.assertProjectFunctionPermission(user, project, 'snapshot')
   logger.usage.info "Generating snapshot for project with id #{project.id} - zipped #{zipped}"
   database = new DatabaseService(config.get('services.database.url'), project.id)
-  database.snapshot().then((data)->
-    if not zipped
-      data
-    else
-      FileService.gunZip(data, project)
-  )
+  if zipped
+    FileService.storeZip(database.snapshotZipped(), project)
+  else
+    database.snapshot()
+)
+
+# Create a snapshot with write operations for the project
+bus.private('snapshotGraph').retrieve('project', 'user').optional('graph', 'zipped').on((req, project, user, graph, zipped = false) ->
+  AclService.assertProjectFunctionPermission(user, project, 'snapshot')
+  logger.usage.info "Generating snapshotGraph for project with id #{project.id} - zipped #{zipped}"
+  database = new DatabaseService(config.get('services.database.url'), project.id)
+  if zipped
+    FileService.storeZip(database.snapshotGraphZipped(graph), project)
+  else
+    database.snapshotGraph(graph)
 )
 
 # Wipe single project

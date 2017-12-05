@@ -16,15 +16,16 @@ class ProjectService extends LokiService
       throw {code:-1, message: "Project with id #{id} already exists"}
 
     logger.code.info "ProjectService storing project with id-name-acl #{id}-#{name}-#{acl}"
-    @projects.insert({id, name, acl})
+    @projects.insert({id, name, acl, apps: {}})
 
   get: (id) ->
     project = @projects.find({id})[0]
     if not project?
       throw {code: -1, message: "No project found for id #{id}"}
 
+    project.apps = {} if not project.apps? # Init for existing projects
     project
-    
+
   delete: (project) ->
     logger.code.info "ProjectService deleting project with id #{project.id if project}"
     @projects.remove(project)
@@ -36,21 +37,29 @@ class ProjectService extends LokiService
     super().then(=>
       @checkProjectAcls()
     )
-  
-  nameProject: (user, project, name) ->
+
+  _getProjectToEdit: (user, project) ->
     AclService.assertProjectFunctionPermission(user, project, 'project-administration')
-    project = @projects.find({id: project.id})[0]
+    @projects.find({id: project.id})[0]
+
+  nameProject: (user, project, name) ->
+    project = @_getProjectToEdit(user, project)
     project.name = name
-    
+
+  addApp: (user, project, appName) ->
+    project = @_getProjectToEdit(user, project)
+    project.apps[appName] = true
+
+  removeApp: (user, project, appName) ->
+    project = @_getProjectToEdit(user, project)
+    delete project.apps[appName]
 
   unfreezeProject: (user, project) ->
-    AclService.assertProjectFunctionPermission(user, project, 'project-administration')
-    project = @projects.find({id: project.id})[0]
+    project = @_getProjectToEdit(user, project)
     project.frozen = false
 
   freezeProject: (user, project) ->
-    AclService.assertProjectFunctionPermission(user, project, 'project-administration')
-    project = @projects.find({id: project.id})[0]
+    project = @_getProjectToEdit(user, project)
     project.frozen = true
 
   isFrozen: (project) ->

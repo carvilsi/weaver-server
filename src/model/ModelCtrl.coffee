@@ -12,3 +12,8 @@ bus.private('model.read').retrieve('user').retrieve('model').on((req, user, mode
   logger.usage.info "User #{user.username} retrieved model #{model.name}"
   model
 )
+
+bus.private('model.reload').retrieve('user').retrieve('model').on((req, user, model) ->
+  logger.usage.info "User #{user.username} reloaded model #{model.name}"
+  ModelService.reload(model.name)
+)
