@@ -19,7 +19,7 @@ class ClientVersionChecker
       logger.usage.warn "Client without a sdkVersion connected, rejecting"
       false
     else
-      logger.usage.debug "Client connected with version #{sdkVersion}"
+      logger.usage.info "Client connected with version #{sdkVersion}"
       true
 
   serverSatisfies: (versionRequirement) ->

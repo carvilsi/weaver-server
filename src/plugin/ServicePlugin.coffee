@@ -76,7 +76,10 @@ class ServicePlugin
           if p is 'project'
             qs.project = param.id
           else if p is 'user'
-            qs.user = param.getAuthToken()
+            if param.getAuthToken?
+              qs.user = param.getAuthToken()
+            else
+              qs.user = params[0].payload.authToken
           else
             logger.code.error "Unknown retrieve parameter #{p} provided to #{@getName()}.#{definition.operationId}"
         else if index > retrieves.length && index <= retrieves.length + requireds.length
@@ -88,6 +91,10 @@ class ServicePlugin
             qs[p] = param
 
       request = { uri: "#{@url}#{apipath}", method, qs}
+
+      if definition.produces? and definition.produces[0] is 'application/octet-stream'
+        request = { uri: "#{@url}#{apipath}", method, qs, encoding: null}
+
       rp(request)
     )
 

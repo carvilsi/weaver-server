@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t sysunite/weaver-server:3.1.0 .
+docker build -t sysunite/weaver-server:3.2.0-beta.3 .

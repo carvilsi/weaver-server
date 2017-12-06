@@ -3,7 +3,7 @@ AclService    = require('AclService')
 logger        = require('logger')
 
 bus.private('write').retrieve('user', 'project', 'database').on((req, user, project, database) ->
-  logger.code.debug("The user stuff: #{JSON.stringify(user)}")
+  logger.code.silly("Write received for user: #{JSON.stringify(user)}")
   AclService.assertACLWritePermission(user, project.acl)
   database.write(req.payload.operations, user.userId)
 )
