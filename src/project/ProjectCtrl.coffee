@@ -9,23 +9,23 @@ AclService      = require('AclService')
 DatabaseService = require('DatabaseService')
 logger          = require('logger')
 
-bus.private('write').priority(1000).retrieve('user', 'project').on((req, user, project) ->
+bus.private('write').priority(1000).retrieve('project').on((req, project) ->
   if ProjectService.isFrozen(project)
     throw {code: -1, message: 'Project is frozen'}
 )
 
-bus.provide("project").require('target').on((req, target) ->
+bus.provide("project").retrieve('user').require('target').on((req, user, target) ->
   result = ProjectService.get(target)
-  AclService.assertACLReadPermission(user, project.acl)
+  AclService.assertACLReadPermission(user, result.acl)
   result
 )
 
-bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
+bus.provide("database").retrieve('project').on((req, project) ->
   new DatabaseService(config.get('services.database.url'), project.id)
 )
 
 # Move to FileController
-bus.provide('minio').retrieve('project', 'user').on((req, project, user) ->
+bus.provide('minio').on((req) ->
   MinioClient.create(config.get('services.fileServer'))
 )
 
