@@ -130,8 +130,8 @@ bus.private("user.read").retrieve('user').on((req, user) ->
 )
 
 # Gives back user object that is currently signed in
-bus.private("user.roles").require('id').on((req, id) ->
-  # TODO: Check permissions
+bus.private("user.roles").retrieve('user').require('id').on((req, user, id) ->
+  AclService.assertServerFunctionPermission(user, 'create-users') if user.userId isnt id
   RoleService.getRolesForUser(id)
 )
 
@@ -153,6 +153,7 @@ bus.private("user.projects").retrieve('user').require('id').on((req, user, id) -
 
 # Destroy user
 bus.private("user.delete").retrieve('user').require('id').on((req, user, id) ->
+  AclService.assertServerFunctionPermission(user, 'create-users')
 
   if AdminUser.id is id
     throw {code:-1, message: "Admin user can not be deleted."}
@@ -162,15 +163,13 @@ bus.private("user.delete").retrieve('user').require('id').on((req, user, id) ->
 )
 
 bus.private('user.update').retrieve('user').require('update').on((req, user, update) ->
-  if not user.isAdmin() and update.userId isnt user.userId
-    throw {code: -1, message: 'Permission denied'}
+  AclService.assertServerFunctionPermission(user, 'create-users') if user.userId isnt id
 
   UserService.update(update)
 )
 
 bus.private('user.changePassword').retrieve('user').require('userId', 'password').on((req, user, userId, password) ->
-  if not user.isAdmin() and userId isnt user.userId
-    throw {code: -1, message: 'Permission denied'}
+  AclService.assertServerFunctionPermission(user, 'create-users') if user.userId isnt id
 
   UserService.changePassword(userId, password)
 )
