@@ -9,23 +9,23 @@ AclService      = require('AclService')
 DatabaseService = require('DatabaseService')
 logger          = require('logger')
 
-bus.private('write').priority(1000).retrieve('user', 'project').on((req, user, project) ->
+bus.private('write').priority(1000).retrieve('project').on((req, project) ->
   if ProjectService.isFrozen(project)
     throw {code: -1, message: 'Project is frozen'}
 )
 
-bus.provide("project").require('target').on((req, target) ->
-  ProjectService.get(target)
+bus.provide("project").retrieve('user').require('target').on((req, user, target) ->
+  result = ProjectService.get(target)
+  AclService.assertACLReadPermission(user, result.acl)
+  result
 )
 
-bus.provide("database").retrieve('user', 'project').on((req, user, project) ->
-  AclService.assertACLReadPermission(user, project.acl)
+bus.provide("database").retrieve('project').on((req, project) ->
   new DatabaseService(config.get('services.database.url'), project.id)
 )
 
 # Move to FileController
-bus.provide('minio').retrieve('project', 'user').on((req, project, user) ->
-  AclService.assertACLReadPermission(user, project.acl)
+bus.provide('minio').on((req) ->
   MinioClient.create(config.get('services.fileServer'))
 )
 
@@ -36,21 +36,25 @@ bus.private('project.executeZip').retrieve('user', 'project').require('filename'
 )
 
 bus.private('project.freeze').retrieve('user', 'project').on((req, user, project) ->
+  AclService.assertProjectFunctionPermission(user, project, 'project-administration')
   logger.code.info "Freezing project id: #{project.id}"
   ProjectService.freezeProject(user, project)
 )
 
 bus.private('project.unfreeze').retrieve('user', 'project').on((req, user, project) ->
+  AclService.assertProjectFunctionPermission(user, project, 'project-administration')
   logger.code.info "Unfreezing project id: #{project.id}"
   ProjectService.unfreezeProject(user, project)
 )
 
 bus.private('project.app.add').retrieve('user', 'project').require('app').on((req, user, project, app) ->
+  AclService.assertProjectFunctionPermission(user, project, 'project-administration')
   logger.code.info "Adding app #{app} to project id: #{project.id}"
   ProjectService.addApp(user, project, app)
 )
 
 bus.private('project.app.remove').retrieve('user', 'project').require('app').on((req, user, project, app) ->
+  AclService.assertProjectFunctionPermission(user, project, 'project-administration')
   logger.code.info "Remove app #{app} to project id: #{project.id}"
   ProjectService.removeApp(user, project, app)
 )
@@ -75,6 +79,7 @@ bus.private('project').retrieve('user').on((req, user) ->
 )
 
 bus.private('project.name').retrieve('user', 'project').require('name').on((req, user, project, name) ->
+  AclService.assertProjectFunctionPermission(user, project, 'project-administration')
   logger.code.info "Renaming project #{project.name} to: #{name}"
   ProjectService.nameProject(user, project, name)
 )
@@ -161,12 +166,10 @@ bus.private('project.wipe')
 .retrieve('project', 'user', 'database')
 .enable(config.get('application.wipe'))
 .on((req, project, user, database) ->
-  if not user.isAdmin()
-    throw {code: -1, message: 'Permission denied'}
+  AclService.assertProjectFunctionPermission(user, project, 'project-administration')
 
   logger.usage.info "Wiping project with id #{project.id}"
   database.wipe()
-
 )
 
 

@@ -34,7 +34,7 @@ bus.private('file.delete')
   .retrieve('project', 'user')
   .require('target', 'fileId')
   .on((req, project, user, target, fileId) ->
-    AclService.assertACLReadPermission(user, project.acl)
+    AclService.assertACLWritePermission(user, project.acl)
     FileService.deleteFile(fileId, project.id)
   )
 
