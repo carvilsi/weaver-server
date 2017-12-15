@@ -31,7 +31,9 @@ class RouteHandler
 
     logger.code.silly "Request: #{route}, payload: #{CircularJSON.stringify(req.payload)}"
     @bus.emit(route, req).then((data)->
-      data.serverStart = req.payload.serverStart
+      if data.times?
+        data.times.serverStart = req.payload.serverStart
+
       logger.code.silly "Request: #{route}, payload: #{CircularJSON.stringify(req.payload)}, 200 data: #{CircularJSON.stringify(data)}"
       res.success(data or "200")
     )
