@@ -13,7 +13,7 @@ class Socket
 
   wire: (http) ->
 
-    io = socketIO(http)
+    io = socketIO(http,{pingTimeout : 1200000})
     io.use((socket, next) =>
       if not @versionChecker.isValidSDKVersion(socket.handshake.query.sdkVersion)
         next(new Error("Invalid SDK Version '#{socket.handshake.query.sdkVersion}'"))

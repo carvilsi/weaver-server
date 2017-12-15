@@ -11,8 +11,10 @@ module.exports =
       qs = { database: @database }
       qs[key] = value for key, value of parameters
       rp({method, uri, body, json: true, qs, resolveWithFullResponse: true}).then((response) ->
-        response.body.serverStartConnector = beginRequestPromise
-        response.body.serverEnd = Date.now()
+        if (response.body.times?)
+          response.body.times.serverStartConnector = beginRequestPromise
+          response.body.times.serverEnd = Date.now()
+
         if response.statusCode is 200
           Promise.resolve(response.body)
         else
@@ -51,7 +53,7 @@ module.exports =
     snapshotGraph: (graph) ->
       if graph?
         @_GET("#{@uri}/dumpGraph", null, {graph})
-      else 
+      else
         @_GET("#{@uri}/dumpGraph")
 
     snapshotGraphZipped: (graph) ->
@@ -87,5 +89,5 @@ module.exports =
     wipe: ->
       @_GET("#{@uri}/wipe")
 
-    clone: (sourceNodeId, targetNodeId, userUid, relationsToTraverse) ->
-      @_POST("#{@uri}/node/clone", { sourceNodeId, targetNodeId, userUid, relationsToTraverse})
+    clone: (sourceNodeId, targetNodeId, userUid, relationsToTraverse, sourceNodeGraph, targetNodeGraph) ->
+      @_POST("#{@uri}/node/clone", { sourceNodeId, targetNodeId, userUid, relationsToTraverse, sourceNodeGraph, targetNodeGraph})

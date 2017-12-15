@@ -166,12 +166,10 @@ bus.private('project.wipe')
 .retrieve('project', 'user', 'database')
 .enable(config.get('application.wipe'))
 .on((req, project, user, database) ->
-  if not user.isAdmin()
-    throw {code: -1, message: 'Permission denied'}
+  AclService.assertProjectFunctionPermission(user, project, 'project-administration')
 
   logger.usage.info "Wiping project with id #{project.id}"
   database.wipe()
-
 )
 
 
