@@ -68,7 +68,7 @@ class UserService extends LokiService
       comparePassword(username,password)
       .then( ->
         logger.auth.warn("Invalid sign in: #{username} does not exist")
-        throw {code: -1, message: "Invalid Username or Password"}
+        throw {code: 212, message: "Invalid Username or Password"}
       )
     else
       if not user.active
@@ -79,7 +79,7 @@ class UserService extends LokiService
       .then((res) =>
         if !res
           logger.auth.warn("Invalid sign in: #{username} wrong password")
-          throw {code: -1, message: "Invalid Username or Password"}
+          throw {code: 212, message: "Invalid Username or Password"}
         else
           # Sign token with secret set in config and add username to payload
           authToken = jwt.sign({ username }, secret, { expiresIn })

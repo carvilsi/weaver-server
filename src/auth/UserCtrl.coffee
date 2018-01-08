@@ -93,7 +93,7 @@ else
 bus.public("user.signInUsername").require('username', 'password').on((req, username, password) ->
   if typeof username isnt 'string' || not /^[a-zA-Z0-9_-]*$/.test(username) ||  not username
     logger.auth.error("Invalid Sign up attempt with invalid username: #{username}")
-    throw {code:-1, message: "Username not valid"}
+    throw {code:212, message: "Invalid Username or Password"}
   else
     AdminUser.signInUsername(username, password)
     .then((res) =>
