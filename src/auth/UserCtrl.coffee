@@ -6,6 +6,7 @@ ProjectService  = require('ProjectService')
 AdminUser       = require('AdminUser')
 logger          = require('logger')
 config          = require('config')
+Weaver          = require('weaver-sdk')
 
 # All private routes require a signed in user that is loaded in this handler based on authToken
 bus.private("*").priority(1000).retrieve('user').on((req, user) ->
@@ -93,7 +94,7 @@ else
 bus.public("user.signInUsername").require('username', 'password').on((req, username, password) ->
   if typeof username isnt 'string' || not /^[a-zA-Z0-9_-]*$/.test(username) ||  not username
     logger.auth.error("Invalid Sign up attempt with invalid username: #{username}")
-    throw {code:212, message: "Invalid Username or Password"}
+    throw {code: Weaver.Error.INVALID_USERNAME_PASSWORD, message: "Invalid Username or Password"}
   else
     AdminUser.signInUsername(username, password)
     .then((res) =>

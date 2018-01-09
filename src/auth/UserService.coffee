@@ -4,11 +4,11 @@ cuid         = require('cuid')
 _            = require('lodash')
 jwt          = require('jsonwebtoken')
 HashPassInit = require('HashPassInit')
-
-secret = conf.get('auth.secret')
-expiresIn = conf.get('auth.expire')
-bcrypt = require('bcrypt')
-logger = require('logger')
+secret       = conf.get('auth.secret')
+expiresIn    = conf.get('auth.expire')
+bcrypt       = require('bcrypt')
+logger       = require('logger')
+Weaver       = require('weaver-sdk')
 
 class UserService extends LokiService
 
@@ -68,7 +68,7 @@ class UserService extends LokiService
       comparePassword(username,password)
       .then( ->
         logger.auth.warn("Invalid sign in: #{username} does not exist")
-        throw {code: 212, message: "Invalid Username or Password"}
+        throw {code: Weaver.Error.INVALID_USERNAME_PASSWORD, message: "Invalid Username or Password"}
       )
     else
       if not user.active
@@ -79,7 +79,7 @@ class UserService extends LokiService
       .then((res) =>
         if !res
           logger.auth.warn("Invalid sign in: #{username} wrong password")
-          throw {code: 212, message: "Invalid Username or Password"}
+          throw {code: Weaver.Error.INVALID_USERNAME_PASSWORD, message: "Invalid Username or Password"}
         else
           # Sign token with secret set in config and add username to payload
           authToken = jwt.sign({ username }, secret, { expiresIn })
@@ -141,7 +141,7 @@ class UserService extends LokiService
       jwt.verify(authToken, secret)
     catch error
       logger.auth.warn("Invalid token supplied #{authToken}")
-      throw {code: -1, message: "Invalid token supplied #{authToken}"}
+      throw {code: Weaver.Error.INVALID_SESSION_TOKEN, message: "Invalid token supplied #{authToken}"}
 
   # Checking if there is any password stored in plain text
   checkPasswords = ->
