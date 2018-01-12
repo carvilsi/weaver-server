@@ -164,13 +164,13 @@ bus.private("user.delete").retrieve('user').require('id').on((req, user, id) ->
 )
 
 bus.private('user.update').retrieve('user').require('update').on((req, user, update) ->
-  AclService.assertServerFunctionPermission(user, 'create-users') if user.userId isnt id
+  AclService.assertServerFunctionPermission(user, 'create-users') if user.userId isnt update.userId
 
   UserService.update(update)
 )
 
 bus.private('user.changePassword').retrieve('user').require('userId', 'password').on((req, user, userId, password) ->
-  AclService.assertServerFunctionPermission(user, 'create-users') if user.userId isnt id
+  AclService.assertServerFunctionPermission(user, 'create-users') if user.userId isnt userId
 
   UserService.changePassword(userId, password)
 )

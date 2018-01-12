@@ -125,13 +125,13 @@ class UserService extends LokiService
 
   update: (update) ->
     # TODO Lots of checking (is the username/email correct?, does the user exist? etc)
+    logger.auth.info "Updating user #{update.userId}"
     user = @users.findOne({userId: update.userId})
     user.username  = update.username
     user.email     = update.email
     user.firstname = update.firstname
     user.lastname  = update.lastname
     user.active    = update.active
-    logger.auth.warn("Updating user #{user.username}")
     @users.update(user)
     return
 
